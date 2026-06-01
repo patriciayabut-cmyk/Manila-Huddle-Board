@@ -187,6 +187,11 @@ a{color:inherit}
   <div class="pane active" id="pane-dash">
     <div class="vtabs" id="vtabs"></div>
     <div class="vsec active" id="vsec-overview">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:.75rem;flex-wrap:wrap">
+        <label style="font-size:12px;color:#666;font-weight:500">Viewing week:</label>
+        <select id="week-filter" onchange="onWeekFilterChange()" style="padding:5px 10px;border:1.5px solid #ddd;border-radius:7px;background:#fff;font-size:12px;color:#333;min-width:200px"></select>
+        <span style="font-size:11px;color:#aaa" id="week-filter-meta"></span>
+      </div>
       <div class="metrics">
         <div class="mc"><div class="mc-label">Total headcount</div><div class="mc-val" id="ov-hc">—</div><div class="mc-sub">all functions</div></div>
         <div class="mc"><div class="mc-label">On track</div><div class="mc-val" id="ov-grn">—</div><div class="mc-sub">of 11 functions</div></div>
@@ -272,6 +277,8 @@ localStorage.setItem('huddle_script_url', SCRIPT_URL);
 let allWeekly  = [];   // all weekly entries from sheet
 let allKpis    = [];   // all kpi entries from sheet
 let nav = 'dash', inpMode = 'weekly', inpFunc = 'grace';
+let detailWeek = {};
+let selectedFilterWeek = 'latest';
 let viewSec = 'overview', ovChart = null;
 let dataLoaded = false;
 
@@ -286,6 +293,53 @@ function saveScriptUrl(){
   localStorage.setItem('huddle_script_url', val);
   document.getElementById('config-banner').style.display = 'none';
   loadData();
+}
+
+function buildWeekFilter(){
+  const sel = document.getElementById('week-filter');
+  if(!sel) return;
+  // Collect all unique week labels from data, sorted by date
+  const weeks = [...new Set(allWeekly.map(e=>e.weekLabel))]
+    .sort((a,b)=>{
+      const da = allWeekly.find(e=>e.weekLabel===a);
+      const db = allWeekly.find(e=>e.weekLabel===b);
+      if(!da||!db) return 0;
+      return db.updatedAt.localeCompare(da.updatedAt);
+    });
+  sel.innerHTML = '<option value="latest">Latest update (default)</option>' +
+    weeks.map(w=>`<option value="${w}" ${w===selectedFilterWeek?'selected':''}>${w}</option>`).join('');
+  updateWeekFilterMeta();
+}
+
+function updateWeekFilterMeta(){
+  const meta = document.getElementById('week-filter-meta');
+  if(!meta) return;
+  if(selectedFilterWeek==='latest'){
+    meta.textContent = 'Showing most recent update per function';
+  } else {
+    const count = FUNCS.filter(f=>allWeekly.some(e=>e.funcId===f.id&&e.weekLabel===selectedFilterWeek)).length;
+    meta.textContent = `${count} of ${FUNCS.length} functions updated this week`;
+  }
+}
+
+function onWeekFilterChange(){
+  selectedFilterWeek = document.getElementById('week-filter').value;
+  updateWeekFilterMeta();
+  renderOverview();
+}
+
+function setDetailWeek(fid, weekLabel){
+  detailWeek[fid] = weekLabel;
+  renderDetail(fid);
+}
+
+function getFilteredNarrative(fid){
+  const arr = allWeekly.filter(r=>r.funcId===fid);
+  if(!arr.length) return null;
+  if(selectedFilterWeek==='latest'){
+    return [...arr].sort((a,b)=>b.updatedAt.localeCompare(a.updatedAt))[0];
+  }
+  return arr.find(e=>e.weekLabel===selectedFilterWeek) || null;
 }
 
 function init(){
@@ -351,6 +405,7 @@ async function loadData(){
     allKpis   = data.kpis   || [];
     dataLoaded = true;
     setStatus('ok', `Connected · ${allWeekly.length} weekly entries · ${allKpis.length} KPI records · Last fetch: ${new Date().toLocaleTimeString()}`);
+    buildWeekFilter();
     renderOverview();
     populateMonthSelect();
     if(viewSec !== 'overview') renderDetail(viewSec);
@@ -411,9 +466,15 @@ function getFuncRag(fid){
 }
 
 function getCurrentWeekLabel(){
-  const d=new Date(),y=d.getFullYear(),s=new Date(y,0,1);
-  const wk=Math.ceil((((d-s)/86400000)+s.getDay()+1)/7);
-  return `Week ${wk} - ${d.toLocaleDateString('en-US',{month:'short',day:'numeric'})}`;
+  // Week 1 starts Dec 29, 2025 (Monday). Weeks run Mon-Fri.
+  const week1 = new Date(2025, 11, 29); // Dec 29, 2025
+  const now = new Date();
+  const diffDays = Math.floor((now - week1) / 86400000);
+  const wkNum = Math.max(1, Math.floor(diffDays / 7) + 1);
+  const wkStart = new Date(week1.getTime() + (wkNum - 1) * 7 * 86400000);
+  const wkEnd = new Date(wkStart.getTime() + 4 * 86400000);
+  const fmt = (d) => d.toLocaleDateString('en-US', {month:'short', day:'2-digit'});
+  return `Week ${wkNum} - ${fmt(wkStart)}-${fmt(wkEnd)}`;
 }
 
 // ─── BUILD UI STRUCTURE ───────────────────────────────────────
@@ -461,7 +522,7 @@ function renderOverview(){
   const grid=document.getElementById('func-cards'); grid.innerHTML='';
   FUNCS.forEach(f=>{
     const rag=getFuncRag(f.id),defs=KPI_DEFS[f.id]||[],kpis=getLatestKpis(f.id);
-    const updated=wasUpdatedThisWeek(f.id),latest=getLatestNarrative(f.id);
+    const updated=wasUpdatedThisWeek(f.id),latest=getFilteredNarrative(f.id);
     const card=document.createElement('div'); card.className='fc';
     card.onclick=()=>{ const btn=document.querySelector(`.vtab[data-fid="${f.id}"]`); showVsec(f.id,btn); };
     let kh='';
@@ -515,23 +576,41 @@ function renderDetail(fid){
     kpiBlock=`<table class="kpi-tbl"><thead><tr><th>KPI</th><th>Target</th><th>Actual</th><th>Status</th><th>vs Target</th></tr></thead><tbody>${rows}</tbody></table>`;
   }
 
-  let narBlock='<div class="no-data">No narrative this week.</div>';
-  if(latest){
-    narBlock=`<div class="nar-grid">${NAR_FIELDS.map(nf=>`<div class="nc"><div class="nc-lbl">${nf.label}</div><div class="nc-text">${latest[nf.k]||'—'}</div></div>`).join('')}</div>`;
+  // Get all weeks for this function, sorted newest first
+  const allFuncEntries = [...allWeekly.filter(r=>r.funcId===fid)].sort((a,b)=>b.updatedAt.localeCompare(a.updatedAt));
+  
+  // Determine which week to show — use detailWeek[fid] state or default to latest
+  if(!detailWeek[fid] && allFuncEntries.length) detailWeek[fid] = allFuncEntries[0].weekLabel;
+  const selectedEntry = allFuncEntries.find(e=>e.weekLabel===detailWeek[fid]) || allFuncEntries[0];
+
+  let narBlock='<div class="no-data">No narrative for this week.</div>';
+  if(selectedEntry){
+    narBlock=`<div class="nar-grid">${NAR_FIELDS.map(nf=>`<div class="nc"><div class="nc-lbl">${nf.label}</div><div class="nc-text">${selectedEntry[nf.k]||'—'}</div></div>`).join('')}</div>`;
   }
 
-  // history
-  const hist=[...allWeekly.filter(r=>r.funcId===fid)].sort((a,b)=>b.updatedAt.localeCompare(a.updatedAt));
-  let histHtml=hist.length?hist.slice(0,8).map(e=>{
+  // Week nav
+  const uniqueWeeks = [...new Set(allFuncEntries.map(e=>e.weekLabel))];
+  const weekNavOpts = uniqueWeeks.map(w=>`<option value="${w}" ${w===detailWeek[fid]?'selected':''}>${w}</option>`).join('');
+  const weekNavHtml = uniqueWeeks.length ? `
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:.75rem;flex-wrap:wrap">
+      <label style="font-size:12px;color:#666;font-weight:500">Week:</label>
+      <select onchange="setDetailWeek('${fid}', this.value)" style="padding:5px 10px;border:1.5px solid #ddd;border-radius:7px;background:#fff;font-size:12px;color:#333;min-width:200px">${weekNavOpts}</select>
+      <span style="font-size:11px;color:#aaa">${uniqueWeeks.length} weeks on record</span>
+    </div>` : '';
+
+  // history pills
+  let histHtml=allFuncEntries.length?allFuncEntries.slice(0,10).map(e=>{
     const cats=NAR_FIELDS.filter(nf=>e[nf.k]&&e[nf.k].toString().trim());
-    return `<div class="history-entry"><div class="he-hdr"><span>${e.weekLabel}</span><span style="color:#aaa">${new Date(e.updatedAt).toLocaleDateString()}</span></div><div class="he-pills">${cats.map(c=>`<span class="pill">${c.label}</span>`).join('')}</div></div>`;
+    const isSelected = e.weekLabel===detailWeek[fid];
+    return `<div class="history-entry" style="${isSelected?'border-color:#1a1a2e;background:#f8f9ff':''}" onclick="setDetailWeek('${fid}','${e.weekLabel.replace(/'/,"\'")}')"><div class="he-hdr"><span style="${isSelected?'font-weight:700':''}">${e.weekLabel}</span><span style="color:#aaa">${new Date(e.updatedAt).toLocaleDateString()}</span></div><div class="he-pills">${cats.map(c=>`<span class="pill">${c.label}</span>`).join('')}</div></div>`;
   }).join(''):'<div class="no-data">No history yet.</div>';
 
   el.innerHTML=`
-    <div class="det-hdr"><div class="det-title">${f.name} — ${f.role}</div><div class="det-sub">HC: ${f.hc} · ${latest?latest.weekLabel:'No updates yet'}</div></div>
+    <div class="det-hdr"><div class="det-title">${f.name} — ${f.role}</div><div class="det-sub">HC: ${f.hc} · ${allFuncEntries.length} weeks on record</div></div>
     <div class="card"><div class="card-title">Monthly KPIs</div>${kpiBlock}</div>
-    <div class="card"><div class="card-title">Latest narrative — ${latest?latest.weekLabel:'none'}</div>${narBlock}</div>
-    <div class="card"><div class="card-title">Weekly update history (${hist.length} entries)</div>${histHtml}</div>`;
+    ${weekNavHtml}
+    <div class="card"><div class="card-title">Narrative — ${selectedEntry?selectedEntry.weekLabel:'none'}</div>${narBlock}</div>
+    <div class="card"><div class="card-title">All weeks (click to view)</div>${histHtml}</div>`;
 }
 
 // ─── INPUT ────────────────────────────────────────────────────
