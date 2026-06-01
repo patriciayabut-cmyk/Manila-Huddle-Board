@@ -267,7 +267,8 @@ const NAR_FIELDS = [
 ];
 
 // ─── STATE ────────────────────────────────────────────────────
-let SCRIPT_URL = localStorage.getItem('huddle_script_url') || '';
+let SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxzE0ecv1NSi08-RpcCKZQ1VASqlQnf72_GNTZv3CrhJveL517NpPf-qYZN-NkqfANStg/exec';
+localStorage.setItem('huddle_script_url', SCRIPT_URL);
 let allWeekly  = [];   // all weekly entries from sheet
 let allKpis    = [];   // all kpi entries from sheet
 let nav = 'dash', inpMode = 'weekly', inpFunc = 'grace';
@@ -302,11 +303,8 @@ function init(){
   const badge = document.getElementById('dl-badge');
   badge.textContent = dlText; badge.className = 'deadline-badge ' + dlCls;
 
-  // show/hide config banner
-  if(SCRIPT_URL){
-    document.getElementById('config-banner').style.display = 'none';
-    document.getElementById('script-url-input').value = SCRIPT_URL;
-  }
+  // config banner always hidden — URL is hardcoded
+  document.getElementById('config-banner').style.display = 'none';
 
   buildViewTabs();
   buildInpFuncSel();
