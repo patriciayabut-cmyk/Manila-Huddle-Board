@@ -193,9 +193,9 @@ a{color:inherit}
         <span style="font-size:11px;color:#aaa" id="week-filter-meta"></span>
       </div>
       <div class="metrics">
-        <div class="mc"><div class="mc-label">Total headcount</div><div class="mc-val" id="ov-hc">—</div><div class="mc-sub">all functions</div></div>
-        <div class="mc"><div class="mc-label">On track</div><div class="mc-val" id="ov-grn">—</div><div class="mc-sub">of 11 functions</div></div>
-        <div class="mc"><div class="mc-label">Needs attention</div><div class="mc-val" id="ov-att">—</div><div class="mc-sub">red or amber</div></div>
+        <div class="mc"><div class="mc-label">Total headcount</div><div class="mc-val" id="ov-hc">—</div><div class="mc-sub">across all functions</div></div>
+        <div class="mc"><div class="mc-label">Annualized attrition</div><div class="mc-val" id="ov-attrition">—</div><div class="mc-sub">Manila Services avg</div></div>
+        <div class="mc"><div class="mc-label">Internal promotion %</div><div class="mc-val" id="ov-promo">—</div><div class="mc-sub">movements YTD vs HC</div></div>
         <div class="mc"><div class="mc-label">Updated this week</div><div class="mc-val" id="ov-upd">—</div><div class="mc-sub">of 11 functions</div></div>
       </div>
       <div class="func-grid" id="func-cards"></div>
@@ -466,6 +466,16 @@ function getAttrition(fid){
   };
 }
 
+function getPromo(fid){
+  const arr = [...allKpis.filter(r=>r.funcId===fid&&r.promotions!=null&&r.promotions!='')].sort((a,b)=>b.month.localeCompare(a.month));
+  if(!arr.length) return null;
+  const latest = arr[0];
+  const promotions = parseFloat(latest.promotions)||0;
+  const avgHC = parseFloat(latest.avgHC)||getLatestHC(fid)||1;
+  const pct = ((promotions/avgHC)*100).toFixed(1);
+  return { pct, promotions, avgHC, month: latest.month };
+}
+
 function getMonthEntries(fid, month){
   return allWeekly.filter(r=>r.funcId===fid&&String(r.updatedAt).slice(0,7)===month)
     .sort((a,b)=>a.updatedAt.localeCompare(b.updatedAt));
@@ -553,17 +563,33 @@ function showVsec(id,btn){
 
 // ─── OVERVIEW ─────────────────────────────────────────────────
 function renderOverview(){
-  let hc=0,grn=0,att=0,upd=0;
+  let hc=0,upd=0,attrRates=[],promoNums=[],promoHCs=[];
   FUNCS.forEach(f=>{
     hc+=getLatestHC(f.id)||f.hc;
-    const r=getFuncRag(f.id);
-    if(r==='G')grn++; if(r==='R'||r==='A')att++;
     if(wasUpdatedThisWeek(f.id))upd++;
+    const att=getAttrition(f.id);
+    if(att) attrRates.push(parseFloat(att.rate));
+    const promo=getPromo(f.id);
+    if(promo){ promoNums.push(promo.promotions); promoHCs.push(promo.avgHC||getLatestHC(f.id)||1); }
   });
   document.getElementById('ov-hc').textContent=hc.toLocaleString();
-  document.getElementById('ov-grn').textContent=grn;
-  document.getElementById('ov-att').textContent=att;
   document.getElementById('ov-upd').textContent=upd;
+  // Attrition — average across functions that have data
+  if(attrRates.length){
+    const avg=(attrRates.reduce((a,b)=>a+b,0)/attrRates.length).toFixed(1);
+    document.getElementById('ov-attrition').textContent=avg+'%';
+  } else {
+    document.getElementById('ov-attrition').textContent='—';
+  }
+  // Promo % — total promotions / total HC
+  if(promoNums.length){
+    const totalPromo=promoNums.reduce((a,b)=>a+b,0);
+    const totalHC=promoHCs.reduce((a,b)=>a+b,0)||1;
+    const pct=((totalPromo/totalHC)*100).toFixed(1);
+    document.getElementById('ov-promo').textContent=pct+'%';
+  } else {
+    document.getElementById('ov-promo').textContent='—';
+  }
 
   const grid=document.getElementById('func-cards'); grid.innerHTML='';
   FUNCS.forEach(f=>{
@@ -663,8 +689,14 @@ function renderDetail(fid){
   el.innerHTML=`
     ${(()=>{
       const att=getAttrition(fid);
-      const attStr=att?`· Attrition: <b>${att.rate}%</b> annualized (${att.resignations} resignation${att.resignations!==1?'s':''} YTD)`:'· Attrition: not yet entered';
-      return `<div class="det-hdr"><div class="det-title">${f.name} — ${f.role}</div><div class="det-sub">HC: ${getLatestHC(fid)} ${attStr} · ${allFuncEntries.length} weeks on record</div></div>`;
+      const promo=getPromo(fid);
+      const attStr=att?`Attrition: <b>${att.rate}%</b> (${att.resignations} resignation${att.resignations!==1?'s':''} YTD)`:'Attrition: not entered';
+      const promoStr=promo?`Internal movement: <b>${promo.pct}%</b> (${promo.promotions} YTD)`:'Internal movement: not entered';
+      const latestKpiRec=[...allKpis.filter(r=>r.funcId===fid)].sort((a,b)=>b.month.localeCompare(a.month))[0];
+      const openReqStr=latestKpiRec&&latestKpiRec.openRequisitions?`Open reqs: <b>${latestKpiRec.openRequisitions}</b>`:'';
+      const newRolesStr=latestKpiRec&&latestKpiRec.newRolesSinceJan?`New roles YTD: <b>${latestKpiRec.newRolesSinceJan}</b>`:'';
+      const extras=[openReqStr,newRolesStr].filter(Boolean).join(' &nbsp;·&nbsp; ');
+      return \`<div class="det-hdr"><div class="det-title">\${f.name} — \${f.role}</div><div class="det-sub" style="display:flex;gap:8px;flex-wrap:wrap">HC: \${getLatestHC(fid)} &nbsp;·&nbsp; \${attStr} &nbsp;·&nbsp; \${promoStr}\${extras?' &nbsp;·&nbsp; '+extras:''} &nbsp;·&nbsp; \${allFuncEntries.length} weeks on record</div></div>\`;
     })()}
     <div class="card"><div class="card-title">Monthly KPIs</div>${kpiBlock}</div>
     ${weekNavHtml}
@@ -726,11 +758,14 @@ function renderInpForm(){
     const curMonth=new Date().toISOString().slice(0,7);
     const existing=getKpisForMonth(inpFunc,curMonth)||[];
     const existingKpiRec = allKpis.find(x=>x.funcId===inpFunc&&x.month===curMonth);
-    const existingResign = existingKpiRec ? (existingKpiRec.resignations||'') : '';
-    const existingAvgHC  = existingKpiRec ? (existingKpiRec.avgHC||getLatestHC(inpFunc)||'') : (getLatestHC(inpFunc)||'');
+    const existingResign   = existingKpiRec ? (existingKpiRec.resignations||'') : '';
+    const existingPromo    = existingKpiRec ? (existingKpiRec.promotions||'') : '';
+    const existingAvgHC    = existingKpiRec ? (existingKpiRec.avgHC||getLatestHC(inpFunc)||'') : (getLatestHC(inpFunc)||'');
+    const existingOpenReqs = existingKpiRec ? (existingKpiRec.openRequisitions||'') : '';
+    const existingNewRoles = existingKpiRec ? (existingKpiRec.newRolesSinceJan||'') : '';
     const kpiRows=defs.length?defs.map((k,i)=>`<div class="kpi-inp"><span>${k.l}</span><span>Target: ${k.t}${k.t<=100?'%':''}</span><input type="number" step="0.01" id="kpi_${i}" value="${existing[i]!=null?existing[i]:''}" placeholder="Actual"></div>`).join(''):'<div class="no-data">No KPIs defined.</div>';
     const monthsElapsed = parseInt(curMonth.split('-')[1]) || 1;
-    area.innerHTML=`<div class="dl-info" style="background:#e8f0fe;color:#1565c0">📊 KPIs updated <b>monthly</b> — recording for <b>${curMonth}</b>${!dataLoaded?' · <span style="color:#e65100">Connect to Google Sheets to save</span>':''}</div><div class="form-card"><div style="font-weight:700;font-size:13px;margin-bottom:.25rem">${f.name} — ${f.role}</div><div class="fsec">KPI actuals — ${curMonth}</div>${kpiRows}<div class="fsec">Attrition tracking</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:.75rem"><div class="ng"><label>Resignations YTD (count)</label><input type="number" min="0" id="kpi_resignations" value="${existingResign}" placeholder="0"></div><div class="ng"><label>Average HC this month</label><input type="number" min="0" id="kpi_avgHC" value="${existingAvgHC}" placeholder="${getLatestHC(inpFunc)||''}"><span style="font-size:10px;color:#aaa;margin-top:2px">Used for attrition calc</span></div></div><div style="background:#f4f5f7;border-radius:7px;padding:.6rem .85rem;font-size:12px;color:#555;margin-bottom:.75rem">Annualized attrition = (Resignations YTD ÷ Avg HC) × (12 ÷ ${monthsElapsed} months) × 100</div><button class="save-btn" onclick="saveKpis()" ${!dataLoaded?'disabled':''}>Save KPI update ↗</button></div>`;
+    area.innerHTML=`<div class="dl-info" style="background:#e8f0fe;color:#1565c0">📊 KPIs updated <b>monthly</b> — recording for <b>${curMonth}</b>${!dataLoaded?' · <span style="color:#e65100">Connect to Google Sheets to save</span>':''}</div><div class="form-card"><div style="font-weight:700;font-size:13px;margin-bottom:.25rem">${f.name} — ${f.role}</div><div class="fsec">KPI actuals — ${curMonth}</div>${kpiRows}<div class="fsec">Attrition tracking</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:.5rem"><div class="ng"><label>Resignations YTD</label><input type="number" min="0" id="kpi_resignations" value="${existingResign}" placeholder="0"></div><div class="ng"><label>Total internal movements YTD</label><input type="number" min="0" id="kpi_promotions" value="${existingPromo}" placeholder="0"><span style="font-size:10px;color:#aaa;margin-top:2px">Transfers + promotions</span></div><div class="ng"><label>Average HC this month</label><input type="number" min="0" id="kpi_avgHC" value="${existingAvgHC}" placeholder="${getLatestHC(inpFunc)||''}"><span style="font-size:10px;color:#aaa;margin-top:2px">For attrition &amp; promo %</span></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:.75rem"><div class="ng"><label>Open requisitions</label><input type="number" min="0" id="kpi_openReqs" value="${existingOpenReqs}" placeholder="0"></div><div class="ng"><label>New roles since January</label><input type="number" min="0" id="kpi_newRoles" value="${existingNewRoles}" placeholder="0"></div></div><div style="background:#f4f5f7;border-radius:7px;padding:.6rem .85rem;font-size:12px;color:#555;margin-bottom:.75rem">Annualized attrition = (Resignations YTD ÷ Avg HC) × (12 ÷ ${monthsElapsed} months) × 100</div><button class="save-btn" onclick="saveKpis()" ${!dataLoaded?'disabled':''}>Save KPI update ↗</button></div>`;
   }
 }
 
@@ -777,13 +812,19 @@ async function saveKpis(){
   const f=FUNCS.find(x=>x.id===inpFunc);
   const kpis=defs.map((_,i)=>{ const el=document.getElementById('kpi_'+i); return el&&el.value!==''?parseFloat(el.value):null; });
   const resignEl=document.getElementById('kpi_resignations');
+  const promoEl=document.getElementById('kpi_promotions');
   const avgHCEl=document.getElementById('kpi_avgHC');
   const resignations=resignEl&&resignEl.value!==''?parseInt(resignEl.value):null;
+  const promotions=promoEl&&promoEl.value!==''?parseInt(promoEl.value):null;
   const avgHC=avgHCEl&&avgHCEl.value!==''?parseFloat(avgHCEl.value):null;
+  const openReqsEl=document.getElementById('kpi_openReqs');
+  const newRolesEl=document.getElementById('kpi_newRoles');
+  const openRequisitions=openReqsEl&&openReqsEl.value!==''?parseInt(openReqsEl.value):null;
+  const newRolesSinceJan=newRolesEl&&newRolesEl.value!==''?parseInt(newRolesEl.value):null;
   try {
     const btn=document.querySelector('#inp-form .save-btn');
     btn.textContent='Saving...'; btn.disabled=true;
-    const res=await postData({action:'saveKpi',funcId:inpFunc,funcName:f.name,month:curMonth,kpis,resignations,avgHC});
+    const res=await postData({action:'saveKpi',funcId:inpFunc,funcName:f.name,month:curMonth,kpis,resignations,promotions,avgHC,openRequisitions,newRolesSinceJan});
     if(res.error) throw new Error(res.error);
     showToast('KPI data saved ✓');
     await loadData();
