@@ -441,6 +441,14 @@ function getLatestNarrative(fid){
   return [...arr].sort((a,b)=>b.updatedAt.localeCompare(a.updatedAt))[0];
 }
 
+function getLatestHC(fid){
+  // Get most recent HC from weekly entries, fall back to FUNCS default
+  const arr = allWeekly.filter(r=>r.funcId===fid&&r.hc&&parseInt(r.hc)>0);
+  if(!arr.length){ const f=FUNCS.find(x=>x.id===fid); return f?f.hc:0; }
+  const latest=[...arr].sort((a,b)=>b.updatedAt.localeCompare(a.updatedAt))[0];
+  return parseInt(latest.hc)||0;
+}
+
 function getMonthEntries(fid, month){
   return allWeekly.filter(r=>r.funcId===fid&&String(r.updatedAt).slice(0,7)===month)
     .sort((a,b)=>a.updatedAt.localeCompare(b.updatedAt));
@@ -530,7 +538,7 @@ function showVsec(id,btn){
 function renderOverview(){
   let hc=0,grn=0,att=0,upd=0;
   FUNCS.forEach(f=>{
-    hc+=f.hc;
+    hc+=getLatestHC(f.id)||f.hc;
     const r=getFuncRag(f.id);
     if(r==='G')grn++; if(r==='R'||r==='A')att++;
     if(wasUpdatedThisWeek(f.id))upd++;
@@ -634,7 +642,7 @@ function renderDetail(fid){
   }).join(''):'<div class="no-data">No history yet.</div>';
 
   el.innerHTML=`
-    <div class="det-hdr"><div class="det-title">${f.name} — ${f.role}</div><div class="det-sub">HC: ${f.hc} · ${allFuncEntries.length} weeks on record</div></div>
+    <div class="det-hdr"><div class="det-title">${f.name} — ${f.role}</div><div class="det-sub">HC: ${getLatestHC(fid)} · ${allFuncEntries.length} weeks on record</div></div>
     <div class="card"><div class="card-title">Monthly KPIs</div>${kpiBlock}</div>
     ${weekNavHtml}
     <div class="card"><div class="card-title">Narrative — ${selectedEntry?selectedEntry.weekLabel:'none'}</div>${narBlock}</div>
@@ -681,6 +689,11 @@ function renderInpForm(){
         </div>
         <div class="fsec">Weekly narrative</div>
         <div class="nar-inp-grid">${fields}</div>
+        <div style="margin-top:.75rem;display:flex;align-items:center;gap:8px">
+          <label style="font-size:12px;color:#666;font-weight:500;white-space:nowrap">Headcount this week:</label>
+          <input type="number" id="wn_hc" value="${draft.hc||f.hc||''}" oninput="saveDraft('${inpFunc}')" style="padding:6px 10px;border:1.5px solid #ddd;border-radius:7px;font-size:12px;width:90px">
+          <span style="font-size:11px;color:#aaa">Update if HC changed from last week</span>
+        </div>
         <div style="display:flex;align-items:center;gap:10px;margin-top:.85rem">
           <button class="save-btn" onclick="saveWeekly()" ${!dataLoaded?'disabled':''}>Save weekly update ↗</button>
           <button onclick="clearDraft('${inpFunc}')" style="padding:7px 14px;border:1.5px solid #ddd;border-radius:7px;background:#fff;cursor:pointer;font-size:12px;color:#888">Clear form</button>
@@ -698,6 +711,8 @@ function saveDraft(funcId){
   const sessionKey = `draft_${funcId}`;
   const draft = {};
   NAR_FIELDS.forEach(nf=>{ const el=document.getElementById('wn_'+nf.k); if(el) draft[nf.k]=el.value; });
+  const hcEl = document.getElementById('wn_hc');
+  if(hcEl) draft.hc = hcEl.value;
   sessionStorage.setItem(sessionKey, JSON.stringify(draft));
 }
 
@@ -705,6 +720,8 @@ function clearDraft(funcId){
   const sessionKey = `draft_${funcId}`;
   sessionStorage.removeItem(sessionKey);
   NAR_FIELDS.forEach(nf=>{ const el=document.getElementById('wn_'+nf.k); if(el) el.value=''; });
+  const hcEl = document.getElementById('wn_hc');
+  if(hcEl) hcEl.value = '';
 }
 
 async function saveWeekly(){
@@ -713,6 +730,8 @@ async function saveWeekly(){
   const f=FUNCS.find(x=>x.id===inpFunc);
   const payload={action:'saveWeekly',funcId:inpFunc,funcName:f.name,weekLabel:wkLabel};
   NAR_FIELDS.forEach(nf=>{ const el=document.getElementById('wn_'+nf.k); payload[nf.k]=el?el.value:''; });
+  const hcEl=document.getElementById('wn_hc');
+  if(hcEl&&hcEl.value) payload.hc=parseInt(hcEl.value);
   try {
     const btn=document.querySelector('#inp-form .save-btn');
     btn.textContent='Saving...'; btn.disabled=true;
