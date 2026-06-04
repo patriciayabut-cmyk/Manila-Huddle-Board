@@ -599,25 +599,32 @@ function renderDetail(fid){
 
   // Get all weeks for this function, sorted newest first
   const allFuncEntries = [...allWeekly.filter(r=>r.funcId===fid)].sort((a,b)=>b.updatedAt.localeCompare(a.updatedAt));
-  
-  // Determine which week to show — use detailWeek[fid] state or default to latest
-  if(!detailWeek[fid] && allFuncEntries.length) detailWeek[fid] = allFuncEntries[0].weekLabel;
-  const selectedEntry = allFuncEntries.find(e=>e.weekLabel===detailWeek[fid]) || allFuncEntries[0];
 
-  let narBlock='<div class="no-data">No narrative for this week.</div>';
+  // Build full week list from calendar (not just submitted weeks)
+  const allCalWeeks = getAllWeekOptions(); // newest first
+  
+  // Default to latest reporting week
+  if(!detailWeek[fid]) detailWeek[fid] = allCalWeeks[0].label;
+  const selectedEntry = allFuncEntries.find(e=>e.weekLabel===detailWeek[fid]) || null;
+
+  // Narrative block — blank if no entry for selected week
+  let narBlock='<div class="no-data" style="padding:.5rem 0">No entry submitted for this week yet.</div>';
   if(selectedEntry){
     narBlock=`<div class="nar-grid">${NAR_FIELDS.map(nf=>`<div class="nc"><div class="nc-lbl">${nf.label}</div><div class="nc-text">${selectedEntry[nf.k]||'—'}</div></div>`).join('')}</div>`;
   }
 
-  // Week nav
-  const uniqueWeeks = [...new Set(allFuncEntries.map(e=>e.weekLabel))];
-  const weekNavOpts = uniqueWeeks.map(w=>`<option value="${w}" ${w===detailWeek[fid]?'selected':''}>${w}</option>`).join('');
-  const weekNavHtml = uniqueWeeks.length ? `
+  // Week dropdown — all calendar weeks, submitted ones marked
+  const submittedWeeks = new Set(allFuncEntries.map(e=>e.weekLabel));
+  const weekNavOpts = allCalWeeks.map(w=>{
+    const submitted = submittedWeeks.has(w.label);
+    return `<option value="${w.label}" ${w.label===detailWeek[fid]?'selected':''}>${w.label}${submitted?' ✓':''}</option>`;
+  }).join('');
+  const weekNavHtml = `
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:.75rem;flex-wrap:wrap">
       <label style="font-size:12px;color:#666;font-weight:500">Week:</label>
-      <select onchange="setDetailWeek('${fid}', this.value)" style="padding:5px 10px;border:1.5px solid #ddd;border-radius:7px;background:#fff;font-size:12px;color:#333;min-width:200px">${weekNavOpts}</select>
-      <span style="font-size:11px;color:#aaa">${uniqueWeeks.length} weeks on record</span>
-    </div>` : '';
+      <select onchange="setDetailWeek('${fid}', this.value)" style="padding:5px 10px;border:1.5px solid #ddd;border-radius:7px;background:#fff;font-size:12px;color:#333;min-width:220px">${weekNavOpts}</select>
+      <span style="font-size:11px;color:#aaa">${submittedWeeks.size} of ${allCalWeeks.length} weeks submitted</span>
+    </div>`;
 
   // history pills
   let histHtml=allFuncEntries.length?allFuncEntries.slice(0,10).map(e=>{
