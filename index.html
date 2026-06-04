@@ -467,17 +467,35 @@ function getFuncRag(fid){
 
 function getCurrentWeekLabel(){
   // Week 1 starts Dec 29, 2025 (Monday). Weeks run Mon-Fri.
-  // Reporting week = previous week (managers report on last week, due Mon EOD before Tue huddle)
+  // Reporting week = the week being reported on (previous Mon-Fri period)
+  // Managers report Mon EOD, huddle Tuesday — so reporting week = last completed Mon-Fri week
   const week1 = new Date(2025, 11, 29); // Dec 29, 2025
   const now = new Date();
   const diffDays = Math.floor((now - week1) / 86400000);
   const currentWkNum = Math.max(1, Math.floor(diffDays / 7) + 1);
-  // Reporting week is the previous week
+  // Always report on the previous completed week
   const wkNum = Math.max(1, currentWkNum - 1);
   const wkStart = new Date(week1.getTime() + (wkNum - 1) * 7 * 86400000);
   const wkEnd = new Date(wkStart.getTime() + 4 * 86400000);
   const fmt = (d) => d.toLocaleDateString('en-US', {month:'short', day:'2-digit'});
   return `Week ${wkNum} - ${fmt(wkStart)}-${fmt(wkEnd)}`;
+}
+
+function getAllWeekOptions(){
+  // Generate all weeks from Week 1 up to current reporting week
+  const week1 = new Date(2025, 11, 29);
+  const now = new Date();
+  const diffDays = Math.floor((now - week1) / 86400000);
+  const currentWkNum = Math.max(1, Math.floor(diffDays / 7) + 1);
+  const reportingWk = Math.max(1, currentWkNum - 1);
+  const weeks = [];
+  for(let i = reportingWk; i >= 1; i--){
+    const wkStart = new Date(week1.getTime() + (i-1) * 7 * 86400000);
+    const wkEnd = new Date(wkStart.getTime() + 4 * 86400000);
+    const fmt = (d) => d.toLocaleDateString('en-US', {month:'short', day:'2-digit'});
+    weeks.push({num:i, label:`Week ${i} - ${fmt(wkStart)}-${fmt(wkEnd)}`});
+  }
+  return weeks;
 }
 
 // ─── BUILD UI STRUCTURE ───────────────────────────────────────
@@ -637,10 +655,30 @@ function renderInpForm(){
   const area=document.getElementById('inp-form');
 
   if(inpMode==='weekly'){
-    const latest=getLatestNarrative(inpFunc)||{};
     const wkLabel=getCurrentWeekLabel();
-    const fields=NAR_FIELDS.map(nf=>`<div class="ng"><label>${nf.label}</label><textarea id="wn_${nf.k}" placeholder="${nf.label}...">${latest[nf.k]||''}</textarea></div>`).join('');
-    area.innerHTML=`<div class="dl-info">📅 Narrative due <b>Monday EOD</b> · Auto-labeled: <b>${wkLabel}</b>${!dataLoaded?' · <span style="color:#e65100">Connect to Google Sheets to save</span>':''}</div><div class="form-card"><div style="font-weight:700;font-size:13px;margin-bottom:.25rem">${f.name} — ${f.role}</div><div class="no-data" style="margin-bottom:.5rem">Week: ${wkLabel}</div><div class="fsec">Weekly narrative</div><div class="nar-inp-grid">${fields}</div><button class="save-btn" onclick="saveWeekly()" ${!dataLoaded?'disabled':''}>Save weekly update ↗</button></div>`;
+    const weeks=getAllWeekOptions();
+    const weekOpts=weeks.map(w=>`<option value="${w.label}" ${w.label===wkLabel?'selected':''}>${w.label}</option>`).join('');
+    
+    // Use sessionStorage to preserve in-progress edits (blank on fresh open, kept during session)
+    const sessionKey = `draft_${inpFunc}`;
+    const draft = JSON.parse(sessionStorage.getItem(sessionKey) || '{}');
+    
+    const fields=NAR_FIELDS.map(nf=>`<div class="ng"><label>${nf.label}</label><textarea id="wn_${nf.k}" placeholder="${nf.label}..." oninput="saveDraft('${inpFunc}')">${draft[nf.k]||''}</textarea></div>`).join('');
+    area.innerHTML=`
+      <div class="dl-info">📅 Narrative due <b>Monday EOD</b> · ${!dataLoaded?'<span style="color:#e65100">Connect to Google Sheets to save</span>':''}</div>
+      <div class="form-card">
+        <div style="font-weight:700;font-size:13px;margin-bottom:.5rem">${f.name} — ${f.role}</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:.75rem">
+          <label style="font-size:12px;color:#666;font-weight:500;white-space:nowrap">Reporting week:</label>
+          <select id="wn_weekLabel" style="padding:5px 10px;border:1.5px solid #ddd;border-radius:7px;background:#fff;font-size:12px;color:#333;flex:1">${weekOpts}</select>
+        </div>
+        <div class="fsec">Weekly narrative</div>
+        <div class="nar-inp-grid">${fields}</div>
+        <div style="display:flex;align-items:center;gap:10px;margin-top:.85rem">
+          <button class="save-btn" onclick="saveWeekly()" ${!dataLoaded?'disabled':''}>Save weekly update ↗</button>
+          <button onclick="clearDraft('${inpFunc}')" style="padding:7px 14px;border:1.5px solid #ddd;border-radius:7px;background:#fff;cursor:pointer;font-size:12px;color:#888">Clear form</button>
+        </div>
+      </div>`;
   } else {
     const curMonth=new Date().toISOString().slice(0,7);
     const existing=getKpisForMonth(inpFunc,curMonth)||[];
@@ -649,8 +687,22 @@ function renderInpForm(){
   }
 }
 
+function saveDraft(funcId){
+  const sessionKey = `draft_${funcId}`;
+  const draft = {};
+  NAR_FIELDS.forEach(nf=>{ const el=document.getElementById('wn_'+nf.k); if(el) draft[nf.k]=el.value; });
+  sessionStorage.setItem(sessionKey, JSON.stringify(draft));
+}
+
+function clearDraft(funcId){
+  const sessionKey = `draft_${funcId}`;
+  sessionStorage.removeItem(sessionKey);
+  NAR_FIELDS.forEach(nf=>{ const el=document.getElementById('wn_'+nf.k); if(el) el.value=''; });
+}
+
 async function saveWeekly(){
-  const wkLabel=getCurrentWeekLabel();
+  const wkSel=document.getElementById('wn_weekLabel');
+  const wkLabel=wkSel?wkSel.value:getCurrentWeekLabel();
   const f=FUNCS.find(x=>x.id===inpFunc);
   const payload={action:'saveWeekly',funcId:inpFunc,funcName:f.name,weekLabel:wkLabel};
   NAR_FIELDS.forEach(nf=>{ const el=document.getElementById('wn_'+nf.k); payload[nf.k]=el?el.value:''; });
@@ -659,6 +711,7 @@ async function saveWeekly(){
     btn.textContent='Saving...'; btn.disabled=true;
     const res=await postData(payload);
     if(res.error) throw new Error(res.error);
+    clearDraft(inpFunc);
     showToast('Weekly narrative saved ✓');
     await loadData();
     renderInpForm();
