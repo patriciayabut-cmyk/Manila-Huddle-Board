@@ -154,7 +154,7 @@ a{color:inherit}
 <div class="app">
 
   <!-- CONFIG BANNER -->
-  <div class="config-banner" id="config-banner">
+  <div class="config-banner" id="config-banner" style="display:none">
     <b>⚙️ One-time setup:</b> Paste your Google Apps Script Web App URL below, then click Save.
     <br><small>Extensions → Apps Script → Deploy → New Deployment → Web App → Anyone → Deploy → Copy URL</small>
     <input type="text" id="script-url-input" placeholder="https://script.google.com/macros/s/YOUR_ID/exec">
@@ -690,13 +690,13 @@ function renderDetail(fid){
     ${(()=>{
       const att=getAttrition(fid);
       const promo=getPromo(fid);
-      const attStr=att?`Attrition: <b>${att.rate}%</b> (${att.resignations} resignation${att.resignations!==1?'s':''} YTD)`:'Attrition: not entered';
-      const promoStr=promo?`Internal movement: <b>${promo.pct}%</b> (${promo.promotions} YTD)`:'Internal movement: not entered';
+      const attStr=att?'Attrition: <b>'+att.rate+'%</b> ('+att.resignations+' resignation'+(att.resignations!==1?'s':'')+' YTD)':'Attrition: not entered';
+      const promoStr=promo?'Internal movement: <b>'+promo.pct+'%</b> ('+promo.promotions+' YTD)':'Internal movement: not entered';
       const latestKpiRec=[...allKpis.filter(r=>r.funcId===fid)].sort((a,b)=>b.month.localeCompare(a.month))[0];
-      const openReqStr=latestKpiRec&&latestKpiRec.openRequisitions?`Open reqs: <b>${latestKpiRec.openRequisitions}</b>`:'';
-      const newRolesStr=latestKpiRec&&latestKpiRec.newRolesSinceJan?`New roles YTD: <b>${latestKpiRec.newRolesSinceJan}</b>`:'';
+      const openReqStr=latestKpiRec&&latestKpiRec.openRequisitions?'Open reqs: <b>'+latestKpiRec.openRequisitions+'</b>':'';
+      const newRolesStr=latestKpiRec&&latestKpiRec.newRolesSinceJan?'New roles YTD: <b>'+latestKpiRec.newRolesSinceJan+'</b>':'';
       const extras=[openReqStr,newRolesStr].filter(Boolean).join(' &nbsp;·&nbsp; ');
-      return \`<div class="det-hdr"><div class="det-title">\${f.name} — \${f.role}</div><div class="det-sub" style="display:flex;gap:8px;flex-wrap:wrap">HC: \${getLatestHC(fid)} &nbsp;·&nbsp; \${attStr} &nbsp;·&nbsp; \${promoStr}\${extras?' &nbsp;·&nbsp; '+extras:''} &nbsp;·&nbsp; \${allFuncEntries.length} weeks on record</div></div>\`;
+      return '<div class="det-hdr"><div class="det-title">'+f.name+' — '+f.role+'</div><div class="det-sub" style="display:flex;gap:8px;flex-wrap:wrap">HC: '+getLatestHC(fid)+' &nbsp;·&nbsp; '+attStr+' &nbsp;·&nbsp; '+promoStr+(extras?' &nbsp;·&nbsp; '+extras:'')+' &nbsp;·&nbsp; '+allFuncEntries.length+' weeks on record</div></div>';
     })()}
     <div class="card"><div class="card-title">Monthly KPIs</div>${kpiBlock}</div>
     ${weekNavHtml}
