@@ -467,10 +467,13 @@ function getFuncRag(fid){
 
 function getCurrentWeekLabel(){
   // Week 1 starts Dec 29, 2025 (Monday). Weeks run Mon-Fri.
+  // Reporting week = previous week (managers report on last week, due Mon EOD before Tue huddle)
   const week1 = new Date(2025, 11, 29); // Dec 29, 2025
   const now = new Date();
   const diffDays = Math.floor((now - week1) / 86400000);
-  const wkNum = Math.max(1, Math.floor(diffDays / 7) + 1);
+  const currentWkNum = Math.max(1, Math.floor(diffDays / 7) + 1);
+  // Reporting week is the previous week
+  const wkNum = Math.max(1, currentWkNum - 1);
   const wkStart = new Date(week1.getTime() + (wkNum - 1) * 7 * 86400000);
   const wkEnd = new Date(wkStart.getTime() + 4 * 86400000);
   const fmt = (d) => d.toLocaleDateString('en-US', {month:'short', day:'2-digit'});
