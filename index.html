@@ -808,7 +808,16 @@ function renderInpForm(){
     const existingAvgHC    = ref.avgHC            || getLatestHC(inpFunc) || '';
     const existingOpenReqs = ref.openRequisitions || '';
     const existingNewRoles = ref.newRolesSinceJan || '';
-    area.innerHTML=`<div class="dl-info" style="background:#e8f5e9;color:#2e7d32">👥 HC &amp; People data — recording for <b>${curMonth}</b>${!dataLoaded?' · <span style="color:#e65100">Connect to Google Sheets to save</span>':''}</div><div class="form-card"><div style="font-weight:700;font-size:13px;margin-bottom:.25rem">${f.name} — ${f.role}</div><div class="fsec">Headcount &amp; movements — ${curMonth}</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:.5rem"><div class="ng"><label>Resignations YTD</label><input type="number" min="0" id="hc_resignations" value="${existingResign}" placeholder="0"></div><div class="ng"><label>Total internal movements YTD</label><input type="number" min="0" id="hc_promotions" value="${existingPromo}" placeholder="0"><span style="font-size:10px;color:#aaa;margin-top:2px">Transfers + promotions within &amp; outside</span></div><div class="ng"><label>Average HC this month</label><input type="number" min="0" id="hc_avgHC" value="${existingAvgHC}" placeholder="${getLatestHC(inpFunc)||''}"><span style="font-size:10px;color:#aaa;margin-top:2px">App computes attrition &amp; promo %</span></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:.75rem"><div class="ng"><label>Open requisitions</label><input type="number" min="0" id="hc_openReqs" value="${existingOpenReqs}" placeholder="0"></div><div class="ng"><label>New roles since January</label><input type="number" min="0" id="hc_newRoles" value="${existingNewRoles}" placeholder="0"></div></div><div style="background:#f4f5f7;border-radius:7px;padding:.6rem .85rem;font-size:12px;color:#555;margin-bottom:.75rem">Annualized attrition and internal movement % are computed automatically from these numbers.</div><button class="save-btn" onclick="saveHCData()" ${!dataLoaded?'disabled':''}>Save HC &amp; people data ↗</button></div>`;
+    // Use session draft if available, otherwise use sheet data
+    const hcDraftKey = `hc_draft_${inpFunc}`;
+    const hcDraft = JSON.parse(sessionStorage.getItem(hcDraftKey) || 'null');
+    const resign   = hcDraft ? hcDraft.resignations   : existingResign;
+    const promo    = hcDraft ? hcDraft.promotions      : existingPromo;
+    const avgHCVal = hcDraft ? hcDraft.avgHC           : existingAvgHC;
+    const openReqs = hcDraft ? hcDraft.openReqs        : existingOpenReqs;
+    const newRoles = hcDraft ? hcDraft.newRoles        : existingNewRoles;
+
+    area.innerHTML=`<div class="dl-info" style="background:#e8f5e9;color:#2e7d32">👥 HC &amp; People data — recording for <b>${curMonth}</b>${!dataLoaded?' · <span style="color:#e65100">Connect to Google Sheets to save</span>':''}</div><div class="form-card"><div style="font-weight:700;font-size:13px;margin-bottom:.25rem">${f.name} — ${f.role}</div><div class="fsec">Headcount &amp; movements — ${curMonth}</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:.5rem"><div class="ng"><label>Resignations YTD</label><input type="number" min="0" id="hc_resignations" value="${resign}" placeholder="0" oninput="saveHCDraft('${inpFunc}')"></div><div class="ng"><label>Total internal movements YTD</label><input type="number" min="0" id="hc_promotions" value="${promo}" placeholder="0" oninput="saveHCDraft('${inpFunc}')"><span style="font-size:10px;color:#aaa;margin-top:2px">Transfers + promotions within &amp; outside</span></div><div class="ng"><label>Average HC this month</label><input type="number" min="0" id="hc_avgHC" value="${avgHCVal}" placeholder="${getLatestHC(inpFunc)||''}" oninput="saveHCDraft('${inpFunc}')"><span style="font-size:10px;color:#aaa;margin-top:2px">App computes attrition &amp; promo %</span></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:.75rem"><div class="ng"><label>Open requisitions</label><input type="number" min="0" id="hc_openReqs" value="${openReqs}" placeholder="0" oninput="saveHCDraft('${inpFunc}')"></div><div class="ng"><label>New roles since January</label><input type="number" min="0" id="hc_newRoles" value="${newRoles}" placeholder="0" oninput="saveHCDraft('${inpFunc}')"></div></div><div style="background:#f4f5f7;border-radius:7px;padding:.6rem .85rem;font-size:12px;color:#555;margin-bottom:.75rem">Annualized attrition and internal movement % are computed automatically from these numbers.</div><button class="save-btn" onclick="saveHCData()" ${!dataLoaded?'disabled':''}>Save HC &amp; people data ↗</button></div>`;
   }
 }
 
@@ -849,6 +858,21 @@ async function saveWeekly(){
   } catch(e){ showToast('Save failed: '+e.message); }
 }
 
+function saveHCDraft(funcId){
+  const d = {
+    resignations: document.getElementById('hc_resignations')?.value || '',
+    promotions:   document.getElementById('hc_promotions')?.value  || '',
+    avgHC:        document.getElementById('hc_avgHC')?.value       || '',
+    openReqs:     document.getElementById('hc_openReqs')?.value    || '',
+    newRoles:     document.getElementById('hc_newRoles')?.value    || '',
+  };
+  sessionStorage.setItem(`hc_draft_${funcId}`, JSON.stringify(d));
+}
+
+function clearHCDraft(funcId){
+  sessionStorage.removeItem(`hc_draft_${funcId}`);
+}
+
 async function saveHCData(){
   const now=new Date(); const curMonth=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
   const f=FUNCS.find(x=>x.id===inpFunc);
@@ -879,6 +903,7 @@ async function saveHCData(){
     };
     if(existingIdx>=0) Object.assign(allKpis[existingIdx], updatedRec);
     else allKpis.push(updatedRec);
+    clearHCDraft(inpFunc);
     showToast('HC & people data saved ✓');
     loadData(); // refresh in background
     renderInpForm();
