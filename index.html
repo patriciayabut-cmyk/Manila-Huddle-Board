@@ -209,6 +209,7 @@ a{color:inherit}
     <div class="inp-mode-tabs">
       <button class="imt active" id="imt-w" onclick="setInpMode('weekly')">📝 Weekly narrative <small style="opacity:.6">(due Mon EOD)</small></button>
       <button class="imt"        id="imt-k" onclick="setInpMode('kpi')">📈 Monthly KPIs <small style="opacity:.6">(once a month)</small></button>
+      <button class="imt"        id="imt-h" onclick="setInpMode('hc')">👥 HC &amp; People data <small style="opacity:.6">(once a month)</small></button>
     </div>
     <div class="func-sel" id="inp-fsel"></div>
     <div id="inp-form"></div>
@@ -714,6 +715,7 @@ function setInpMode(m){
   inpMode=m;
   document.getElementById('imt-w').classList.toggle('active',m==='weekly');
   document.getElementById('imt-k').classList.toggle('active',m==='kpi');
+  document.getElementById('imt-h').classList.toggle('active',m==='hc');
   renderInpForm();
 }
 
@@ -751,21 +753,24 @@ function renderInpForm(){
           <button onclick="clearDraft('${inpFunc}')" style="padding:7px 14px;border:1.5px solid #ddd;border-radius:7px;background:#fff;cursor:pointer;font-size:12px;color:#888">Clear form</button>
         </div>
       </div>`;
-  } else {
+  } else if(inpMode==='kpi'){
     const curMonth=new Date().toISOString().slice(0,7);
     const existing=getKpisForMonth(inpFunc,curMonth)||[];
     const existingKpiRec = allKpis.find(x=>x.funcId===inpFunc&&x.month===curMonth);
-    // For people metrics, fall back to most recent previous record if current month not yet entered
+    const kpiRows=defs.length?defs.map((k,i)=>`<div class="kpi-inp"><span>${k.l}</span><span>Target: ${k.t}${k.t<=100?'%':''}</span><input type="number" step="0.01" id="kpi_${i}" value="${existing[i]!=null?existing[i]:''}" placeholder="Actual"></div>`).join(''):'<div class="no-data">No KPIs defined.</div>';
+    const monthsElapsed = parseInt(curMonth.split('-')[1]) || 1;
+    area.innerHTML=`<div class="dl-info" style="background:#e8f0fe;color:#1565c0">📊 KPIs updated <b>monthly</b> — recording for <b>${curMonth}</b>${!dataLoaded?' · <span style="color:#e65100">Connect to Google Sheets to save</span>':''}</div><div class="form-card"><div style="font-weight:700;font-size:13px;margin-bottom:.25rem">${f.name} — ${f.role}</div><div class="fsec">KPI actuals — ${curMonth}</div>${kpiRows}<button class="save-btn" onclick="saveKpis()" ${!dataLoaded?'disabled':''}>Save KPI update ↗</button></div>`;
+
+  } else if(inpMode==='hc'){
+    const curMonth=new Date().toISOString().slice(0,7);
+    const existingKpiRec = allKpis.find(x=>x.funcId===inpFunc&&x.month===curMonth);
     const prevKpiRec = existingKpiRec || [...allKpis.filter(r=>r.funcId===inpFunc)].sort((a,b)=>b.month.localeCompare(a.month))[0];
     const existingResign   = existingKpiRec ? (existingKpiRec.resignations||'') : (prevKpiRec ? (prevKpiRec.resignations||'') : '');
-    const existingAttrition= existingKpiRec ? (existingKpiRec.attritionRate||'') : '';
     const existingPromo    = existingKpiRec ? (existingKpiRec.promotions||'') : (prevKpiRec ? (prevKpiRec.promotions||'') : '');
     const existingAvgHC    = existingKpiRec ? (existingKpiRec.avgHC||getLatestHC(inpFunc)||'') : (prevKpiRec ? (prevKpiRec.avgHC||getLatestHC(inpFunc)||'') : (getLatestHC(inpFunc)||''));
     const existingOpenReqs = existingKpiRec ? (existingKpiRec.openRequisitions||'') : (prevKpiRec ? (prevKpiRec.openRequisitions||'') : '');
     const existingNewRoles = existingKpiRec ? (existingKpiRec.newRolesSinceJan||'') : (prevKpiRec ? (prevKpiRec.newRolesSinceJan||'') : '');
-    const kpiRows=defs.length?defs.map((k,i)=>`<div class="kpi-inp"><span>${k.l}</span><span>Target: ${k.t}${k.t<=100?'%':''}</span><input type="number" step="0.01" id="kpi_${i}" value="${existing[i]!=null?existing[i]:''}" placeholder="Actual"></div>`).join(''):'<div class="no-data">No KPIs defined.</div>';
-    const monthsElapsed = parseInt(curMonth.split('-')[1]) || 1;
-    area.innerHTML=`<div class="dl-info" style="background:#e8f0fe;color:#1565c0">📊 KPIs updated <b>monthly</b> — recording for <b>${curMonth}</b>${!dataLoaded?' · <span style="color:#e65100">Connect to Google Sheets to save</span>':''}</div><div class="form-card"><div style="font-weight:700;font-size:13px;margin-bottom:.25rem">${f.name} — ${f.role}</div><div class="fsec">KPI actuals — ${curMonth}</div>${kpiRows}<div class="fsec">People metrics</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:.5rem"><div class="ng"><label>Resignations YTD</label><input type="number" min="0" id="kpi_resignations" value="${existingResign}" placeholder="0"></div><div class="ng"><label>Total internal movements YTD</label><input type="number" min="0" id="kpi_promotions" value="${existingPromo}" placeholder="0"><span style="font-size:10px;color:#aaa;margin-top:2px">Transfers + promotions</span></div><div class="ng"><label>Average HC this month</label><input type="number" min="0" id="kpi_avgHC" value="${existingAvgHC}" placeholder="${getLatestHC(inpFunc)||''}"><span style="font-size:10px;color:#aaa;margin-top:2px">App computes attrition &amp; promo %</span></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:.75rem"><div class="ng"><label>Open requisitions</label><input type="number" min="0" id="kpi_openReqs" value="${existingOpenReqs}" placeholder="0"></div><div class="ng"><label>New roles since January</label><input type="number" min="0" id="kpi_newRoles" value="${existingNewRoles}" placeholder="0"></div></div><button class="save-btn" onclick="saveKpis()" ${!dataLoaded?'disabled':''}>Save KPI update ↗</button></div>`;
+    area.innerHTML=`<div class="dl-info" style="background:#e8f5e9;color:#2e7d32">👥 HC &amp; People data — recording for <b>${curMonth}</b>${!dataLoaded?' · <span style="color:#e65100">Connect to Google Sheets to save</span>':''}</div><div class="form-card"><div style="font-weight:700;font-size:13px;margin-bottom:.25rem">${f.name} — ${f.role}</div><div class="fsec">Headcount &amp; movements — ${curMonth}</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:.5rem"><div class="ng"><label>Resignations YTD</label><input type="number" min="0" id="hc_resignations" value="${existingResign}" placeholder="0"></div><div class="ng"><label>Total internal movements YTD</label><input type="number" min="0" id="hc_promotions" value="${existingPromo}" placeholder="0"><span style="font-size:10px;color:#aaa;margin-top:2px">Transfers + promotions within &amp; outside</span></div><div class="ng"><label>Average HC this month</label><input type="number" min="0" id="hc_avgHC" value="${existingAvgHC}" placeholder="${getLatestHC(inpFunc)||''}"><span style="font-size:10px;color:#aaa;margin-top:2px">App computes attrition &amp; promo %</span></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:.75rem"><div class="ng"><label>Open requisitions</label><input type="number" min="0" id="hc_openReqs" value="${existingOpenReqs}" placeholder="0"></div><div class="ng"><label>New roles since January</label><input type="number" min="0" id="hc_newRoles" value="${existingNewRoles}" placeholder="0"></div></div><div style="background:#f4f5f7;border-radius:7px;padding:.6rem .85rem;font-size:12px;color:#555;margin-bottom:.75rem">Annualized attrition and internal movement % are computed automatically from these numbers.</div><button class="save-btn" onclick="saveHCData()" ${!dataLoaded?'disabled':''}>Save HC &amp; people data ↗</button></div>`;
   }
 }
 
@@ -801,6 +806,30 @@ async function saveWeekly(){
     if(res.error) throw new Error(res.error);
     clearDraft(inpFunc);
     showToast('Weekly narrative saved ✓');
+    await loadData();
+    renderInpForm();
+  } catch(e){ showToast('Save failed: '+e.message); }
+}
+
+async function saveHCData(){
+  const curMonth=new Date().toISOString().slice(0,7);
+  const f=FUNCS.find(x=>x.id===inpFunc);
+  const resignEl=document.getElementById('hc_resignations');
+  const promoEl=document.getElementById('hc_promotions');
+  const avgHCEl=document.getElementById('hc_avgHC');
+  const openReqsEl=document.getElementById('hc_openReqs');
+  const newRolesEl=document.getElementById('hc_newRoles');
+  const resignations=resignEl&&resignEl.value!==''?parseInt(resignEl.value):null;
+  const promotions=promoEl&&promoEl.value!==''?parseInt(promoEl.value):null;
+  const avgHC=avgHCEl&&avgHCEl.value!==''?parseFloat(avgHCEl.value):null;
+  const openRequisitions=openReqsEl&&openReqsEl.value!==''?parseInt(openReqsEl.value):null;
+  const newRolesSinceJan=newRolesEl&&newRolesEl.value!==''?parseInt(newRolesEl.value):null;
+  try {
+    const btn=document.querySelector('#inp-form .save-btn');
+    btn.textContent='Saving...'; btn.disabled=true;
+    const res=await postData({action:'saveKpi',funcId:inpFunc,funcName:f.name,month:curMonth,kpis:[],resignations,promotions,avgHC,openRequisitions,newRolesSinceJan});
+    if(res.error) throw new Error(res.error);
+    showToast('HC & people data saved ✓');
     await loadData();
     renderInpForm();
   } catch(e){ showToast('Save failed: '+e.message); }
