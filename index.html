@@ -790,7 +790,7 @@ function renderInpForm(){
         </div>
       </div>`;
   } else if(inpMode==='kpi'){
-    const curMonth=new Date().toISOString().slice(0,7);
+    const now=new Date(); const curMonth=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
     const existing=getKpisForMonth(inpFunc,curMonth)||[];
     const existingKpiRec = allKpis.filter(x=>x.funcId===inpFunc&&normalizeMonth(x.month)===curMonth).sort((a,b)=>b.updatedAt.localeCompare(a.updatedAt))[0];
     const kpiRows=defs.length?defs.map((k,i)=>`<div class="kpi-inp"><span>${k.l}</span><span>Target: ${k.t}${k.t<=100?'%':''}</span><input type="number" step="0.01" id="kpi_${i}" value="${existing[i]!=null?existing[i]:''}" placeholder="Actual"></div>`).join(''):'<div class="no-data">No KPIs defined.</div>';
@@ -798,7 +798,7 @@ function renderInpForm(){
     area.innerHTML=`<div class="dl-info" style="background:#e8f0fe;color:#1565c0">📊 KPIs updated <b>monthly</b> — recording for <b>${curMonth}</b>${!dataLoaded?' · <span style="color:#e65100">Connect to Google Sheets to save</span>':''}</div><div class="form-card"><div style="font-weight:700;font-size:13px;margin-bottom:.25rem">${f.name} — ${f.role}</div><div class="fsec">KPI actuals — ${curMonth}</div>${kpiRows}<button class="save-btn" onclick="saveKpis()" ${!dataLoaded?'disabled':''}>Save KPI update ↗</button></div>`;
 
   } else if(inpMode==='hc'){
-    const curMonth=new Date().toISOString().slice(0,7);
+    const now=new Date(); const curMonth=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
     const existingKpiRec = allKpis.filter(x=>x.funcId===inpFunc&&normalizeMonth(x.month)===curMonth).sort((a,b)=>b.updatedAt.localeCompare(a.updatedAt))[0];
     // Always fall back to most recent record regardless of month
     const latestKpiRec = [...allKpis.filter(r=>r.funcId===inpFunc)].sort((a,b)=>normalizeMonth(b.month).localeCompare(normalizeMonth(a.month)))[0];
@@ -850,7 +850,7 @@ async function saveWeekly(){
 }
 
 async function saveHCData(){
-  const curMonth=new Date().toISOString().slice(0,7);
+  const now=new Date(); const curMonth=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
   const f=FUNCS.find(x=>x.id===inpFunc);
   const resignEl=document.getElementById('hc_resignations');
   const promoEl=document.getElementById('hc_promotions');
@@ -886,7 +886,7 @@ async function saveHCData(){
 }
 
 async function saveKpis(){
-  const curMonth=new Date().toISOString().slice(0,7);
+  const now=new Date(); const curMonth=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
   const defs=KPI_DEFS[inpFunc]||[];
   const f=FUNCS.find(x=>x.id===inpFunc);
   const kpis=defs.map((_,i)=>{ const el=document.getElementById('kpi_'+i); return el&&el.value!==''?parseFloat(el.value):null; });
