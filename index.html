@@ -446,7 +446,7 @@ function getLatestHC(fid){
 }
 
 function getAttrition(fid){
-  // Find latest KPI record with resignation data
+  // Compute from resignations YTD and avgHC
   const arr = [...allKpis.filter(r=>r.funcId===fid&&r.resignations!=null&&r.resignations!='')].sort((a,b)=>b.month.localeCompare(a.month));
   if(!arr.length) return null;
   const latest = arr[0];
@@ -687,7 +687,7 @@ function renderDetail(fid){
     ${(()=>{
       const att=getAttrition(fid);
       const promo=getPromo(fid);
-      const attStr=att?'Attrition: <b>'+att.rate+'%</b> ('+att.resignations+' resignation'+(att.resignations!==1?'s':'')+' YTD)':'Attrition: not entered';
+      const attStr=att?'Attrition: <b>'+att.rate+'%</b> annualized ('+att.resignations+' resignation'+(att.resignations!==1?'s':'')+' YTD)':'Attrition: not entered';
       const promoStr=promo?'Internal movement: <b>'+promo.pct+'%</b> ('+promo.promotions+' YTD)':'Internal movement: not entered';
       const latestKpiRec=[...allKpis.filter(r=>r.funcId===fid)].sort((a,b)=>b.month.localeCompare(a.month))[0];
       const openReqStr=latestKpiRec&&latestKpiRec.openRequisitions?'Open reqs: <b>'+latestKpiRec.openRequisitions+'</b>':'';
@@ -756,13 +756,14 @@ function renderInpForm(){
     const existing=getKpisForMonth(inpFunc,curMonth)||[];
     const existingKpiRec = allKpis.find(x=>x.funcId===inpFunc&&x.month===curMonth);
     const existingResign   = existingKpiRec ? (existingKpiRec.resignations||'') : '';
+    const existingAttrition= existingKpiRec ? (existingKpiRec.attritionRate||'') : '';
     const existingPromo    = existingKpiRec ? (existingKpiRec.promotions||'') : '';
     const existingAvgHC    = existingKpiRec ? (existingKpiRec.avgHC||getLatestHC(inpFunc)||'') : (getLatestHC(inpFunc)||'');
     const existingOpenReqs = existingKpiRec ? (existingKpiRec.openRequisitions||'') : '';
     const existingNewRoles = existingKpiRec ? (existingKpiRec.newRolesSinceJan||'') : '';
     const kpiRows=defs.length?defs.map((k,i)=>`<div class="kpi-inp"><span>${k.l}</span><span>Target: ${k.t}${k.t<=100?'%':''}</span><input type="number" step="0.01" id="kpi_${i}" value="${existing[i]!=null?existing[i]:''}" placeholder="Actual"></div>`).join(''):'<div class="no-data">No KPIs defined.</div>';
     const monthsElapsed = parseInt(curMonth.split('-')[1]) || 1;
-    area.innerHTML=`<div class="dl-info" style="background:#e8f0fe;color:#1565c0">📊 KPIs updated <b>monthly</b> — recording for <b>${curMonth}</b>${!dataLoaded?' · <span style="color:#e65100">Connect to Google Sheets to save</span>':''}</div><div class="form-card"><div style="font-weight:700;font-size:13px;margin-bottom:.25rem">${f.name} — ${f.role}</div><div class="fsec">KPI actuals — ${curMonth}</div>${kpiRows}<div class="fsec">Attrition tracking</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:.5rem"><div class="ng"><label>Resignations YTD</label><input type="number" min="0" id="kpi_resignations" value="${existingResign}" placeholder="0"></div><div class="ng"><label>Total internal movements YTD</label><input type="number" min="0" id="kpi_promotions" value="${existingPromo}" placeholder="0"><span style="font-size:10px;color:#aaa;margin-top:2px">Transfers + promotions</span></div><div class="ng"><label>Average HC this month</label><input type="number" min="0" id="kpi_avgHC" value="${existingAvgHC}" placeholder="${getLatestHC(inpFunc)||''}"><span style="font-size:10px;color:#aaa;margin-top:2px">For attrition &amp; promo %</span></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:.75rem"><div class="ng"><label>Open requisitions</label><input type="number" min="0" id="kpi_openReqs" value="${existingOpenReqs}" placeholder="0"></div><div class="ng"><label>New roles since January</label><input type="number" min="0" id="kpi_newRoles" value="${existingNewRoles}" placeholder="0"></div></div><div style="background:#f4f5f7;border-radius:7px;padding:.6rem .85rem;font-size:12px;color:#555;margin-bottom:.75rem">Annualized attrition = (Resignations YTD ÷ Avg HC) × (12 ÷ ${monthsElapsed} months) × 100</div><button class="save-btn" onclick="saveKpis()" ${!dataLoaded?'disabled':''}>Save KPI update ↗</button></div>`;
+    area.innerHTML=`<div class="dl-info" style="background:#e8f0fe;color:#1565c0">📊 KPIs updated <b>monthly</b> — recording for <b>${curMonth}</b>${!dataLoaded?' · <span style="color:#e65100">Connect to Google Sheets to save</span>':''}</div><div class="form-card"><div style="font-weight:700;font-size:13px;margin-bottom:.25rem">${f.name} — ${f.role}</div><div class="fsec">KPI actuals — ${curMonth}</div>${kpiRows}<div class="fsec">People metrics</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:.5rem"><div class="ng"><label>Resignations YTD</label><input type="number" min="0" id="kpi_resignations" value="${existingResign}" placeholder="0"></div><div class="ng"><label>Total internal movements YTD</label><input type="number" min="0" id="kpi_promotions" value="${existingPromo}" placeholder="0"><span style="font-size:10px;color:#aaa;margin-top:2px">Transfers + promotions</span></div><div class="ng"><label>Average HC this month</label><input type="number" min="0" id="kpi_avgHC" value="${existingAvgHC}" placeholder="${getLatestHC(inpFunc)||''}"><span style="font-size:10px;color:#aaa;margin-top:2px">App computes attrition &amp; promo %</span></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:.75rem"><div class="ng"><label>Open requisitions</label><input type="number" min="0" id="kpi_openReqs" value="${existingOpenReqs}" placeholder="0"></div><div class="ng"><label>New roles since January</label><input type="number" min="0" id="kpi_newRoles" value="${existingNewRoles}" placeholder="0"></div></div><button class="save-btn" onclick="saveKpis()" ${!dataLoaded?'disabled':''}>Save KPI update ↗</button></div>`;
   }
 }
 
