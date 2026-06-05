@@ -276,6 +276,7 @@ let allWeekly  = [];   // all weekly entries from sheet
 let allKpis    = [];   // all kpi entries from sheet
 let nav = 'dash', inpMode = 'weekly', inpFunc = 'grace';
 let detailWeek = {};
+let detailKpiMonth = {};
 let selectedFilterWeek = 'latest';
 let viewSec = 'overview', ovChart = null;
 let dataLoaded = false;
@@ -328,6 +329,11 @@ function onWeekFilterChange(){
 
 function setDetailWeek(fid, weekLabel){
   detailWeek[fid] = weekLabel;
+  renderDetail(fid);
+}
+
+function setDetailKpiMonth(fid, month){
+  detailKpiMonth[fid] = month;
   renderDetail(fid);
 }
 
@@ -636,10 +642,29 @@ function renderDetail(fid){
   const latest=getLatestNarrative(fid);
   const el=document.getElementById('det-'+fid); if(!el)return;
 
+  // KPI month selector
+  const allKpiMonths = [...new Set(allKpis.filter(r=>r.funcId===fid).map(r=>r.month))].sort().reverse();
+  if(!detailKpiMonth[fid] && allKpiMonths.length) detailKpiMonth[fid] = allKpiMonths[0];
+  const selectedKpiMonth = detailKpiMonth[fid] || allKpiMonths[0];
+  const selectedKpis = selectedKpiMonth ? getKpisForMonth(fid, selectedKpiMonth) : kpis;
+
+  const kpiMonthOpts = allKpiMonths.map(m=>{
+    const [y,mo] = m.split('-');
+    const label = new Date(+y,+mo-1,1).toLocaleDateString('en-US',{month:'long',year:'numeric'});
+    return `<option value="${m}" ${m===selectedKpiMonth?'selected':''}>${label}</option>`;
+  }).join('');
+
+  const kpiMonthNav = allKpiMonths.length ? `
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:.75rem;flex-wrap:wrap">
+      <label style="font-size:12px;color:#666;font-weight:500;white-space:nowrap">Month:</label>
+      <select onchange="setDetailKpiMonth('${fid}',this.value)" style="padding:5px 10px;border:1.5px solid #ddd;border-radius:7px;background:#fff;font-size:12px;color:#333;min-width:180px">${kpiMonthOpts}</select>
+      <span style="font-size:11px;color:#aaa">${allKpiMonths.length} month${allKpiMonths.length!==1?'s':''} on record</span>
+    </div>` : '';
+
   let kpiBlock='<div class="no-data">No KPI data yet. Use Monthly KPIs input to add.</div>';
-  if(kpis.length){
+  if(selectedKpis && selectedKpis.length){
     let rows='';
-    kpis.forEach((v,i)=>{
+    selectedKpis.forEach((v,i)=>{
       if(!defs[i])return;
       const r=getRag(fid,i,v),isLg=defs[i].t>100;
       const disp=v+((!isLg&&v<=100)?'%':''),tDisp=defs[i].t+((!isLg&&defs[i].t<=100)?'%':'');
@@ -698,7 +723,7 @@ function renderDetail(fid){
       const extras=[openReqStr,newRolesStr].filter(Boolean).join(' &nbsp;·&nbsp; ');
       return '<div class="det-hdr"><div class="det-title">'+f.name+' — '+f.role+'</div><div class="det-sub" style="display:flex;gap:8px;flex-wrap:wrap">HC: '+getLatestHC(fid)+' &nbsp;·&nbsp; '+attStr+' &nbsp;·&nbsp; '+promoStr+(extras?' &nbsp;·&nbsp; '+extras:'')+' &nbsp;·&nbsp; '+allFuncEntries.length+' weeks on record</div></div>';
     })()}
-    <div class="card"><div class="card-title">Monthly KPIs</div>${kpiBlock}</div>
+    <div class="card"><div class="card-title">Monthly KPIs</div>${kpiMonthNav}${kpiBlock}</div>
     ${weekNavHtml}
     <div class="card"><div class="card-title">Narrative — ${selectedEntry?selectedEntry.weekLabel:'none'}</div>${narBlock}</div>
     <div class="card"><div class="card-title">All weeks (click to view)</div>${histHtml}</div>`;
