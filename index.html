@@ -428,14 +428,23 @@ async function postData(payload){
 function getLatestKpis(fid){
   const arr = allKpis.filter(r=>r.funcId===fid);
   if(!arr.length) return [];
-  arr.sort((a,b)=>b.month.localeCompare(a.month));
+  arr.sort((a,b)=>normalizeMonth(b.month).localeCompare(normalizeMonth(a.month)));
   const r = arr[0];
   return [r.kpi1,r.kpi2,r.kpi3,r.kpi4,r.kpi5].filter(v=>v!==''&&v!=null).map(Number);
 }
 
+function normalizeMonth(m){
+  // Handle both '2026-05' and '2026-05-31T16:00:00.000Z' formats
+  if(!m) return '';
+  return String(m).slice(0,7);
+}
+
 function getKpisForMonth(fid, month){
-  const r = allKpis.find(x=>x.funcId===fid&&x.month===month);
-  if(!r) return null;
+  const nm = normalizeMonth(month);
+  const arr = allKpis.filter(x=>x.funcId===fid&&normalizeMonth(x.month)===nm);
+  if(!arr.length) return null;
+  // Get most recently updated record for this month
+  const r = arr.sort((a,b)=>b.updatedAt.localeCompare(a.updatedAt))[0];
   return [r.kpi1,r.kpi2,r.kpi3,r.kpi4,r.kpi5].filter(v=>v!==''&&v!=null).map(Number);
 }
 
@@ -454,7 +463,7 @@ function getLatestHC(fid){
 
 function getAttrition(fid){
   // Compute from resignations YTD and avgHC
-  const arr = [...allKpis.filter(r=>r.funcId===fid&&r.resignations!=null&&r.resignations!='')].sort((a,b)=>b.month.localeCompare(a.month));
+  const arr = [...allKpis.filter(r=>r.funcId===fid&&r.resignations!=null&&r.resignations!='')].sort((a,b)=>normalizeMonth(b.month).localeCompare(normalizeMonth(a.month)));
   if(!arr.length) return null;
   const latest = arr[0];
   const resignations = parseFloat(latest.resignations)||0;
@@ -471,7 +480,7 @@ function getAttrition(fid){
 }
 
 function getPromo(fid){
-  const arr = [...allKpis.filter(r=>r.funcId===fid&&r.promotions!=null&&r.promotions!='')].sort((a,b)=>b.month.localeCompare(a.month));
+  const arr = [...allKpis.filter(r=>r.funcId===fid&&r.promotions!=null&&r.promotions!='')].sort((a,b)=>normalizeMonth(b.month).localeCompare(normalizeMonth(a.month)));
   if(!arr.length) return null;
   const latest = arr[0];
   const promotions = parseFloat(latest.promotions)||0;
@@ -783,16 +792,16 @@ function renderInpForm(){
   } else if(inpMode==='kpi'){
     const curMonth=new Date().toISOString().slice(0,7);
     const existing=getKpisForMonth(inpFunc,curMonth)||[];
-    const existingKpiRec = allKpis.find(x=>x.funcId===inpFunc&&x.month===curMonth);
+    const existingKpiRec = allKpis.filter(x=>x.funcId===inpFunc&&normalizeMonth(x.month)===curMonth).sort((a,b)=>b.updatedAt.localeCompare(a.updatedAt))[0];
     const kpiRows=defs.length?defs.map((k,i)=>`<div class="kpi-inp"><span>${k.l}</span><span>Target: ${k.t}${k.t<=100?'%':''}</span><input type="number" step="0.01" id="kpi_${i}" value="${existing[i]!=null?existing[i]:''}" placeholder="Actual"></div>`).join(''):'<div class="no-data">No KPIs defined.</div>';
     const monthsElapsed = parseInt(curMonth.split('-')[1]) || 1;
     area.innerHTML=`<div class="dl-info" style="background:#e8f0fe;color:#1565c0">📊 KPIs updated <b>monthly</b> — recording for <b>${curMonth}</b>${!dataLoaded?' · <span style="color:#e65100">Connect to Google Sheets to save</span>':''}</div><div class="form-card"><div style="font-weight:700;font-size:13px;margin-bottom:.25rem">${f.name} — ${f.role}</div><div class="fsec">KPI actuals — ${curMonth}</div>${kpiRows}<button class="save-btn" onclick="saveKpis()" ${!dataLoaded?'disabled':''}>Save KPI update ↗</button></div>`;
 
   } else if(inpMode==='hc'){
     const curMonth=new Date().toISOString().slice(0,7);
-    const existingKpiRec = allKpis.find(x=>x.funcId===inpFunc&&x.month===curMonth);
+    const existingKpiRec = allKpis.filter(x=>x.funcId===inpFunc&&normalizeMonth(x.month)===curMonth).sort((a,b)=>b.updatedAt.localeCompare(a.updatedAt))[0];
     // Always fall back to most recent record regardless of month
-    const latestKpiRec = [...allKpis.filter(r=>r.funcId===inpFunc)].sort((a,b)=>b.month.localeCompare(a.month))[0];
+    const latestKpiRec = [...allKpis.filter(r=>r.funcId===inpFunc)].sort((a,b)=>normalizeMonth(b.month).localeCompare(normalizeMonth(a.month)))[0];
     const ref = existingKpiRec || latestKpiRec || {};
     const existingResign   = ref.resignations    || '';
     const existingPromo    = ref.promotions       || '';
