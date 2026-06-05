@@ -610,10 +610,12 @@ function renderOverview(){
     card.innerHTML=`<div class="fc-top"><div><div class="fc-name">${f.name}</div><div class="fc-role">${f.role}</div></div><div class="fc-dots"><div class="upd ${updated?'upd-y':'upd-n'}" title="${updated?'Updated this week':'Not updated this week'}"></div><div class="rag rag-${rag}"></div></div></div>${kh}<div class="fc-stamp">${stamp}${attDisp?' · '+attDisp:''}</div>`;
     grid.appendChild(card);
   });
-  renderOvChart();
+  // chart removed
 }
 
 function renderOvChart(){
+  const canvas = document.getElementById('ov-chart');
+  if(!canvas) return; // chart removed — skip
   const fw=FUNCS.filter(f=>getLatestKpis(f.id).length);
   const labels=fw.map(f=>f.name.split(' ')[0]);
   const scores=fw.map(f=>{
@@ -623,7 +625,7 @@ function renderOvChart(){
     return cnt?Math.round(sum/cnt):0;
   });
   const cols=fw.map(f=>{ const r=getFuncRag(f.id); return r==='G'?'#4caf50':r==='A'?'#ff9800':'#f44336'; });
-  const ctx=document.getElementById('ov-chart').getContext('2d');
+  const ctx=canvas.getContext('2d');
   if(ovChart)ovChart.destroy();
   ovChart=new Chart(ctx,{type:'bar',data:{labels,datasets:[{data:scores,backgroundColor:cols,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{min:0,max:115,grid:{color:'rgba(0,0,0,.05)'},ticks:{callback:v=>v+'%',font:{size:10}}},x:{grid:{display:false},ticks:{font:{size:10}}}}}});
 }
