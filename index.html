@@ -858,8 +858,20 @@ async function saveHCData(){
     btn.textContent='Saving...'; btn.disabled=true;
     const res=await postData({action:'saveKpi',funcId:inpFunc,funcName:f.name,month:curMonth,kpis:[],resignations,promotions,avgHC,openRequisitions,newRolesSinceJan});
     if(res.error) throw new Error(res.error);
+    // Update local cache immediately so form re-renders with saved values
+    const existingIdx = allKpis.findIndex(r=>r.funcId===inpFunc&&r.month===curMonth);
+    const updatedRec = {
+      funcId:inpFunc, funcName:f.name, month:curMonth,
+      resignations: resignations!=null?resignations:'',
+      promotions:   promotions!=null?promotions:'',
+      avgHC:        avgHC!=null?avgHC:'',
+      openRequisitions: openRequisitions!=null?openRequisitions:'',
+      newRolesSinceJan: newRolesSinceJan!=null?newRolesSinceJan:'',
+    };
+    if(existingIdx>=0) Object.assign(allKpis[existingIdx], updatedRec);
+    else allKpis.push(updatedRec);
     showToast('HC & people data saved ✓');
-    await loadData();
+    loadData(); // refresh in background
     renderInpForm();
   } catch(e){ showToast('Save failed: '+e.message); }
 }
