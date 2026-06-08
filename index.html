@@ -461,22 +461,20 @@ function getLatestHC(fid){
   return parseInt(latest.hc)||0;
 }
 
+function normalizeMonth(m){
+  if(!m) return '';
+  return String(m).slice(0,7);
+}
+
 function getAttrition(fid){
-  // Compute from resignations YTD and avgHC
   const arr = [...allKpis.filter(r=>r.funcId===fid&&r.resignations!=null&&r.resignations!='')].sort((a,b)=>normalizeMonth(b.month).localeCompare(normalizeMonth(a.month)));
   if(!arr.length) return null;
   const latest = arr[0];
   const resignations = parseFloat(latest.resignations)||0;
   const avgHC = parseFloat(latest.avgHC)||getLatestHC(fid)||1;
-  const monthsElapsed = parseInt(latest.month.split('-')[1])||1;
-  const attrition = (resignations / avgHC) * (12 / monthsElapsed) * 100;
-  return {
-    rate: attrition.toFixed(1),
-    resignations,
-    avgHC,
-    month: latest.month,
-    monthsElapsed,
-  };
+  const monthNum = parseInt(normalizeMonth(latest.month).split('-')[1])||1;
+  const attrition = (resignations / avgHC) * (12 / monthNum) * 100;
+  return { rate: attrition.toFixed(1), resignations, avgHC, month: latest.month, monthsElapsed: monthNum };
 }
 
 function getPromo(fid){
