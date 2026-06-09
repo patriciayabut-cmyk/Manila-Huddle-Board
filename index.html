@@ -182,14 +182,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   <div class="pane" id="pane-report">
     <div class="rpt-ctrl">
       <select class="rpt-sel" id="rpt-month"></select>
-      <button class="rpt-btn" id="gen-btn" onclick="generateReport()">&#10024; Generate with AI</button>
+      <button class="rpt-btn" id="gen-btn" onclick="generateReport()">Generate Report</button>
       <button class="prt-btn" onclick="printReport()">&#128424; Print / Save PDF</button>
     </div>
-    <div class="prog-wrap" id="prog-wrap">
-      <div class="prog-label" id="prog-label">Generating...</div>
-      <div class="prog-bar-bg"><div class="prog-bar" id="prog-bar"></div></div>
-      <div class="prog-sub" id="prog-sub"></div>
-    </div>
+
     <div id="report-out"><div style="color:#aaa;font-size:12px">Select a month and click Generate.</div></div>
   </div>
 </div>
@@ -297,16 +293,55 @@ async function saveHCData(){var cm=localMonth();var f=FUNCS.find(function(x){ret
 
 function populateMonthSelect(){var months=new Set();allKpis.forEach(function(r){months.add(normalizeMonth(r.month));});allWeekly.forEach(function(r){if(r.updatedAt)months.add(normalizeMonth(r.updatedAt));});months.add(localMonth());var sel=document.getElementById('rpt-month');var sorted=[...months].filter(Boolean).sort().reverse();sel.innerHTML=sorted.map(function(m){var p=m.split('-');var lbl=new Date(+p[0],+p[1]-1,1).toLocaleDateString('en-US',{month:'long',year:'numeric'});return '<option value="'+m+'">'+lbl+'</option>';}).join('');}
 
-function setProgress(label,sub,pct){document.getElementById('prog-wrap').style.display='block';document.getElementById('prog-label').textContent=label;document.getElementById('prog-sub').textContent=sub;document.getElementById('prog-bar').style.width=pct+'%';}
-function hideProgress(){document.getElementById('prog-wrap').style.display='none';}
-
-async function callClaude(prompt){var res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});var data=await res.json();return (data.content&&data.content[0]&&data.content[0].text)||'';}
-
-function buildNarrativeText(entries){if(!entries.length)return null;var parts=[];NAR_FIELDS.forEach(function(nf){var vals=entries.map(function(e){return e[nf.k];}).filter(function(v){return v&&v.toString().trim();});if(vals.length)parts.push(nf.label.toUpperCase()+':\n'+vals.join('\n'));});return parts.join('\n\n');}
-
-function parseBullets(text){return text.split('\n').map(function(l){return l.trim();}).filter(function(l){return l.length>2&&(l.charAt(0)===String.fromCharCode(8226)||l.charAt(0)==='-'||l.charAt(0)==='*'||/^\d+\./.test(l));}).map(function(l){return '<li style="margin-bottom:3px">'+l.replace(/^[\u2022\-\*]\s*/,'').replace(/^\d+\.\s*/,'')+'</li>';}).join('');}
-
-async function generateReport(){var month=document.getElementById('rpt-month').value;var mp=month.split('-');var monthLabel=new Date(+mp[0],+mp[1]-1,1).toLocaleDateString('en-US',{month:'long',year:'numeric'});var btn=document.getElementById('gen-btn');btn.disabled=true;btn.textContent='Generating...';var totalGreen=0,updatedCount=0,blockerLines=[];FUNCS.forEach(function(f){var kpis=getKpisForMonth(f.id,month);if(kpis&&kpis.length){var rags=kpis.map(function(v,i){return getRag(f.id,i,v);});if(rags.indexOf('R')<0&&rags.indexOf('A')<0)totalGreen++;}var entries=allWeekly.filter(function(r){return r.funcId===f.id&&normalizeMonth(r.updatedAt)===month;});if(entries.length)updatedCount++;entries.forEach(function(e){if(e.redFlag&&e.redFlag.toString().trim()&&e.redFlag.toString().toLowerCase().indexOf('none')<0)blockerLines.push(f.name+': '+e.redFlag);});});var execHtml='<div class="rpt-exec"><div class="rpt-exec-title">Manila Services -- Executive Summary</div><p style="margin-bottom:.5rem">Manila Services closed <b>'+monthLabel+'</b> with <b>'+totalGreen+'</b> of '+FUNCS.length+' functions fully on track across KPIs. <b>'+updatedCount+'</b> of '+FUNCS.length+' functions submitted weekly narrative updates.</p>'+(blockerLines.length?'<p style="font-weight:700;margin-bottom:.25rem">Open blockers requiring attention:</p><ul style="padding-left:1.25rem;font-size:11px">'+blockerLines.map(function(b){return '<li>'+b+'</li>';}).join('')+'</ul>':'<p style="color:#aaa">No open blockers logged this month.</p>')+'</div>';document.getElementById('report-out').innerHTML='<div class="rpt-title">Manila Services -- Monthly Report</div><div class="rpt-sub">'+monthLabel+' - Generated '+new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})+'</div>'+execHtml+'<div id="rpt-func-sections"></div>';var funcsWithData=FUNCS.filter(function(f){return getKpisForMonth(f.id,month)||allWeekly.some(function(r){return r.funcId===f.id&&normalizeMonth(r.updatedAt)===month;});});for(var i=0;i<funcsWithData.length;i++){var f=funcsWithData[i];setProgress('Summarizing '+f.name+'...',(i+1)+' of '+funcsWithData.length+' functions',Math.round((i/funcsWithData.length)*100));var kpis=getKpisForMonth(f.id,month),defs=KPI_DEFS[f.id]||[];var entries=allWeekly.filter(function(r){return r.funcId===f.id&&normalizeMonth(r.updatedAt)===month;}).slice().sort(function(a,b){return String(a.updatedAt).localeCompare(String(b.updatedAt));});var rag=kpis&&kpis.length?getFuncRag(f.id):'N';var ragCol=rag==='G'?'#4caf50':rag==='A'?'#ff9800':rag==='R'?'#f44336':'#ccc';var kpiBlock='<div style="font-size:11px;color:#aaa;font-style:italic;margin-bottom:.5rem">No KPI data for this month.</div>';if(kpis&&kpis.length){var rows='';kpis.forEach(function(v,j){if(!defs[j])return;var r=getRag(f.id,j,v),isLg=defs[j].t>100;rows+='<div class="rpt-kpi-row"><span>'+defs[j].l+'</span><span>'+defs[j].t+(!isLg?'%':'')+'</span><span><b>'+v+(!isLg&&v<=100?'%':'')+'</b></span><span style="color:'+(r==='G'?'#2e7d32':r==='A'?'#e65100':'#c62828')+'">'+(r==='G'?'On track':r==='A'?'Monitor':'Attention')+'</span></div>';});kpiBlock='<div style="font-size:11px;margin-bottom:.75rem"><div class="rpt-kpi-row hdr"><span>KPI</span><span>Target</span><span>Actual</span><span>Status</span></div>'+rows+'</div>';}var summaryHtml='<div style="font-size:11px;color:#aaa;font-style:italic">No weekly narratives submitted this month.</div>';var narrativeText=buildNarrativeText(entries);if(narrativeText){try{var prompt='You are writing an executive monthly report for Manila Services, a back-office organization supporting a global MNC.\n\nBelow are the weekly narrative updates submitted by '+f.name+' ('+f.role+') for '+monthLabel+'.\n\n'+narrativeText+'\n\nWrite a concise executive summary in exactly this format:\n\nHIGHLIGHTS / ACCOMPLISHMENTS:\n- [bullet]\n- [bullet]\n\nACTIONS / HELP NEEDED:\n- [bullet]\n- [bullet]\n\nRules:\n- Maximum 4 bullets per section\n- Each bullet is one sentence, specific and factual\n- Formal tone suitable for VP-level readers\n- If a section has nothing relevant, write "None this month." as the only bullet\n- Output only the two sections above, nothing else';var aiText=await callClaude(prompt);var hlIdx=aiText.toUpperCase().indexOf('HIGHLIGHTS');var acIdx=aiText.toUpperCase().indexOf('ACTIONS');var hlRaw=hlIdx>=0?aiText.slice(hlIdx,acIdx>=0?acIdx:undefined).replace(/HIGHLIGHTS[^:\n]*:/i,'').trim():'';var acRaw=acIdx>=0?aiText.slice(acIdx).replace(/ACTIONS[^:\n]*:/i,'').trim():'';summaryHtml='<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:.5rem"><div><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#2e7d32;margin-bottom:.35rem">Highlights / Accomplishments</div><ul style="padding-left:1rem;font-size:11px;line-height:1.6;color:#333">'+parseBullets(hlRaw)+'</ul></div><div><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#c62828;margin-bottom:.35rem">Actions / Help Needed</div><ul style="padding-left:1rem;font-size:11px;line-height:1.6;color:#333">'+parseBullets(acRaw)+'</ul></div></div>';}catch(e){summaryHtml='<div style="font-size:11px;color:#e65100">AI summary unavailable: '+e.message+'</div>';}}var section=document.createElement('div');section.className='rpt-fsec';section.innerHTML='<div class="rpt-fhdr"><div style="width:9px;height:9px;border-radius:50%;background:'+ragCol+';flex-shrink:0;margin-top:2px"></div><div><div class="rpt-fname">'+f.name+' -- '+f.role+'</div><div style="font-size:11px;color:#aaa">'+entries.length+' week'+(entries.length!==1?'s':'')+' - '+monthLabel+'</div></div></div>'+kpiBlock+summaryHtml;document.getElementById('rpt-func-sections').appendChild(section);}setProgress('Done!','',100);setTimeout(hideProgress,1500);btn.disabled=false;btn.textContent='Generate with AI';}
+function generateReport(){
+  var month=document.getElementById('rpt-month').value;
+  var mp=month.split('-');
+  var monthLabel=new Date(+mp[0],+mp[1]-1,1).toLocaleDateString('en-US',{month:'long',year:'numeric'});
+  var btn=document.getElementById('gen-btn');
+  btn.disabled=true;btn.textContent='Generating...';
+  var totalGreen=0,updatedCount=0,blockerLines=[];
+  FUNCS.forEach(function(f){
+    var kpis=getKpisForMonth(f.id,month);
+    if(kpis&&kpis.length){var rags=kpis.map(function(v,i){return getRag(f.id,i,v);});if(rags.indexOf('R')<0&&rags.indexOf('A')<0)totalGreen++;}
+    var entries=allWeekly.filter(function(r){return r.funcId===f.id&&normalizeMonth(r.updatedAt)===month;});
+    if(entries.length)updatedCount++;
+    entries.forEach(function(e){if(e.redFlag&&e.redFlag.toString().trim()&&e.redFlag.toString().toLowerCase().indexOf('none')<0)blockerLines.push(f.name+': '+e.redFlag);});
+  });
+  var execHtml='<div class="rpt-exec"><div class="rpt-exec-title">Manila Services -- Executive Summary</div>'+
+    '<p style="margin-bottom:.5rem">Manila Services closed <b>'+monthLabel+'</b> with <b>'+totalGreen+'</b> of '+FUNCS.length+' functions fully on track. <b>'+updatedCount+'</b> of '+FUNCS.length+' functions submitted weekly narratives.</p>'+
+    (blockerLines.length?'<p style="font-weight:700;margin-bottom:.25rem">Open blockers:</p><ul style="padding-left:1.25rem;font-size:11px">'+blockerLines.map(function(b){return '<li>'+b+'</li>';}).join('')+'</ul>':'<p style="color:#aaa">No open blockers this month.</p>')+
+    '</div>';
+  var funcSections='';
+  FUNCS.forEach(function(f){
+    var kpis=getKpisForMonth(f.id,month),defs=KPI_DEFS[f.id]||[];
+    var entries=allWeekly.filter(function(r){return r.funcId===f.id&&normalizeMonth(r.updatedAt)===month;}).slice().sort(function(a,b){return String(a.updatedAt).localeCompare(String(b.updatedAt));});
+    if(!kpis&&!entries.length)return;
+    var rag=kpis&&kpis.length?getFuncRag(f.id):'N';
+    var ragCol=rag==='G'?'#4caf50':rag==='A'?'#ff9800':rag==='R'?'#f44336':'#ccc';
+    var kpiBlock='<div style="font-size:11px;color:#aaa;font-style:italic;margin-bottom:.5rem">No KPI data for this month.</div>';
+    if(kpis&&kpis.length){
+      var rows='';
+      kpis.forEach(function(v,j){if(!defs[j])return;var r=getRag(f.id,j,v),isLg=defs[j].t>100;rows+='<div class="rpt-kpi-row"><span>'+defs[j].l+'</span><span>'+defs[j].t+(!isLg?'%':'')+'</span><span><b>'+v+(!isLg&&v<=100?'%':'')+'</b></span><span style="color:'+(r==='G'?'#2e7d32':r==='A'?'#e65100':'#c62828')+'">'+(r==='G'?'On track':r==='A'?'Monitor':'Attention')+'</span></div>';});
+      kpiBlock='<div style="font-size:11px;margin-bottom:.75rem"><div class="rpt-kpi-row hdr"><span>KPI</span><span>Target</span><span>Actual</span><span>Status</span></div>'+rows+'</div>';
+    }
+    var highlights=[],actions=[];
+    entries.forEach(function(e){
+      ['customerFocus','innovation','opEx','hpCulture','strategic'].forEach(function(k){if(e[k]&&e[k].trim())highlights.push('['+e.weekLabel+'] '+e[k]);});
+      ['redFlag','discussion'].forEach(function(k){if(e[k]&&e[k].trim()&&e[k].toLowerCase().indexOf('none')<0)actions.push('['+e.weekLabel+'] '+e[k]);});
+    });
+    var narHtml=entries.length?
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:.5rem">'+
+      '<div><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#2e7d32;margin-bottom:.5rem">Highlights / Accomplishments</div>'+
+      (highlights.length?highlights.map(function(h){return '<div style="font-size:11px;line-height:1.6;margin-bottom:.5rem;padding-left:.75rem;border-left:2px solid #e8f5e9">'+h+'</div>';}).join(''):'<div style="font-size:11px;color:#aaa;font-style:italic">None this month.</div>')+
+      '</div><div><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#c62828;margin-bottom:.5rem">Actions / Help Needed</div>'+
+      (actions.length?actions.map(function(a){return '<div style="font-size:11px;line-height:1.6;margin-bottom:.5rem;padding-left:.75rem;border-left:2px solid #ffebee">'+a+'</div>';}).join(''):'<div style="font-size:11px;color:#aaa;font-style:italic">None this month.</div>')+
+      '</div></div>':
+      '<div style="font-size:11px;color:#aaa;font-style:italic">No weekly narratives submitted this month.</div>';
+    funcSections+='<div class="rpt-fsec"><div class="rpt-fhdr"><div style="width:9px;height:9px;border-radius:50%;background:'+ragCol+';flex-shrink:0;margin-top:2px"></div><div><div class="rpt-fname">'+f.name+' -- '+f.role+'</div><div style="font-size:11px;color:#aaa">'+entries.length+' week'+(entries.length!==1?'s':'')+' - '+monthLabel+'</div></div></div>'+kpiBlock+narHtml+'</div>';
+  });
+  document.getElementById('report-out').innerHTML='<div class="rpt-title">Manila Services -- Monthly Report</div><div class="rpt-sub">'+monthLabel+' - Generated '+new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})+'</div>'+execHtml+(funcSections||'<div style="color:#aaa;font-size:12px">No data for this month.</div>');
+  btn.disabled=false;btn.textContent='Generate';
+}
 
 function printReport(){var content=document.getElementById('report-out').innerHTML;var w=window.open('','_blank');w.document.write('<html><head><title>Manila Services Monthly Report</title><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;font-size:12px;padding:2cm;color:#111;max-width:900px;margin:0 auto}.rpt-title{font-size:20px;font-weight:700;margin-bottom:4px}.rpt-sub{font-size:11px;color:#666;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid #ddd}.rpt-exec{background:#f5f5f5;border-radius:6px;padding:1rem;margin-bottom:1.25rem}.rpt-exec-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem;color:#666}.rpt-fsec{margin-bottom:1.25rem;padding-bottom:1.25rem;border-bottom:1px solid #eee}.rpt-fhdr{display:flex;align-items:center;gap:8px;margin-bottom:.75rem}.rpt-fname{font-size:13px;font-weight:700}.rpt-kpi-row{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:6px;font-size:11px;padding:4px 0;border-bottom:1px solid #eee}.rpt-kpi-row.hdr{font-weight:700;color:#aaa;font-size:10px;text-transform:uppercase}ul{padding-left:1.25rem;margin-bottom:.5rem}li{margin-bottom:3px;font-size:11px}@media print{body{padding:1cm}}</style></head><body>'+content+'</body></html>');w.document.close();w.focus();setTimeout(function(){w.print();},400);}
 
