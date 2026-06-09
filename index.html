@@ -69,10 +69,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .he-hdr{display:flex;justify-content:space-between;font-weight:600;font-size:11px;margin-bottom:4px}
 .pill{font-size:10px;padding:1px 8px;border-radius:20px;background:#e8f0fe;color:#1565c0;margin-right:3px}
 .wk-sel{display:flex;align-items:center;gap:8px;margin-bottom:.75rem;flex-wrap:wrap}
-.wk-sel label{font-size:12px;color:#666;font-weight:500;white-space:nowrap}
+.wk-sel label,.mo-sel label{font-size:12px;color:#666;font-weight:500;white-space:nowrap}
 .wk-sel select,.mo-sel select{padding:5px 10px;border:1.5px solid #ddd;border-radius:7px;background:#fff;font-size:12px;color:#333;min-width:200px}
 .mo-sel{display:flex;align-items:center;gap:8px;margin-bottom:.75rem;flex-wrap:wrap}
-.mo-sel label{font-size:12px;color:#666;font-weight:500;white-space:nowrap}
 .imt-tabs{display:flex;gap:5px;margin-bottom:.85rem;flex-wrap:wrap}
 .imt{padding:5px 14px;border:1.5px solid #ddd;border-radius:7px;background:#fff;cursor:pointer;font-size:12px;color:#555;font-weight:500}
 .imt.active{background:#1a1a2e;border-color:#1a1a2e;color:#fff}
@@ -82,9 +81,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .form-card{background:#fff;border-radius:8px;padding:1rem 1.25rem;box-shadow:0 1px 3px rgba(0,0,0,.06)}
 .fsec{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:#888;margin:1rem 0 .5rem;padding-bottom:3px;border-bottom:1px solid #f0f0f0}
 .ng{display:flex;flex-direction:column;gap:3px}
-.ng.full{grid-column:1/-1}
 .ng label{font-size:11px;color:#888;font-weight:500}
-.ng input,.ng textarea,.ng select{padding:7px 9px;border:1px solid #ddd;border-radius:6px;background:#fff;color:#1a1a2e;font-size:12px;font-family:inherit}
+.ng input,.ng textarea{padding:7px 9px;border:1px solid #ddd;border-radius:6px;background:#fff;color:#1a1a2e;font-size:12px;font-family:inherit}
 .ng textarea{resize:vertical;min-height:62px}
 .ng .hint{font-size:10px;color:#aaa;margin-top:2px}
 .nar-inp-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
@@ -120,21 +118,26 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .rpt-nar-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:.75rem}
 .rpt-nar-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:#aaa;margin-bottom:3px}
 .toast{position:fixed;bottom:20px;right:20px;background:#1a1a2e;color:#fff;padding:10px 18px;border-radius:8px;font-size:12px;font-weight:600;z-index:9999;display:none;box-shadow:0 4px 12px rgba(0,0,0,.15)}
+.prog-wrap{display:none;background:#fff;border-radius:8px;padding:1rem 1.25rem;margin-bottom:.75rem;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.prog-label{font-size:12px;font-weight:600;margin-bottom:.5rem}
+.prog-bar-bg{background:#f0f0f0;border-radius:20px;height:6px;overflow:hidden}
+.prog-bar{height:100%;background:#1a1a2e;border-radius:20px;width:0%;transition:width .4s}
+.prog-sub{font-size:11px;color:#aaa;margin-top:.35rem}
 </style>
 </head>
 <body>
 <div class="app">
   <div class="header">
     <div>
-      <h1>Manila Services — Huddle Board</h1>
+      <h1>Manila Services &mdash; Huddle Board</h1>
       <div class="header-meta" id="week-meta"></div>
     </div>
     <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
       <span class="dl-badge" id="dl-badge"></span>
       <div class="nav-btns">
-        <button class="nbtn active" id="nb-dash"   onclick="setNav('dash')">📊 Dashboard</button>
-        <button class="nbtn"        id="nb-update" onclick="setNav('update')">✏️ Enter Update</button>
-        <button class="nbtn"        id="nb-report" onclick="setNav('report')">📄 Monthly Report</button>
+        <button class="nbtn active" id="nb-dash"   onclick="setNav('dash')">&#128202; Dashboard</button>
+        <button class="nbtn"        id="nb-update" onclick="setNav('update')">&#9998; Enter Update</button>
+        <button class="nbtn"        id="nb-report" onclick="setNav('report')">&#128196; Monthly Report</button>
       </div>
     </div>
   </div>
@@ -154,10 +157,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
         <span style="font-size:11px;color:#aaa" id="wf-meta"></span>
       </div>
       <div class="metrics">
-        <div class="mc"><div class="mc-label">Total headcount</div><div class="mc-val" id="ov-hc">—</div><div class="mc-sub">across all functions</div></div>
-        <div class="mc"><div class="mc-label">Annualized attrition</div><div class="mc-val" id="ov-att">—</div><div class="mc-sub">Manila Services avg</div></div>
-        <div class="mc"><div class="mc-label">Internal movement %</div><div class="mc-val" id="ov-promo">—</div><div class="mc-sub">movements YTD vs HC</div></div>
-        <div class="mc"><div class="mc-label">Updated this week</div><div class="mc-val" id="ov-upd">—</div><div class="mc-sub">of 11 functions</div></div>
+        <div class="mc"><div class="mc-label">Total headcount</div><div class="mc-val" id="ov-hc">&#8212;</div><div class="mc-sub">across all functions</div></div>
+        <div class="mc"><div class="mc-label">Annualized attrition</div><div class="mc-val" id="ov-att">&#8212;</div><div class="mc-sub">Manila Services avg</div></div>
+        <div class="mc"><div class="mc-label">Internal movement %</div><div class="mc-val" id="ov-promo">&#8212;</div><div class="mc-sub">movements YTD vs HC</div></div>
+        <div class="mc"><div class="mc-label">Updated this week</div><div class="mc-val" id="ov-upd">&#8212;</div><div class="mc-sub">of 11 functions</div></div>
       </div>
       <div class="func-grid" id="func-cards"></div>
     </div>
@@ -167,9 +170,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   <!-- UPDATE -->
   <div class="pane" id="pane-update">
     <div class="imt-tabs">
-      <button class="imt active" id="imt-w" onclick="setInpMode('weekly')">📝 Weekly narrative <small style="opacity:.6">(due Mon EOD)</small></button>
-      <button class="imt"        id="imt-k" onclick="setInpMode('kpi')">📈 Monthly KPIs <small style="opacity:.6">(once a month)</small></button>
-      <button class="imt"        id="imt-h" onclick="setInpMode('hc')">👥 HC &amp; People data <small style="opacity:.6">(once a month)</small></button>
+      <button class="imt active" id="imt-w" onclick="setInpMode('weekly')">&#128203; Weekly narrative <small style="opacity:.6">(due Mon EOD)</small></button>
+      <button class="imt"        id="imt-k" onclick="setInpMode('kpi')">&#128200; Monthly KPIs <small style="opacity:.6">(once a month)</small></button>
+      <button class="imt"        id="imt-h" onclick="setInpMode('hc')">&#128101; HC &amp; People data <small style="opacity:.6">(once a month)</small></button>
     </div>
     <div class="func-sel" id="inp-fsel"></div>
     <div id="inp-form"></div>
@@ -179,630 +182,135 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   <div class="pane" id="pane-report">
     <div class="rpt-ctrl">
       <select class="rpt-sel" id="rpt-month"></select>
-      <button class="rpt-btn" onclick="generateReport()">Generate ↗</button>
-      <button class="prt-btn" onclick="printReport()">🖨 Print / Save PDF</button>
+      <button class="rpt-btn" id="gen-btn" onclick="generateReport()">&#10024; Generate with AI</button>
+      <button class="prt-btn" onclick="printReport()">&#128424; Print / Save PDF</button>
+    </div>
+    <div class="prog-wrap" id="prog-wrap">
+      <div class="prog-label" id="prog-label">Generating...</div>
+      <div class="prog-bar-bg"><div class="prog-bar" id="prog-bar"></div></div>
+      <div class="prog-sub" id="prog-sub"></div>
     </div>
     <div id="report-out"><div style="color:#aaa;font-size:12px">Select a month and click Generate.</div></div>
   </div>
 </div>
 <div class="toast" id="toast"></div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
-// ─── CONFIG ──────────────────────────────────────────────────
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxzE0ecv1NSi08-RpcCKZQ1VASqlQnf72_GNTZv3CrhJveL517NpPf-qYZN-NkqfANStg/exec';
-
-const FUNCS = [
-  {id:'grace',    name:'Grace Ulep',       role:'CRC Operations',           hc:49},
-  {id:'joyce',    name:'Joyce Wise',       role:'Planning & Scheduling',    hc:37},
-  {id:'helen',    name:'Helen Dy',         role:'Data & Procurement',       hc:34},
-  {id:'wilma',    name:'Wilma Paneza',     role:'Billing & Order Admin',    hc:40},
-  {id:'michael',  name:'Michael Garong',   role:'Parts & Logistics',        hc:54},
-  {id:'kath',     name:'Kath Rogacion',    role:'CI PMO',                   hc:2},
-  {id:'eric',     name:'Eric Poja',        role:'ERS / Eng Reports',        hc:36},
-  {id:'roshie',   name:'Roshie Aquino',    role:'Sales Operations',         hc:44},
-  {id:'marianne', name:'Marianne Dimla',   role:'TKO / ConnectedCE / RCA',  hc:27},
-  {id:'tristan',  name:'Tristan Laniohan', role:'Tech Support',             hc:29},
-  {id:'norbert',  name:'Norbert Emata',    role:'Engineering Services',     hc:4},
+var SCRIPT_URL='https://script.google.com/macros/s/AKfycbxzE0ecv1NSi08-RpcCKZQ1VASqlQnf72_GNTZv3CrhJveL517NpPf-qYZN-NkqfANStg/exec';
+var FUNCS=[
+  {id:'grace',    name:'Grace Ulep',       role:'CRC Operations',          hc:49},
+  {id:'joyce',    name:'Joyce Wise',       role:'Planning & Scheduling',   hc:37},
+  {id:'helen',    name:'Helen Dy',         role:'Data & Procurement',      hc:34},
+  {id:'wilma',    name:'Wilma Paneza',     role:'Billing & Order Admin',   hc:40},
+  {id:'michael',  name:'Michael Garong',   role:'Parts & Logistics',       hc:54},
+  {id:'kath',     name:'Kath Rogacion',    role:'CI PMO',                  hc:2},
+  {id:'eric',     name:'Eric Poja',        role:'ERS / Eng Reports',       hc:36},
+  {id:'roshie',   name:'Roshie Aquino',    role:'Sales Operations',        hc:44},
+  {id:'marianne', name:'Marianne Dimla',   role:'TKO / ConnectedCE / RCA', hc:27},
+  {id:'tristan',  name:'Tristan Laniohan', role:'Tech Support',            hc:29},
+  {id:'norbert',  name:'Norbert Emata',    role:'Engineering Services',    hc:4}
 ];
-
-const KPI_DEFS = {
+var KPI_DEFS={
   grace:   [{l:'Service Level Achievement',t:90,hi:true},{l:'Answer Rate',t:90,hi:true},{l:'Quality Score',t:90,hi:true},{l:'CSAT Score',t:70,hi:true}],
   joyce:   [{l:'TAT Audit %',t:100,hi:true},{l:'TAT Triage %',t:100,hi:true},{l:'Aging Backlog %',t:5,hi:false},{l:'PM Completion %',t:90,hi:true}],
-  helen:   [{l:'FSR Invoice ≤4d',t:90,hi:true},{l:'Vendor Invoice ≤10d',t:90,hi:true},{l:'T&M Quote ≤24hrs',t:96,hi:true},{l:'FSR to Billing ≤5d',t:90,hi:true}],
+  helen:   [{l:'FSR Invoice 4d',t:90,hi:true},{l:'Vendor Invoice 10d',t:90,hi:true},{l:'T&M Quote 24hrs',t:96,hi:true},{l:'FSR to Billing 5d',t:90,hi:true}],
   wilma:   [{l:'Revenue vs Target %',t:100,hi:true},{l:'Invoicing Accuracy %',t:98,hi:true},{l:'Aging SR Resolution %',t:95,hi:true}],
   michael: [{l:'Monthly Revenue %',t:100,hi:true},{l:'TAT Compliance %',t:95,hi:true},{l:'Process Accuracy %',t:99,hi:true},{l:'Order Accuracy %',t:98,hi:true},{l:'Response SLA %',t:90,hi:true}],
   kath:    [{l:'CI Projects',t:5,hi:true},{l:'A3s Active',t:10,hi:true},{l:'VOS Training %',t:100,hi:true},{l:'AI Guild Members',t:40,hi:true}],
-  eric:    [{l:'Bid Review TAT (days)',t:1.5,hi:false},{l:'PSE Projects Active',t:100,hi:true},{l:'Attrition %',t:10,hi:false}],
+  eric:    [{l:'Bid Review TAT days',t:1.5,hi:false},{l:'PSE Projects Active',t:100,hi:true},{l:'Attrition %',t:10,hi:false}],
   roshie:  [{l:'Contracts vs Budget %',t:100,hi:true},{l:'QA Score %',t:90,hi:true},{l:'Posts Filled %',t:100,hi:true}],
   marianne:[{l:'TKO Content TAT %',t:85,hi:true},{l:'RCA TAT %',t:80,hi:true},{l:'Warranty Claims TAT %',t:90,hi:true}],
   tristan: [{l:'T1 First Contact Res %',t:80,hi:true},{l:'Next Predict Uptime %',t:99,hi:true},{l:'Open Requisitions',t:5,hi:false}],
-  norbert: [{l:'TKO Content TAT %',t:85,hi:true},{l:'RCA TAT %',t:80,hi:true},{l:'Warranty Claims TAT %',t:90,hi:true}],
+  norbert: [{l:'TKO Content TAT %',t:85,hi:true},{l:'RCA TAT %',t:80,hi:true},{l:'Warranty Claims TAT %',t:90,hi:true}]
 };
-
-const NAR_FIELDS = [
+var NAR_FIELDS=[
   {k:'customerFocus',label:'Customer focus'},
   {k:'innovation',   label:'Innovation'},
   {k:'opEx',         label:'Operational excellence'},
   {k:'hpCulture',    label:'High performance culture'},
   {k:'strategic',    label:'Strategic priorities'},
   {k:'redFlag',      label:'Red flag / blocker'},
-  {k:'discussion',   label:'Discussion / actions needed'},
+  {k:'discussion',   label:'Discussion / actions needed'}
 ];
 
-// ─── STATE ───────────────────────────────────────────────────
-let allWeekly = [], allKpis = [], dataLoaded = false;
-let nav = 'dash', inpMode = 'weekly', inpFunc = 'grace';
-let viewSec = 'overview';
-let detailWeek = {}, detailKpiMonth = {};
-let selectedFilterWeek = 'latest';
+var allWeekly=[],allKpis=[],dataLoaded=false;
+var nav='dash',inpMode='weekly',inpFunc='grace',viewSec='overview';
+var detailWeek={},detailKpiMonth={},selectedFilterWeek='latest';
+var WEEK1=new Date(2025,11,29);
 
-// ─── HELPERS ─────────────────────────────────────────────────
-function localMonth() {
-  const d = new Date();
-  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
-}
+function localMonth(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');}
+function normalizeMonth(m){if(!m)return '';return String(m).slice(0,7);}
+function getRag(fid,idx,val){var d=KPI_DEFS[fid];if(!d||!d[idx])return 'N';var k=d[idx];if(k.hi){if(val>=k.t)return 'G';if(val>=k.t*.95)return 'A';return 'R';}else{if(val<=k.t)return 'G';if(val<=k.t*1.1)return 'A';return 'R';}}
+function getFuncRag(fid){var kpis=getLatestKpis(fid);if(!kpis.length)return 'N';var rags=kpis.map(function(v,i){return getRag(fid,i,v);});if(rags.indexOf('R')>=0)return 'R';if(rags.indexOf('A')>=0)return 'A';return 'G';}
+function getLatestKpis(fid){var arr=allKpis.filter(function(r){return r.funcId===fid&&(r.kpi1||r.kpi2||r.kpi3);});if(!arr.length)return [];arr.sort(function(a,b){return normalizeMonth(b.month).localeCompare(normalizeMonth(a.month));});var r=arr[0];return [r.kpi1,r.kpi2,r.kpi3,r.kpi4,r.kpi5].filter(function(v){return v!==''&&v!=null&&v!==undefined;}).map(Number);}
+function getKpisForMonth(fid,month){var nm=normalizeMonth(month);var arr=allKpis.filter(function(r){return r.funcId===fid&&normalizeMonth(r.month)===nm&&(r.kpi1||r.kpi2||r.kpi3);});if(!arr.length)return null;arr.sort(function(a,b){return String(b.updatedAt).localeCompare(String(a.updatedAt));});var r=arr[0];return [r.kpi1,r.kpi2,r.kpi3,r.kpi4,r.kpi5].filter(function(v){return v!==''&&v!=null&&v!==undefined;}).map(Number);}
+function getLatestPeopleRec(fid){var arr=allKpis.filter(function(r){return r.funcId===fid;});if(!arr.length)return null;arr.sort(function(a,b){return String(b.updatedAt).localeCompare(String(a.updatedAt));});var wp=arr.find(function(r){return r.resignations||r.promotions||r.avgHC||r.openRequisitions;});return wp||arr[0];}
+function getLatestHC(fid){var arr=allWeekly.filter(function(r){return r.funcId===fid&&r.hc&&parseInt(r.hc)>0;});if(!arr.length){var pr=getLatestPeopleRec(fid);if(pr&&pr.avgHC)return parseInt(pr.avgHC);var f=FUNCS.find(function(x){return x.id===fid;});return f?f.hc:0;}arr.sort(function(a,b){return String(b.updatedAt).localeCompare(String(a.updatedAt));});return parseInt(arr[0].hc)||0;}
+function getAttrition(fid){var pr=getLatestPeopleRec(fid);if(!pr||!pr.resignations)return null;var res=parseFloat(pr.resignations)||0;var hc=parseFloat(pr.avgHC)||getLatestHC(fid)||1;var mn=parseInt(normalizeMonth(pr.month).split('-')[1])||1;return {rate:((res/hc)*(12/mn)*100).toFixed(1),resignations:res};}
+function getPromo(fid){var pr=getLatestPeopleRec(fid);if(!pr||!pr.promotions)return null;var p=parseFloat(pr.promotions)||0;var hc=parseFloat(pr.avgHC)||getLatestHC(fid)||1;return {pct:((p/hc)*100).toFixed(1),promotions:p};}
+function getLatestNarrative(fid){var arr=allWeekly.filter(function(r){return r.funcId===fid;});if(!arr.length)return null;return arr.slice().sort(function(a,b){return String(b.updatedAt).localeCompare(String(a.updatedAt));})[0];}
+function getFilteredNarrative(fid){var arr=allWeekly.filter(function(r){return r.funcId===fid;});if(!arr.length)return null;if(selectedFilterWeek==='latest')return arr.slice().sort(function(a,b){return String(b.updatedAt).localeCompare(String(a.updatedAt));})[0];return arr.find(function(e){return e.weekLabel===selectedFilterWeek;})||null;}
+function wasUpdatedThisWeek(fid){var l=getLatestNarrative(fid);if(!l)return false;return (new Date()-new Date(l.updatedAt))/86400000<7;}
 
-function normalizeMonth(m) {
-  if (!m) return '';
-  return String(m).slice(0,7);
-}
+function getWeekInfo(n){var s=new Date(WEEK1.getTime()+(n-1)*7*86400000);var e=new Date(s.getTime()+4*86400000);var fmt=function(d){return d.toLocaleDateString('en-US',{month:'short',day:'2-digit'});};return {num:n,label:'Week '+n+' - '+fmt(s)+'-'+fmt(e)};}
+function getCurrentReportingWeek(){var diff=Math.floor((new Date()-WEEK1)/86400000);return Math.max(1,Math.floor(diff/7));}
+function getCurrentWeekLabel(){return getWeekInfo(getCurrentReportingWeek()).label;}
+function getAllWeekOptions(){var rw=getCurrentReportingWeek();var weeks=[];for(var i=rw;i>=1;i--)weeks.push(getWeekInfo(i));return weeks;}
 
-function getRag(fid, idx, val) {
-  const d = KPI_DEFS[fid]; if (!d||!d[idx]) return 'N';
-  const k = d[idx];
-  if (k.hi) { if (val>=k.t) return 'G'; if (val>=k.t*.95) return 'A'; return 'R'; }
-  else { if (val<=k.t) return 'G'; if (val<=k.t*1.1) return 'A'; return 'R'; }
-}
+function jsonp(url){return new Promise(function(res,rej){var cb='hcb_'+Date.now();var s=document.createElement('script');var t=setTimeout(function(){cleanup();rej(new Error('Timeout'));},30000);function cleanup(){clearTimeout(t);delete window[cb];if(s.parentNode)s.parentNode.removeChild(s);}window[cb]=function(d){cleanup();res(d);};s.src=url+(url.indexOf('?')>=0?'&':'?')+'callback='+cb;s.onerror=function(){cleanup();rej(new Error('Load failed'));};document.head.appendChild(s);});}
+function postData(p){return jsonp(SCRIPT_URL+'?data='+encodeURIComponent(JSON.stringify(p)));}
+function setStatus(st,msg){document.getElementById('sdot').className='sdot '+st;document.getElementById('stext').textContent=msg;}
+function showToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.style.display='block';setTimeout(function(){t.style.display='none';},3000);}
+function getDraft(k){try{return JSON.parse(sessionStorage.getItem(k)||'null');}catch(e){return null;}}
+function setDraft(k,v){try{sessionStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+function clearDraft(k){try{sessionStorage.removeItem(k);}catch(e){}}
 
-function getFuncRag(fid) {
-  const kpis = getLatestKpis(fid); if (!kpis.length) return 'N';
-  const rags = kpis.map((v,i)=>getRag(fid,i,v));
-  if (rags.includes('R')) return 'R'; if (rags.includes('A')) return 'A'; return 'G';
-}
+async function loadData(){setStatus('loading','Loading from Google Sheets...');try{var d=await jsonp(SCRIPT_URL+'?data='+encodeURIComponent(JSON.stringify({action:'getAll'})));if(d.error)throw new Error(d.error);allWeekly=d.weekly||[];allKpis=d.kpis||[];dataLoaded=true;setStatus('ok','Connected - '+allWeekly.length+' weekly entries - '+allKpis.length+' KPI records - '+new Date().toLocaleTimeString());buildWeekFilter();renderOverview();populateMonthSelect();if(viewSec!=='overview')renderDetail(viewSec);}catch(e){setStatus('err','Could not reach Google Sheets - '+e.message);}}
 
-function getLatestKpis(fid) {
-  const arr = allKpis.filter(r=>r.funcId===fid&&(r.kpi1||r.kpi2||r.kpi3));
-  if (!arr.length) return [];
-  arr.sort((a,b)=>normalizeMonth(b.month).localeCompare(normalizeMonth(a.month)));
-  const r = arr[0];
-  return [r.kpi1,r.kpi2,r.kpi3,r.kpi4,r.kpi5].filter(v=>v!==''&&v!=null&&v!==undefined).map(Number);
-}
+function init(){var d=new Date(),y=d.getFullYear(),s=new Date(y,0,1);var wk=Math.ceil((((d-s)/86400000)+s.getDay()+1)/7);document.getElementById('week-meta').textContent='Week '+wk+' - '+d.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})+' - Huddle every Tuesday';var dow=d.getDay();var dlText,dlCls;if(dow===1){dlText='Deadline today - Monday EOD';dlCls='dl-due';}else if(dow===2){dlText='Huddle today - Tuesday';dlCls='dl-warn';}else{var dtm=dow===0?1:(8-dow)%7||7;dlText='Narrative due in '+dtm+' day'+(dtm>1?'s':'');dlCls='dl-ok';}var badge=document.getElementById('dl-badge');badge.textContent=dlText;badge.className='dl-badge '+dlCls;buildViewTabs();buildInpFuncSel();loadData();}
 
-function getKpisForMonth(fid, month) {
-  const nm = normalizeMonth(month);
-  const arr = allKpis.filter(r=>r.funcId===fid&&normalizeMonth(r.month)===nm&&(r.kpi1||r.kpi2||r.kpi3));
-  if (!arr.length) return null;
-  arr.sort((a,b)=>String(b.updatedAt).localeCompare(String(a.updatedAt)));
-  const r = arr[0];
-  return [r.kpi1,r.kpi2,r.kpi3,r.kpi4,r.kpi5].filter(v=>v!==''&&v!=null&&v!==undefined).map(Number);
-}
+function buildViewTabs(){var el=document.getElementById('vtabs');el.innerHTML='';var secs=document.getElementById('func-vsecs');secs.innerHTML='';var ov=document.createElement('button');ov.className='vtab active';ov.textContent='Overview';ov.onclick=function(){showVsec('overview',ov);};el.appendChild(ov);FUNCS.forEach(function(f){var btn=document.createElement('button');btn.className='vtab';btn.textContent=f.name.split(' ')[0];btn.setAttribute('data-fid',f.id);btn.onclick=function(){showVsec(f.id,btn);};el.appendChild(btn);var sec=document.createElement('div');sec.className='vsec';sec.id='vsec-'+f.id;sec.innerHTML='<div id="det-'+f.id+'"></div>';secs.appendChild(sec);});}
+function showVsec(id,btn){document.querySelectorAll('.vsec').forEach(function(s){s.classList.remove('active');});var sec=document.getElementById(id==='overview'?'vsec-overview':'vsec-'+id);if(sec)sec.classList.add('active');document.querySelectorAll('.vtab').forEach(function(t){t.classList.remove('active');});if(btn)btn.classList.add('active');viewSec=id;if(id!=='overview')renderDetail(id);}
 
-function getLatestPeopleRec(fid) {
-  // Get most recently updated KPI record that has people data
-  const arr = allKpis.filter(r=>r.funcId===fid);
-  if (!arr.length) return null;
-  // Sort by updatedAt descending
-  arr.sort((a,b)=>String(b.updatedAt).localeCompare(String(a.updatedAt)));
-  // Find first one with any people data
-  const withPeople = arr.find(r=>r.resignations||r.promotions||r.avgHC||r.openRequisitions);
-  return withPeople || arr[0];
-}
+function buildWeekFilter(){var sel=document.getElementById('week-filter');if(!sel)return;var weeks=[...new Set(allWeekly.map(function(e){return e.weekLabel;}))].sort(function(a,b){var da=allWeekly.find(function(e){return e.weekLabel===a;}),db=allWeekly.find(function(e){return e.weekLabel===b;});if(!da||!db)return 0;return String(db.updatedAt).localeCompare(String(da.updatedAt));});sel.innerHTML='<option value="latest">Latest update (default)</option>'+weeks.map(function(w){return '<option value="'+w+'" '+(w===selectedFilterWeek?'selected':'')+'>'+w+'</option>';}).join('');updateWFMeta();}
+function updateWFMeta(){var m=document.getElementById('wf-meta');if(!m)return;if(selectedFilterWeek==='latest'){m.textContent='Showing most recent per function';}else{var c=FUNCS.filter(function(f){return allWeekly.some(function(e){return e.funcId===f.id&&e.weekLabel===selectedFilterWeek;});}).length;m.textContent=c+' of '+FUNCS.length+' updated';}}
+function onWeekFilterChange(){selectedFilterWeek=document.getElementById('week-filter').value;updateWFMeta();renderOverview();}
 
-function getLatestHC(fid) {
-  const arr = allWeekly.filter(r=>r.funcId===fid&&r.hc&&parseInt(r.hc)>0);
-  if (!arr.length) {
-    const pr = getLatestPeopleRec(fid);
-    if (pr && pr.avgHC) return parseInt(pr.avgHC);
-    const f = FUNCS.find(x=>x.id===fid); return f?f.hc:0;
-  }
-  arr.sort((a,b)=>String(b.updatedAt).localeCompare(String(a.updatedAt)));
-  return parseInt(arr[0].hc)||0;
-}
+function renderOverview(){var hc=0,upd=0,attRates=[],promoNums=[],promoHCs=[];FUNCS.forEach(function(f){hc+=getLatestHC(f.id)||f.hc;if(wasUpdatedThisWeek(f.id))upd++;var att=getAttrition(f.id);if(att)attRates.push(parseFloat(att.rate));var promo=getPromo(f.id);if(promo){promoNums.push(promo.promotions);promoHCs.push(parseFloat(getLatestPeopleRec(f.id).avgHC)||getLatestHC(f.id)||1);}});document.getElementById('ov-hc').textContent=hc.toLocaleString();document.getElementById('ov-upd').textContent=upd;document.getElementById('ov-att').textContent=attRates.length?((attRates.reduce(function(a,b){return a+b;},0)/attRates.length).toFixed(1)+'%'):'--';document.getElementById('ov-promo').textContent=promoNums.length?(((promoNums.reduce(function(a,b){return a+b;},0)/Math.max(1,promoHCs.reduce(function(a,b){return a+b;},0)))*100).toFixed(1)+'%'):'--';var grid=document.getElementById('func-cards');grid.innerHTML='';FUNCS.forEach(function(f){var rag=getFuncRag(f.id),defs=KPI_DEFS[f.id]||[],kpis=getLatestKpis(f.id);var updated=wasUpdatedThisWeek(f.id),latest=getFilteredNarrative(f.id);var att=getAttrition(f.id);var card=document.createElement('div');card.className='fc';card.onclick=function(){var btn=document.querySelector('.vtab[data-fid="'+f.id+'"]');showVsec(f.id,btn);};var kh='';if(kpis.length){kpis.slice(0,3).forEach(function(v,i){if(!defs[i])return;var r=getRag(f.id,i,v),pct=defs[i].hi?Math.min(v/defs[i].t*100,100):Math.max(0,100-(v/defs[i].t-1)*200);var col=r==='G'?'#4caf50':r==='A'?'#ff9800':'#f44336';kh+='<div class="km-row"><span class="km-lbl">'+defs[i].l+'</span><span class="km-val">'+v+(defs[i].t<=100&&v<=100?'%':'')+'</span></div><div class="km-bar"><div class="km-fill" style="width:'+Math.round(pct)+'%;background:'+col+'"></div></div>';});}else kh='<div class="no-data">No KPIs yet</div>';var stamp=(latest?latest.weekLabel:'Not updated')+(att?' - '+att.rate+'% attrition':'');card.innerHTML='<div class="fc-top"><div><div class="fc-name">'+f.name+'</div><div class="fc-role">'+f.role+'</div></div><div class="fc-dots"><div class="upd '+(updated?'upd-y':'upd-n')+'"></div><div class="rag rag-'+rag+'"></div></div></div>'+kh+'<div class="fc-stamp">'+stamp+'</div>';grid.appendChild(card);});}
 
-function getAttrition(fid) {
-  const pr = getLatestPeopleRec(fid);
-  if (!pr || !pr.resignations) return null;
-  const resignations = parseFloat(pr.resignations)||0;
-  const avgHC = parseFloat(pr.avgHC)||getLatestHC(fid)||1;
-  const monthNum = parseInt(normalizeMonth(pr.month).split('-')[1])||1;
-  const rate = (resignations/avgHC)*(12/monthNum)*100;
-  return {rate:rate.toFixed(1), resignations, avgHC, monthNum};
-}
+function renderDetail(fid){var f=FUNCS.find(function(x){return x.id===fid;}),defs=KPI_DEFS[fid]||[];var el=document.getElementById('det-'+fid);if(!el)return;var allKpiMonths=[...new Set(allKpis.filter(function(r){return r.funcId===fid&&(r.kpi1||r.kpi2||r.kpi3);}).map(function(r){return normalizeMonth(r.month);}))].filter(Boolean).sort().reverse();if(!detailKpiMonth[fid]&&allKpiMonths.length)detailKpiMonth[fid]=allKpiMonths[0];var selMonth=detailKpiMonth[fid]||allKpiMonths[0];var selKpis=selMonth?getKpisForMonth(fid,selMonth):getLatestKpis(fid);var kpiMonthOpts=allKpiMonths.map(function(m){var p=m.split('-');var lbl=new Date(+p[0],+p[1]-1,1).toLocaleDateString('en-US',{month:'long',year:'numeric'});return '<option value="'+m+'" '+(m===selMonth?'selected':'')+'>'+lbl+'</option>';}).join('');var kpiMonthNav=allKpiMonths.length?'<div class="mo-sel"><label>Month:</label><select onchange="setDetailKpiMonth(\''+fid+'\',this.value)">'+kpiMonthOpts+'</select><span style="font-size:11px;color:#aaa">'+allKpiMonths.length+' month'+(allKpiMonths.length!==1?'s':'')+' on record</span></div>':'';var kpiBlock='<div class="no-data">No KPI data yet.</div>';if(selKpis&&selKpis.length){var rows='';selKpis.forEach(function(v,i){if(!defs[i])return;var r=getRag(fid,i,v),isLg=defs[i].t>100;var disp=v+(!isLg&&v<=100?'%':''),tDisp=defs[i].t+(!isLg&&defs[i].t<=100?'%':'');var diff=defs[i].hi?(v-defs[i].t):(defs[i].t-v);var ds=(diff>=0?'+':'')+diff.toFixed(1)+(!isLg&&v<=100?'pp':'');rows+='<tr><td>'+defs[i].l+'</td><td>'+tDisp+'</td><td><b>'+disp+'</b></td><td><span class="rb '+r+'">'+(r==='G'?'On track':r==='A'?'Monitor':r==='R'?'Attention':'--')+'</span></td><td class="'+(diff>=0?'tup':'tdn')+'">'+(diff>=0?'&#8593;':'&#8595;')+' '+ds+'</td></tr>';});kpiBlock='<table class="kpi-tbl"><thead><tr><th>KPI</th><th>Target</th><th>Actual</th><th>Status</th><th>vs Target</th></tr></thead><tbody>'+rows+'</tbody></table>';}var allFuncEntries=allWeekly.filter(function(r){return r.funcId===fid;}).slice().sort(function(a,b){return String(b.updatedAt).localeCompare(String(a.updatedAt));});var allCalWeeks=getAllWeekOptions();if(!detailWeek[fid])detailWeek[fid]=allCalWeeks[0].label;var selEntry=allFuncEntries.find(function(e){return e.weekLabel===detailWeek[fid];})||null;var submittedWeeks=new Set(allFuncEntries.map(function(e){return e.weekLabel;}));var weekOpts=allCalWeeks.map(function(w){return '<option value="'+w.label+'" '+(w.label===detailWeek[fid]?'selected':'')+'>'+(submittedWeeks.has(w.label)?'&#10003; ':'')+w.label+'</option>';}).join('');var weekNav='<div class="wk-sel"><label>Week:</label><select onchange="setDetailWeek(\''+fid+'\',this.value)">'+weekOpts+'</select><span style="font-size:11px;color:#aaa">'+submittedWeeks.size+' of '+allCalWeeks.length+' weeks submitted</span></div>';var narBlock='<div class="no-data">No entry for this week yet.</div>';if(selEntry)narBlock='<div class="nar-grid">'+NAR_FIELDS.map(function(nf){return '<div class="nc"><div class="nc-lbl">'+nf.label+'</div><div class="nc-text">'+(selEntry[nf.k]||'--')+'</div></div>';}).join('')+'</div>';var pr=getLatestPeopleRec(fid),att=getAttrition(fid),promo=getPromo(fid);var attStr=att?'Attrition: <b>'+att.rate+'%</b> annualized ('+att.resignations+' resignations YTD)':'Attrition: not entered';var promoStr=promo?'Internal movement: <b>'+promo.pct+'%</b> ('+promo.promotions+' YTD)':'Internal movement: not entered';var openReqStr=pr&&pr.openRequisitions?'Open reqs: <b>'+pr.openRequisitions+'</b>':'';var newRolesStr=pr&&pr.newRolesSinceJan?'New roles YTD: <b>'+pr.newRolesSinceJan+'</b>':'';var extras=[openReqStr,newRolesStr].filter(Boolean).join(' &nbsp;&#183;&nbsp; ');var histHtml=allFuncEntries.length?allFuncEntries.slice(0,10).map(function(e){var cats=NAR_FIELDS.filter(function(nf){return e[nf.k]&&e[nf.k].toString().trim();});var isSel=e.weekLabel===detailWeek[fid];return '<div class="he" style="'+(isSel?'border-color:#1a1a2e;background:#f8f9ff':'')+'" onclick="setDetailWeek(\''+fid+'\',\''+e.weekLabel.replace(/'/g,"\\'")+'\')"><div class="he-hdr"><span style="'+(isSel?'font-weight:700':'')+'">'+e.weekLabel+'</span><span style="color:#aaa">'+new Date(e.updatedAt).toLocaleDateString()+'</span></div><div>'+cats.map(function(c){return '<span class="pill">'+c.label+'</span>';}).join('')+'</div></div>';}).join(''):'<div class="no-data">No history yet.</div>';el.innerHTML='<div class="det-hdr"><div class="det-title">'+f.name+' -- '+f.role+'</div><div class="det-sub">HC: '+getLatestHC(fid)+' &nbsp;&#183;&nbsp; '+attStr+' &nbsp;&#183;&nbsp; '+promoStr+(extras?' &nbsp;&#183;&nbsp; '+extras:'')+' &nbsp;&#183;&nbsp; '+allFuncEntries.length+' weeks on record</div></div>'+'<div class="card"><div class="card-title">Monthly KPIs</div>'+kpiMonthNav+kpiBlock+'</div>'+weekNav+'<div class="card"><div class="card-title">Narrative -- '+(selEntry?selEntry.weekLabel:'none')+'</div>'+narBlock+'</div>'+'<div class="card"><div class="card-title">All weeks (click to view)</div>'+histHtml+'</div>';}
+function setDetailWeek(fid,wk){detailWeek[fid]=wk;renderDetail(fid);}
+function setDetailKpiMonth(fid,m){detailKpiMonth[fid]=m;renderDetail(fid);}
 
-function getPromo(fid) {
-  const pr = getLatestPeopleRec(fid);
-  if (!pr || !pr.promotions) return null;
-  const promotions = parseFloat(pr.promotions)||0;
-  const avgHC = parseFloat(pr.avgHC)||getLatestHC(fid)||1;
-  const pct = ((promotions/avgHC)*100).toFixed(1);
-  return {pct, promotions, avgHC};
-}
+function buildInpFuncSel(){document.getElementById('inp-fsel').innerHTML=FUNCS.map(function(f){return '<button class="fsb'+(f.id===inpFunc?' active':'')+'" onclick="setInpFunc(\''+f.id+'\')">'+f.name.split(' ')[0]+'</button>';}).join('');}
+function setInpFunc(id){inpFunc=id;document.querySelectorAll('.fsb').forEach(function(b){b.classList.toggle('active',b.textContent.trim()===FUNCS.find(function(f){return f.id===id;}).name.split(' ')[0]);});renderInpForm();}
+function setInpMode(m){inpMode=m;['w','k','h'].forEach(function(x){document.getElementById('imt-'+x).classList.toggle('active',(m==='weekly'&&x==='w')||(m==='kpi'&&x==='k')||(m==='hc'&&x==='h'));});renderInpForm();}
 
-function getLatestNarrative(fid) {
-  const arr = allWeekly.filter(r=>r.funcId===fid);
-  if (!arr.length) return null;
-  return [...arr].sort((a,b)=>String(b.updatedAt).localeCompare(String(a.updatedAt)))[0];
-}
+function saveWDraft(fid){var d={};NAR_FIELDS.forEach(function(nf){var el=document.getElementById('wn_'+nf.k);if(el)d[nf.k]=el.value;});var hcEl=document.getElementById('wn_hc');if(hcEl)d.hc=hcEl.value;setDraft('wd_'+fid,d);}
+function clearWDraft(fid){clearDraft('wd_'+fid);NAR_FIELDS.forEach(function(nf){var el=document.getElementById('wn_'+nf.k);if(el)el.value='';});var hcEl=document.getElementById('wn_hc');if(hcEl)hcEl.value='';}
+function saveHCDraft(fid){var d={resignations:document.getElementById('hc_resign')?document.getElementById('hc_resign').value:'',promotions:document.getElementById('hc_promo')?document.getElementById('hc_promo').value:'',avgHC:document.getElementById('hc_avghc')?document.getElementById('hc_avghc').value:'',openReqs:document.getElementById('hc_openreq')?document.getElementById('hc_openreq').value:'',newRoles:document.getElementById('hc_newrole')?document.getElementById('hc_newrole').value:''};setDraft('hcd_'+fid,d);}
 
-function getFilteredNarrative(fid) {
-  const arr = allWeekly.filter(r=>r.funcId===fid);
-  if (!arr.length) return null;
-  if (selectedFilterWeek==='latest') return [...arr].sort((a,b)=>String(b.updatedAt).localeCompare(String(a.updatedAt)))[0];
-  return arr.find(e=>e.weekLabel===selectedFilterWeek)||null;
-}
+function renderInpForm(){var f=FUNCS.find(function(x){return x.id===inpFunc;});var area=document.getElementById('inp-form');var cm=localMonth();if(inpMode==='weekly'){var wkLabel=getCurrentWeekLabel();var allWeeks=getAllWeekOptions();var weekOpts=allWeeks.map(function(w){return '<option value="'+w.label+'" '+(w.label===wkLabel?'selected':'')+'>'+w.label+'</option>';}).join('');var draft=getDraft('wd_'+inpFunc)||{};var fields=NAR_FIELDS.map(function(nf){return '<div class="ng"><label>'+nf.label+'</label><textarea id="wn_'+nf.k+'" placeholder="'+nf.label+'..." oninput="saveWDraft(\''+inpFunc+'\')">'+(draft[nf.k]||'')+'</textarea></div>';}).join('');area.innerHTML='<div class="dl-info dl-weekly">Narrative due Monday EOD</div><div class="form-card"><div style="font-weight:700;font-size:13px;margin-bottom:.5rem">'+f.name+' -- '+f.role+'</div><div style="display:flex;align-items:center;gap:8px;margin-bottom:.75rem"><label style="font-size:12px;color:#666;font-weight:500;white-space:nowrap">Reporting week:</label><select id="wn_week" style="padding:5px 10px;border:1.5px solid #ddd;border-radius:7px;background:#fff;font-size:12px;color:#333;flex:1">'+weekOpts+'</select></div><div class="fsec">Weekly narrative</div><div class="nar-inp-grid">'+fields+'</div><div style="display:flex;align-items:center;gap:8px;margin-top:.75rem"><label style="font-size:12px;color:#666;font-weight:500;white-space:nowrap">Headcount this week:</label><input type="number" id="wn_hc" value="'+(draft.hc||getLatestHC(inpFunc)||'')+'" oninput="saveWDraft(\''+inpFunc+'\')" style="padding:6px 10px;border:1.5px solid #ddd;border-radius:7px;font-size:12px;width:90px"></div><div class="btn-row"><button class="save-btn" onclick="saveWeekly()" '+(dataLoaded?'':'disabled')+'>Save weekly update</button><button class="clear-btn" onclick="clearWDraft(\''+inpFunc+'\')">Clear form</button></div></div>';}else if(inpMode==='kpi'){var defs=KPI_DEFS[inpFunc]||[];var existing=getKpisForMonth(inpFunc,cm)||[];var kpiRows=defs.length?defs.map(function(k,i){return '<div class="kpi-inp"><span>'+k.l+'</span><span>Target: '+k.t+(k.t<=100?'%':'')+'</span><input type="number" step="0.01" id="ki_'+i+'" value="'+(existing[i]!=null?existing[i]:'')+'" placeholder="Actual"></div>';}).join(''):'<div class="no-data">No KPIs defined.</div>';area.innerHTML='<div class="dl-info dl-kpi">KPIs updated monthly - recording for '+cm+'</div><div class="form-card"><div style="font-weight:700;font-size:13px;margin-bottom:.25rem">'+f.name+' -- '+f.role+'</div><div class="fsec">KPI actuals -- '+cm+'</div>'+kpiRows+'<div class="btn-row"><button class="save-btn" onclick="saveKpis()" '+(dataLoaded&&defs.length?'':'disabled')+'>Save KPI update</button></div></div>';}else if(inpMode==='hc'){var pr=getLatestPeopleRec(inpFunc)||{};var draft=getDraft('hcd_'+inpFunc)||{};var vR=draft.resignations!==undefined?draft.resignations:(pr.resignations||'');var vP=draft.promotions!==undefined?draft.promotions:(pr.promotions||'');var vH=draft.avgHC!==undefined?draft.avgHC:(pr.avgHC||getLatestHC(inpFunc)||'');var vO=draft.openReqs!==undefined?draft.openReqs:(pr.openRequisitions||'');var vN=draft.newRoles!==undefined?draft.newRoles:(pr.newRolesSinceJan||'');area.innerHTML='<div class="dl-info dl-hc">HC and People data - recording for '+cm+'</div><div class="form-card"><div style="font-weight:700;font-size:13px;margin-bottom:.25rem">'+f.name+' -- '+f.role+'</div><div class="fsec">Headcount and movements -- '+cm+'</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:.5rem"><div class="ng"><label>Resignations YTD</label><input type="number" min="0" id="hc_resign" value="'+vR+'" placeholder="0" oninput="saveHCDraft(\''+inpFunc+'\')"></div><div class="ng"><label>Total internal movements YTD</label><input type="number" min="0" id="hc_promo" value="'+vP+'" placeholder="0" oninput="saveHCDraft(\''+inpFunc+'\')"><span class="hint">Transfers + promotions within and outside</span></div><div class="ng"><label>Average HC this month</label><input type="number" min="0" id="hc_avghc" value="'+vH+'" placeholder="'+getLatestHC(inpFunc)+'" oninput="saveHCDraft(\''+inpFunc+'\')"><span class="hint">App computes attrition and promo %</span></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:.75rem"><div class="ng"><label>Open requisitions</label><input type="number" min="0" id="hc_openreq" value="'+vO+'" placeholder="0" oninput="saveHCDraft(\''+inpFunc+'\')"></div><div class="ng"><label>New roles since January</label><input type="number" min="0" id="hc_newrole" value="'+vN+'" placeholder="0" oninput="saveHCDraft(\''+inpFunc+'\')"></div></div><div class="info-box">Annualized attrition and internal movement % are computed automatically.</div><div class="btn-row"><button class="save-btn" onclick="saveHCData()" '+(dataLoaded?'':'disabled')+'>Save HC and people data</button></div></div>';}}
 
-function wasUpdatedThisWeek(fid) {
-  const latest = getLatestNarrative(fid);
-  if (!latest) return false;
-  return (new Date()-new Date(latest.updatedAt))/86400000 < 7;
-}
+async function saveWeekly(){var wkSel=document.getElementById('wn_week');var wkLabel=wkSel?wkSel.value:getCurrentWeekLabel();var f=FUNCS.find(function(x){return x.id===inpFunc;});var payload={action:'saveWeekly',funcId:inpFunc,funcName:f.name,weekLabel:wkLabel};NAR_FIELDS.forEach(function(nf){var el=document.getElementById('wn_'+nf.k);payload[nf.k]=el?el.value:'';});var hcEl=document.getElementById('wn_hc');if(hcEl&&hcEl.value)payload.hc=parseInt(hcEl.value);try{var btn=document.querySelector('#inp-form .save-btn');btn.textContent='Saving...';btn.disabled=true;var res=await postData(payload);if(res.error)throw new Error(res.error);clearDraft('wd_'+inpFunc);showToast('Weekly narrative saved');await loadData();renderInpForm();}catch(e){showToast('Save failed: '+e.message);var btn2=document.querySelector('#inp-form .save-btn');if(btn2){btn2.textContent='Save weekly update';btn2.disabled=false;}}}
+async function saveKpis(){var cm=localMonth();var defs=KPI_DEFS[inpFunc]||[];var f=FUNCS.find(function(x){return x.id===inpFunc;});var kpis=defs.map(function(_,i){var el=document.getElementById('ki_'+i);return el&&el.value!==''?parseFloat(el.value):null;});try{var btn=document.querySelector('#inp-form .save-btn');btn.textContent='Saving...';btn.disabled=true;var res=await postData({action:'saveKpi',funcId:inpFunc,funcName:f.name,month:cm,kpis:kpis});if(res.error)throw new Error(res.error);showToast('KPI data saved');await loadData();renderInpForm();}catch(e){showToast('Save failed: '+e.message);var btn2=document.querySelector('#inp-form .save-btn');if(btn2){btn2.textContent='Save KPI update';btn2.disabled=false;}}}
+async function saveHCData(){var cm=localMonth();var f=FUNCS.find(function(x){return x.id===inpFunc;});var rEl=document.getElementById('hc_resign'),pEl=document.getElementById('hc_promo'),hEl=document.getElementById('hc_avghc'),oEl=document.getElementById('hc_openreq'),nEl=document.getElementById('hc_newrole');var resignations=rEl&&rEl.value!==''?parseInt(rEl.value):null;var promotions=pEl&&pEl.value!==''?parseInt(pEl.value):null;var avgHC=hEl&&hEl.value!==''?parseFloat(hEl.value):null;var openRequisitions=oEl&&oEl.value!==''?parseInt(oEl.value):null;var newRolesSinceJan=nEl&&nEl.value!==''?parseInt(nEl.value):null;try{var btn=document.querySelector('#inp-form .save-btn');btn.textContent='Saving...';btn.disabled=true;var res=await postData({action:'saveKpi',funcId:inpFunc,funcName:f.name,month:cm,kpis:[],resignations:resignations,promotions:promotions,avgHC:avgHC,openRequisitions:openRequisitions,newRolesSinceJan:newRolesSinceJan});if(res.error)throw new Error(res.error);var existing=allKpis.findIndex(function(r){return r.funcId===inpFunc&&normalizeMonth(r.month)===cm;});var updated={funcId:inpFunc,funcName:f.name,month:cm,updatedAt:new Date().toISOString(),resignations:resignations!=null?resignations:'',promotions:promotions!=null?promotions:'',avgHC:avgHC!=null?avgHC:'',openRequisitions:openRequisitions!=null?openRequisitions:'',newRolesSinceJan:newRolesSinceJan!=null?newRolesSinceJan:''};if(existing>=0)Object.assign(allKpis[existing],updated);else allKpis.push(updated);clearDraft('hcd_'+inpFunc);showToast('HC and people data saved');loadData();renderInpForm();}catch(e){showToast('Save failed: '+e.message);var btn2=document.querySelector('#inp-form .save-btn');if(btn2){btn2.textContent='Save HC and people data';btn2.disabled=false;}}}
 
-// ─── WEEK CALENDAR ───────────────────────────────────────────
-// Week 1 = Dec 29, 2025 (Mon). Reporting week = previous completed week.
-const WEEK1 = new Date(2025,11,29);
+function populateMonthSelect(){var months=new Set();allKpis.forEach(function(r){months.add(normalizeMonth(r.month));});allWeekly.forEach(function(r){if(r.updatedAt)months.add(normalizeMonth(r.updatedAt));});months.add(localMonth());var sel=document.getElementById('rpt-month');var sorted=[...months].filter(Boolean).sort().reverse();sel.innerHTML=sorted.map(function(m){var p=m.split('-');var lbl=new Date(+p[0],+p[1]-1,1).toLocaleDateString('en-US',{month:'long',year:'numeric'});return '<option value="'+m+'">'+lbl+'</option>';}).join('');}
 
-function getWeekInfo(wkNum) {
-  const start = new Date(WEEK1.getTime()+(wkNum-1)*7*86400000);
-  const end   = new Date(start.getTime()+4*86400000);
-  const fmt = d => d.toLocaleDateString('en-US',{month:'short',day:'2-digit'});
-  return {num:wkNum, label:'Week '+wkNum+' - '+fmt(start)+'-'+fmt(end), start, end};
-}
+function setProgress(label,sub,pct){document.getElementById('prog-wrap').style.display='block';document.getElementById('prog-label').textContent=label;document.getElementById('prog-sub').textContent=sub;document.getElementById('prog-bar').style.width=pct+'%';}
+function hideProgress(){document.getElementById('prog-wrap').style.display='none';}
 
-function getCurrentReportingWeek() {
-  const now = new Date();
-  const diff = Math.floor((now-WEEK1)/86400000);
-  const current = Math.max(1,Math.floor(diff/7)+1);
-  return Math.max(1,current-1); // report on previous week
-}
+async function callClaude(prompt){var res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});var data=await res.json();return (data.content&&data.content[0]&&data.content[0].text)||'';}
 
-function getCurrentWeekLabel() {
-  return getWeekInfo(getCurrentReportingWeek()).label;
-}
+function buildNarrativeText(entries){if(!entries.length)return null;var parts=[];NAR_FIELDS.forEach(function(nf){var vals=entries.map(function(e){return e[nf.k];}).filter(function(v){return v&&v.toString().trim();});if(vals.length)parts.push(nf.label.toUpperCase()+':\n'+vals.join('\n'));});return parts.join('\n\n');}
 
-function getAllWeekOptions() {
-  const reporting = getCurrentReportingWeek();
-  const weeks = [];
-  for (let i=reporting; i>=1; i--) weeks.push(getWeekInfo(i));
-  return weeks;
-}
+function parseBullets(text){return text.split('\n').map(function(l){return l.trim();}).filter(function(l){return l.length>2&&(l.charAt(0)===String.fromCharCode(8226)||l.charAt(0)==='-'||l.charAt(0)==='*'||/^\d+\./.test(l));}).map(function(l){return '<li style="margin-bottom:3px">'+l.replace(/^[\u2022\-\*]\s*/,'').replace(/^\d+\.\s*/,'')+'</li>';}).join('');}
 
-// ─── JSONP ───────────────────────────────────────────────────
-function jsonp(url) {
-  return new Promise((resolve,reject)=>{
-    const cb = 'hcb_'+Date.now();
-    const script = document.createElement('script');
-    const timer = setTimeout(()=>{ cleanup(); reject(new Error('Timeout')); },30000);
-    function cleanup(){ clearTimeout(timer); delete window[cb]; if(script.parentNode) script.parentNode.removeChild(script); }
-    window[cb] = data=>{ cleanup(); resolve(data); };
-    script.src = url+(url.includes('?')?'&':'?')+'callback='+cb;
-    script.onerror = ()=>{ cleanup(); reject(new Error('Script load failed')); };
-    document.head.appendChild(script);
-  });
-}
+async function generateReport(){var month=document.getElementById('rpt-month').value;var mp=month.split('-');var monthLabel=new Date(+mp[0],+mp[1]-1,1).toLocaleDateString('en-US',{month:'long',year:'numeric'});var btn=document.getElementById('gen-btn');btn.disabled=true;btn.textContent='Generating...';var totalGreen=0,updatedCount=0,blockerLines=[];FUNCS.forEach(function(f){var kpis=getKpisForMonth(f.id,month);if(kpis&&kpis.length){var rags=kpis.map(function(v,i){return getRag(f.id,i,v);});if(rags.indexOf('R')<0&&rags.indexOf('A')<0)totalGreen++;}var entries=allWeekly.filter(function(r){return r.funcId===f.id&&normalizeMonth(r.updatedAt)===month;});if(entries.length)updatedCount++;entries.forEach(function(e){if(e.redFlag&&e.redFlag.toString().trim()&&e.redFlag.toString().toLowerCase().indexOf('none')<0)blockerLines.push(f.name+': '+e.redFlag);});});var execHtml='<div class="rpt-exec"><div class="rpt-exec-title">Manila Services -- Executive Summary</div><p style="margin-bottom:.5rem">Manila Services closed <b>'+monthLabel+'</b> with <b>'+totalGreen+'</b> of '+FUNCS.length+' functions fully on track across KPIs. <b>'+updatedCount+'</b> of '+FUNCS.length+' functions submitted weekly narrative updates.</p>'+(blockerLines.length?'<p style="font-weight:700;margin-bottom:.25rem">Open blockers requiring attention:</p><ul style="padding-left:1.25rem;font-size:11px">'+blockerLines.map(function(b){return '<li>'+b+'</li>';}).join('')+'</ul>':'<p style="color:#aaa">No open blockers logged this month.</p>')+'</div>';document.getElementById('report-out').innerHTML='<div class="rpt-title">Manila Services -- Monthly Report</div><div class="rpt-sub">'+monthLabel+' - Generated '+new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})+'</div>'+execHtml+'<div id="rpt-func-sections"></div>';var funcsWithData=FUNCS.filter(function(f){return getKpisForMonth(f.id,month)||allWeekly.some(function(r){return r.funcId===f.id&&normalizeMonth(r.updatedAt)===month;});});for(var i=0;i<funcsWithData.length;i++){var f=funcsWithData[i];setProgress('Summarizing '+f.name+'...',(i+1)+' of '+funcsWithData.length+' functions',Math.round((i/funcsWithData.length)*100));var kpis=getKpisForMonth(f.id,month),defs=KPI_DEFS[f.id]||[];var entries=allWeekly.filter(function(r){return r.funcId===f.id&&normalizeMonth(r.updatedAt)===month;}).slice().sort(function(a,b){return String(a.updatedAt).localeCompare(String(b.updatedAt));});var rag=kpis&&kpis.length?getFuncRag(f.id):'N';var ragCol=rag==='G'?'#4caf50':rag==='A'?'#ff9800':rag==='R'?'#f44336':'#ccc';var kpiBlock='<div style="font-size:11px;color:#aaa;font-style:italic;margin-bottom:.5rem">No KPI data for this month.</div>';if(kpis&&kpis.length){var rows='';kpis.forEach(function(v,j){if(!defs[j])return;var r=getRag(f.id,j,v),isLg=defs[j].t>100;rows+='<div class="rpt-kpi-row"><span>'+defs[j].l+'</span><span>'+defs[j].t+(!isLg?'%':'')+'</span><span><b>'+v+(!isLg&&v<=100?'%':'')+'</b></span><span style="color:'+(r==='G'?'#2e7d32':r==='A'?'#e65100':'#c62828')+'">'+(r==='G'?'On track':r==='A'?'Monitor':'Attention')+'</span></div>';});kpiBlock='<div style="font-size:11px;margin-bottom:.75rem"><div class="rpt-kpi-row hdr"><span>KPI</span><span>Target</span><span>Actual</span><span>Status</span></div>'+rows+'</div>';}var summaryHtml='<div style="font-size:11px;color:#aaa;font-style:italic">No weekly narratives submitted this month.</div>';var narrativeText=buildNarrativeText(entries);if(narrativeText){try{var prompt='You are writing an executive monthly report for Manila Services, a back-office organization supporting a global MNC.\n\nBelow are the weekly narrative updates submitted by '+f.name+' ('+f.role+') for '+monthLabel+'.\n\n'+narrativeText+'\n\nWrite a concise executive summary in exactly this format:\n\nHIGHLIGHTS / ACCOMPLISHMENTS:\n- [bullet]\n- [bullet]\n\nACTIONS / HELP NEEDED:\n- [bullet]\n- [bullet]\n\nRules:\n- Maximum 4 bullets per section\n- Each bullet is one sentence, specific and factual\n- Formal tone suitable for VP-level readers\n- If a section has nothing relevant, write "None this month." as the only bullet\n- Output only the two sections above, nothing else';var aiText=await callClaude(prompt);var hlIdx=aiText.toUpperCase().indexOf('HIGHLIGHTS');var acIdx=aiText.toUpperCase().indexOf('ACTIONS');var hlRaw=hlIdx>=0?aiText.slice(hlIdx,acIdx>=0?acIdx:undefined).replace(/HIGHLIGHTS[^:\n]*:/i,'').trim():'';var acRaw=acIdx>=0?aiText.slice(acIdx).replace(/ACTIONS[^:\n]*:/i,'').trim():'';summaryHtml='<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:.5rem"><div><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#2e7d32;margin-bottom:.35rem">Highlights / Accomplishments</div><ul style="padding-left:1rem;font-size:11px;line-height:1.6;color:#333">'+parseBullets(hlRaw)+'</ul></div><div><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#c62828;margin-bottom:.35rem">Actions / Help Needed</div><ul style="padding-left:1rem;font-size:11px;line-height:1.6;color:#333">'+parseBullets(acRaw)+'</ul></div></div>';}catch(e){summaryHtml='<div style="font-size:11px;color:#e65100">AI summary unavailable: '+e.message+'</div>';}}var section=document.createElement('div');section.className='rpt-fsec';section.innerHTML='<div class="rpt-fhdr"><div style="width:9px;height:9px;border-radius:50%;background:'+ragCol+';flex-shrink:0;margin-top:2px"></div><div><div class="rpt-fname">'+f.name+' -- '+f.role+'</div><div style="font-size:11px;color:#aaa">'+entries.length+' week'+(entries.length!==1?'s':'')+' - '+monthLabel+'</div></div></div>'+kpiBlock+summaryHtml;document.getElementById('rpt-func-sections').appendChild(section);}setProgress('Done!','',100);setTimeout(hideProgress,1500);btn.disabled=false;btn.textContent='Generate with AI';}
 
-async function loadData() {
-  if (!SCRIPT_URL) return;
-  setStatus('loading','Loading from Google Sheets...');
-  try {
-    const data = await jsonp(SCRIPT_URL+'?data='+encodeURIComponent(JSON.stringify({action:'getAll'})));
-    if (data.error) throw new Error(data.error);
-    allWeekly = data.weekly||[];
-    allKpis   = data.kpis||[];
-    dataLoaded = true;
-    setStatus('ok','Connected · '+allWeekly.length+' weekly entries · '+allKpis.length+' KPI records · '+new Date().toLocaleTimeString());
-    buildWeekFilter();
-    renderOverview();
-    populateMonthSelect();
-    if (viewSec!=='overview') renderDetail(viewSec);
-  } catch(e) {
-    setStatus('err','Could not reach Google Sheets — '+e.message);
-  }
-}
+function printReport(){var content=document.getElementById('report-out').innerHTML;var w=window.open('','_blank');w.document.write('<html><head><title>Manila Services Monthly Report</title><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;font-size:12px;padding:2cm;color:#111;max-width:900px;margin:0 auto}.rpt-title{font-size:20px;font-weight:700;margin-bottom:4px}.rpt-sub{font-size:11px;color:#666;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid #ddd}.rpt-exec{background:#f5f5f5;border-radius:6px;padding:1rem;margin-bottom:1.25rem}.rpt-exec-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem;color:#666}.rpt-fsec{margin-bottom:1.25rem;padding-bottom:1.25rem;border-bottom:1px solid #eee}.rpt-fhdr{display:flex;align-items:center;gap:8px;margin-bottom:.75rem}.rpt-fname{font-size:13px;font-weight:700}.rpt-kpi-row{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:6px;font-size:11px;padding:4px 0;border-bottom:1px solid #eee}.rpt-kpi-row.hdr{font-weight:700;color:#aaa;font-size:10px;text-transform:uppercase}ul{padding-left:1.25rem;margin-bottom:.5rem}li{margin-bottom:3px;font-size:11px}@media print{body{padding:1cm}}</style></head><body>'+content+'</body></html>');w.document.close();w.focus();setTimeout(function(){w.print();},400);}
 
-async function postData(payload) {
-  const url = SCRIPT_URL+'?data='+encodeURIComponent(JSON.stringify(payload));
-  return jsonp(url);
-}
-
-function setStatus(state,msg) {
-  document.getElementById('sdot').className='sdot '+state;
-  document.getElementById('stext').textContent=msg;
-}
-
-// ─── INIT ────────────────────────────────────────────────────
-function init() {
-  const d=new Date(), y=d.getFullYear(), s=new Date(y,0,1);
-  const wk=Math.ceil((((d-s)/86400000)+s.getDay()+1)/7);
-  document.getElementById('week-meta').textContent='Week '+wk+' · '+d.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})+' · Huddle every Tuesday';
-  const dow=d.getDay();
-  let dlText,dlCls;
-  if(dow===1){dlText='Deadline today — Monday EOD';dlCls='dl-due';}
-  else if(dow===2){dlText='Huddle today — Tuesday';dlCls='dl-warn';}
-  else{const dtm=dow===0?1:(8-dow)%7||7;dlText='Narrative due in '+dtm+' day'+(dtm>1?'s':'');dlCls='dl-ok';}
-  const badge=document.getElementById('dl-badge');
-  badge.textContent=dlText; badge.className='dl-badge '+dlCls;
-  buildViewTabs();
-  buildInpFuncSel();
-  loadData();
-}
-
-// ─── VIEW TABS ───────────────────────────────────────────────
-function buildViewTabs() {
-  const el=document.getElementById('vtabs'); el.innerHTML='';
-  const secs=document.getElementById('func-vsecs'); secs.innerHTML='';
-  const ov=document.createElement('button'); ov.className='vtab active'; ov.textContent='Overview';
-  ov.onclick=()=>showVsec('overview',ov); el.appendChild(ov);
-  FUNCS.forEach(f=>{
-    const btn=document.createElement('button'); btn.className='vtab'; btn.textContent=f.name.split(' ')[0]; btn.setAttribute('data-fid',f.id);
-    btn.onclick=()=>showVsec(f.id,btn); el.appendChild(btn);
-    const sec=document.createElement('div'); sec.className='vsec'; sec.id='vsec-'+f.id;
-    sec.innerHTML='<div id="det-'+f.id+'"></div>'; secs.appendChild(sec);
-  });
-}
-
-function showVsec(id,btn) {
-  document.querySelectorAll('.vsec').forEach(s=>s.classList.remove('active'));
-  const sec=document.getElementById(id==='overview'?'vsec-overview':'vsec-'+id);
-  if(sec) sec.classList.add('active');
-  document.querySelectorAll('.vtab').forEach(t=>t.classList.remove('active'));
-  if(btn) btn.classList.add('active');
-  viewSec=id;
-  if(id!=='overview') renderDetail(id);
-}
-
-// ─── WEEK FILTER ─────────────────────────────────────────────
-function buildWeekFilter() {
-  const sel=document.getElementById('week-filter'); if(!sel) return;
-  const weeks=[...new Set(allWeekly.map(e=>e.weekLabel))].sort((a,b)=>{
-    const da=allWeekly.find(e=>e.weekLabel===a), db=allWeekly.find(e=>e.weekLabel===b);
-    if(!da||!db) return 0;
-    return String(db.updatedAt).localeCompare(String(da.updatedAt));
-  });
-  sel.innerHTML='<option value="latest">Latest update (default)</option>'+weeks.map(w=>'<option value="'+w+'" '+(w===selectedFilterWeek?'selected':'')+'>'+w+'</option>').join('');
-  updateWFMeta();
-}
-
-function updateWFMeta() {
-  const meta=document.getElementById('wf-meta'); if(!meta) return;
-  if(selectedFilterWeek==='latest'){meta.textContent='Showing most recent per function';}
-  else{const c=FUNCS.filter(f=>allWeekly.some(e=>e.funcId===f.id&&e.weekLabel===selectedFilterWeek)).length; meta.textContent=c+' of '+FUNCS.length+' updated';}
-}
-
-function onWeekFilterChange() {
-  selectedFilterWeek=document.getElementById('week-filter').value;
-  updateWFMeta(); renderOverview();
-}
-
-// ─── OVERVIEW ────────────────────────────────────────────────
-function renderOverview() {
-  let hc=0,upd=0,attRates=[],promoNums=[],promoHCs=[];
-  FUNCS.forEach(f=>{
-    hc+=getLatestHC(f.id)||f.hc;
-    if(wasUpdatedThisWeek(f.id)) upd++;
-    const att=getAttrition(f.id); if(att) attRates.push(parseFloat(att.rate));
-    const promo=getPromo(f.id); if(promo){promoNums.push(promo.promotions);promoHCs.push(promo.avgHC||getLatestHC(f.id)||1);}
-  });
-  document.getElementById('ov-hc').textContent=hc.toLocaleString();
-  document.getElementById('ov-upd').textContent=upd;
-  if(attRates.length){const avg=(attRates.reduce((a,b)=>a+b,0)/attRates.length).toFixed(1);document.getElementById('ov-att').textContent=avg+'%';}
-  else document.getElementById('ov-att').textContent='—';
-  if(promoNums.length){const tp=promoNums.reduce((a,b)=>a+b,0),th=promoHCs.reduce((a,b)=>a+b,0)||1;document.getElementById('ov-promo').textContent=((tp/th)*100).toFixed(1)+'%';}
-  else document.getElementById('ov-promo').textContent='—';
-
-  const grid=document.getElementById('func-cards'); grid.innerHTML='';
-  FUNCS.forEach(f=>{
-    const rag=getFuncRag(f.id),defs=KPI_DEFS[f.id]||[],kpis=getLatestKpis(f.id);
-    const updated=wasUpdatedThisWeek(f.id),latest=getFilteredNarrative(f.id);
-    const att=getAttrition(f.id);
-    const card=document.createElement('div'); card.className='fc';
-    card.onclick=()=>{ const btn=document.querySelector('.vtab[data-fid="'+f.id+'"]'); showVsec(f.id,btn); };
-    let kh='';
-    if(kpis.length){
-      kpis.slice(0,3).forEach((v,i)=>{
-        if(!defs[i]) return;
-        const r=getRag(f.id,i,v),pct=defs[i].hi?Math.min(v/defs[i].t*100,100):Math.max(0,100-(v/defs[i].t-1)*200);
-        const col=r==='G'?'#4caf50':r==='A'?'#ff9800':'#f44336';
-        kh+='<div class="km-row"><span class="km-lbl">'+defs[i].l+'</span><span class="km-val">'+v+(defs[i].t<=100&&v<=100?'%':'')+'</span></div><div class="km-bar"><div class="km-fill" style="width:'+Math.round(pct)+'%;background:'+col+'"></div></div>';
-      });
-    } else kh='<div class="no-data">No KPIs yet</div>';
-    const stamp=(latest?latest.weekLabel:'Not updated')+(att?' · '+att.rate+'% attrition':'');
-    card.innerHTML='<div class="fc-top"><div><div class="fc-name">'+f.name+'</div><div class="fc-role">'+f.role+'</div></div><div class="fc-dots"><div class="upd '+(updated?'upd-y':'upd-n')+'" title="'+(updated?'Updated':'Not updated')+'"></div><div class="rag rag-'+rag+'"></div></div></div>'+kh+'<div class="fc-stamp">'+stamp+'</div>';
-    grid.appendChild(card);
-  });
-}
-
-// ─── DETAIL ──────────────────────────────────────────────────
-function renderDetail(fid) {
-  const f=FUNCS.find(x=>x.id===fid),defs=KPI_DEFS[fid]||[];
-  const el=document.getElementById('det-'+fid); if(!el) return;
-
-  // KPI month selector
-  const allKpiMonths=[...new Set(allKpis.filter(r=>r.funcId===fid&&(r.kpi1||r.kpi2||r.kpi3)).map(r=>normalizeMonth(r.month)))].filter(Boolean).sort().reverse();
-  if(!detailKpiMonth[fid]&&allKpiMonths.length) detailKpiMonth[fid]=allKpiMonths[0];
-  const selMonth=detailKpiMonth[fid]||allKpiMonths[0];
-  const selKpis=selMonth?getKpisForMonth(fid,selMonth):getLatestKpis(fid);
-  const kpiMonthOpts=allKpiMonths.map(m=>{const[y,mo]=m.split('-');const lbl=new Date(+y,+mo-1,1).toLocaleDateString('en-US',{month:'long',year:'numeric'});return '<option value="'+m+'" '+(m===selMonth?'selected':'')+'>'+lbl+'</option>';}).join('');
-  const kpiMonthNav=allKpiMonths.length?'<div class="mo-sel"><label>Month:</label><select onchange="setDetailKpiMonth(\''+fid+'\',this.value)">'+kpiMonthOpts+'</select><span style="font-size:11px;color:#aaa">'+allKpiMonths.length+' month'+(allKpiMonths.length!==1?'s':'')+' on record</span></div>':'';
-
-  let kpiBlock='<div class="no-data">No KPI data yet.</div>';
-  if(selKpis&&selKpis.length){
-    let rows='';
-    selKpis.forEach((v,i)=>{
-      if(!defs[i]) return;
-      const r=getRag(fid,i,v),isLg=defs[i].t>100;
-      const disp=v+(!isLg&&v<=100?'%':''),tDisp=defs[i].t+(!isLg&&defs[i].t<=100?'%':'');
-      const diff=defs[i].hi?(v-defs[i].t):(defs[i].t-v);
-      const ds=(diff>=0?'+':'')+diff.toFixed(1)+(!isLg&&v<=100?'pp':'');
-      rows+='<tr><td>'+defs[i].l+'</td><td>'+tDisp+'</td><td><b>'+disp+'</b></td><td><span class="rb '+r+'">'+(r==='G'?'On track':r==='A'?'Monitor':r==='R'?'Attention':'—')+'</span></td><td class="'+(diff>=0?'tup':'tdn')+'">'+(diff>=0?'↑':'↓')+' '+ds+'</td></tr>';
-    });
-    kpiBlock='<table class="kpi-tbl"><thead><tr><th>KPI</th><th>Target</th><th>Actual</th><th>Status</th><th>vs Target</th></tr></thead><tbody>'+rows+'</tbody></table>';
-  }
-
-  // Week selector
-  const allFuncEntries=[...allWeekly.filter(r=>r.funcId===fid)].sort((a,b)=>String(b.updatedAt).localeCompare(String(a.updatedAt)));
-  const allCalWeeks=getAllWeekOptions();
-  if(!detailWeek[fid]) detailWeek[fid]=allCalWeeks[0].label;
-  const selEntry=allFuncEntries.find(e=>e.weekLabel===detailWeek[fid])||null;
-  const submittedWeeks=new Set(allFuncEntries.map(e=>e.weekLabel));
-  const weekOpts=allCalWeeks.map(w=>'<option value="'+w.label+'" '+(w.label===detailWeek[fid]?'selected':'')+'>'+(submittedWeeks.has(w.label)?'✓ ':'')+w.label+'</option>').join('');
-  const weekNav='<div class="wk-sel"><label>Week:</label><select onchange="setDetailWeek(\''+fid+'\',this.value)">'+weekOpts+'</select><span style="font-size:11px;color:#aaa">'+submittedWeeks.size+' of '+allCalWeeks.length+' weeks submitted</span></div>';
-
-  let narBlock='<div class="no-data">No entry for this week yet.</div>';
-  if(selEntry) narBlock='<div class="nar-grid">'+NAR_FIELDS.map(nf=>'<div class="nc"><div class="nc-lbl">'+nf.label+'</div><div class="nc-text">'+(selEntry[nf.k]||'—')+'</div></div>').join('')+'</div>';
-
-  // People data
-  const pr=getLatestPeopleRec(fid);
-  const att=getAttrition(fid),promo=getPromo(fid);
-  const attStr=att?'Attrition: <b>'+att.rate+'%</b> annualized ('+att.resignations+' resignation'+(att.resignations!==1?'s':'')+' YTD)':'Attrition: not entered';
-  const promoStr=promo?'Internal movement: <b>'+promo.pct+'%</b> ('+promo.promotions+' YTD)':'Internal movement: not entered';
-  const openReqStr=pr&&pr.openRequisitions?'Open reqs: <b>'+pr.openRequisitions+'</b>':'';
-  const newRolesStr=pr&&pr.newRolesSinceJan?'New roles YTD: <b>'+pr.newRolesSinceJan+'</b>':'';
-  const extras=[openReqStr,newRolesStr].filter(Boolean).join(' &nbsp;·&nbsp; ');
-
-  // History
-  let histHtml=allFuncEntries.length?allFuncEntries.slice(0,10).map(e=>{
-    const cats=NAR_FIELDS.filter(nf=>e[nf.k]&&e[nf.k].toString().trim());
-    const isSel=e.weekLabel===detailWeek[fid];
-    return '<div class="he" style="'+(isSel?'border-color:#1a1a2e;background:#f8f9ff':'')+'" onclick="setDetailWeek(\''+fid+'\',\''+e.weekLabel.replace(/'/,"\\'")+'\')">'+'<div class="he-hdr"><span style="'+(isSel?'font-weight:700':'')+'">'+e.weekLabel+'</span><span style="color:#aaa">'+new Date(e.updatedAt).toLocaleDateString()+'</span></div>'+'<div>'+cats.map(c=>'<span class="pill">'+c.label+'</span>').join('')+'</div></div>';
-  }).join(''):'<div class="no-data">No history yet.</div>';
-
-  el.innerHTML=
-    '<div class="det-hdr"><div class="det-title">'+f.name+' — '+f.role+'</div>'+
-    '<div class="det-sub">HC: '+getLatestHC(fid)+' &nbsp;·&nbsp; '+attStr+' &nbsp;·&nbsp; '+promoStr+(extras?' &nbsp;·&nbsp; '+extras:'')+' &nbsp;·&nbsp; '+allFuncEntries.length+' weeks on record</div></div>'+
-    '<div class="card"><div class="card-title">Monthly KPIs</div>'+kpiMonthNav+kpiBlock+'</div>'+
-    weekNav+
-    '<div class="card"><div class="card-title">Narrative — '+(selEntry?selEntry.weekLabel:'none')+'</div>'+narBlock+'</div>'+
-    '<div class="card"><div class="card-title">All weeks (click to view)</div>'+histHtml+'</div>';
-}
-
-function setDetailWeek(fid,wk){ detailWeek[fid]=wk; renderDetail(fid); }
-function setDetailKpiMonth(fid,m){ detailKpiMonth[fid]=m; renderDetail(fid); }
-
-// ─── INPUT MODE ──────────────────────────────────────────────
-function buildInpFuncSel() {
-  document.getElementById('inp-fsel').innerHTML=FUNCS.map(f=>'<button class="fsb'+(f.id===inpFunc?' active':'')+'" onclick="setInpFunc(\''+f.id+'\')">'+f.name.split(' ')[0]+'</button>').join('');
-}
-
-function setInpFunc(id) {
-  inpFunc=id;
-  document.querySelectorAll('.fsb').forEach(b=>b.classList.toggle('active',b.textContent.trim()===FUNCS.find(f=>f.id===id).name.split(' ')[0]));
-  renderInpForm();
-}
-
-function setInpMode(m) {
-  inpMode=m;
-  ['w','k','h'].forEach(x=>document.getElementById('imt-'+x).classList.toggle('active',(m==='weekly'&&x==='w')||(m==='kpi'&&x==='k')||(m==='hc'&&x==='h')));
-  renderInpForm();
-}
-
-// Draft helpers
-function getDraft(key){ try{return JSON.parse(sessionStorage.getItem(key)||'null');}catch(e){return null;} }
-function setDraft(key,val){ try{sessionStorage.setItem(key,JSON.stringify(val));}catch(e){} }
-function clearDraft(key){ try{sessionStorage.removeItem(key);}catch(e){} }
-
-function renderInpForm() {
-  const f=FUNCS.find(x=>x.id===inpFunc);
-  const area=document.getElementById('inp-form');
-  const cm=localMonth();
-
-  if (inpMode==='weekly') {
-    const wkLabel=getCurrentWeekLabel();
-    const allWeeks=getAllWeekOptions();
-    const weekOpts=allWeeks.map(w=>'<option value="'+w.label+'" '+(w.label===wkLabel?'selected':'')+'>'+w.label+'</option>').join('');
-    const draft=getDraft('wd_'+inpFunc)||{};
-    const fields=NAR_FIELDS.map(nf=>'<div class="ng"><label>'+nf.label+'</label><textarea id="wn_'+nf.k+'" placeholder="'+nf.label+'..." oninput="saveWDraft(\''+inpFunc+'\')">'+(draft[nf.k]||'')+'</textarea></div>').join('');
-    area.innerHTML='<div class="dl-info dl-weekly">📅 Narrative due <b>Monday EOD</b></div>'+
-      '<div class="form-card"><div style="font-weight:700;font-size:13px;margin-bottom:.5rem">'+f.name+' — '+f.role+'</div>'+
-      '<div style="display:flex;align-items:center;gap:8px;margin-bottom:.75rem"><label style="font-size:12px;color:#666;font-weight:500;white-space:nowrap">Reporting week:</label><select id="wn_week" style="padding:5px 10px;border:1.5px solid #ddd;border-radius:7px;background:#fff;font-size:12px;color:#333;flex:1">'+weekOpts+'</select></div>'+
-      '<div class="fsec">Weekly narrative</div>'+
-      '<div class="nar-inp-grid">'+fields+'</div>'+
-      '<div style="display:flex;align-items:center;gap:8px;margin-top:.75rem"><label style="font-size:12px;color:#666;font-weight:500;white-space:nowrap">Headcount this week:</label><input type="number" id="wn_hc" value="'+(draft.hc||getLatestHC(inpFunc)||'')+'" oninput="saveWDraft(\''+inpFunc+'\')" style="padding:6px 10px;border:1.5px solid #ddd;border-radius:7px;font-size:12px;width:90px"></div>'+
-      '<div class="btn-row"><button class="save-btn" onclick="saveWeekly()" '+(dataLoaded?'':'disabled')+'>Save weekly update ↗</button><button class="clear-btn" onclick="clearWDraft(\''+inpFunc+'\')">Clear form</button></div></div>';
-
-  } else if (inpMode==='kpi') {
-    const defs=KPI_DEFS[inpFunc]||[];
-    const existing=getKpisForMonth(inpFunc,cm)||[];
-    const kpiRows=defs.length?defs.map((k,i)=>'<div class="kpi-inp"><span>'+k.l+'</span><span>Target: '+k.t+(k.t<=100?'%':'')+'</span><input type="number" step="0.01" id="ki_'+i+'" value="'+(existing[i]!=null?existing[i]:'')+'" placeholder="Actual"></div>').join(''):'<div class="no-data">No KPIs defined.</div>';
-    area.innerHTML='<div class="dl-info dl-kpi">📊 KPIs updated <b>monthly</b> — recording for <b>'+cm+'</b></div>'+
-      '<div class="form-card"><div style="font-weight:700;font-size:13px;margin-bottom:.25rem">'+f.name+' — '+f.role+'</div>'+
-      '<div class="fsec">KPI actuals — '+cm+'</div>'+kpiRows+
-      '<div class="btn-row"><button class="save-btn" onclick="saveKpis()" '+(dataLoaded&&defs.length?'':'disabled')+'>Save KPI update ↗</button></div></div>';
-
-  } else if (inpMode==='hc') {
-    // Get most recently updated people record for this function
-    const pr=getLatestPeopleRec(inpFunc)||{};
-    const draft=getDraft('hcd_'+inpFunc)||{};
-    // Draft takes priority, then sheet data, then blank
-    const vResign  = draft.resignations   !== undefined ? draft.resignations   : (pr.resignations   || '');
-    const vPromo   = draft.promotions     !== undefined ? draft.promotions     : (pr.promotions     || '');
-    const vAvgHC   = draft.avgHC          !== undefined ? draft.avgHC          : (pr.avgHC          || getLatestHC(inpFunc) || '');
-    const vOpenReq = draft.openReqs       !== undefined ? draft.openReqs       : (pr.openRequisitions|| '');
-    const vNewRole = draft.newRoles       !== undefined ? draft.newRoles       : (pr.newRolesSinceJan|| '');
-
-    area.innerHTML='<div class="dl-info dl-hc">👥 HC &amp; People data — recording for <b>'+cm+'</b></div>'+
-      '<div class="form-card"><div style="font-weight:700;font-size:13px;margin-bottom:.25rem">'+f.name+' — '+f.role+'</div>'+
-      '<div class="fsec">Headcount &amp; movements — '+cm+'</div>'+
-      '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:.5rem">'+
-        '<div class="ng"><label>Resignations YTD</label><input type="number" min="0" id="hc_resign" value="'+vResign+'" placeholder="0" oninput="saveHCDraft(\''+inpFunc+'\')"></div>'+
-        '<div class="ng"><label>Total internal movements YTD</label><input type="number" min="0" id="hc_promo" value="'+vPromo+'" placeholder="0" oninput="saveHCDraft(\''+inpFunc+'\')"><span class="hint">Transfers + promotions within &amp; outside</span></div>'+
-        '<div class="ng"><label>Average HC this month</label><input type="number" min="0" id="hc_avghc" value="'+vAvgHC+'" placeholder="'+getLatestHC(inpFunc)+'" oninput="saveHCDraft(\''+inpFunc+'\')"><span class="hint">App computes attrition &amp; promo %</span></div>'+
-      '</div>'+
-      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:.75rem">'+
-        '<div class="ng"><label>Open requisitions</label><input type="number" min="0" id="hc_openreq" value="'+vOpenReq+'" placeholder="0" oninput="saveHCDraft(\''+inpFunc+'\')"></div>'+
-        '<div class="ng"><label>New roles since January</label><input type="number" min="0" id="hc_newrole" value="'+vNewRole+'" placeholder="0" oninput="saveHCDraft(\''+inpFunc+'\')"></div>'+
-      '</div>'+
-      '<div class="info-box">Annualized attrition and internal movement % are computed automatically.</div>'+
-      '<div class="btn-row"><button class="save-btn" onclick="saveHCData()" '+(dataLoaded?'':'disabled')+'>Save HC &amp; people data ↗</button></div></div>';
-  }
-}
-
-// Draft functions
-function saveWDraft(fid) {
-  const d={};
-  NAR_FIELDS.forEach(nf=>{ const el=document.getElementById('wn_'+nf.k); if(el) d[nf.k]=el.value; });
-  const hcEl=document.getElementById('wn_hc'); if(hcEl) d.hc=hcEl.value;
-  setDraft('wd_'+fid,d);
-}
-
-function clearWDraft(fid) {
-  clearDraft('wd_'+fid);
-  NAR_FIELDS.forEach(nf=>{ const el=document.getElementById('wn_'+nf.k); if(el) el.value=''; });
-  const hcEl=document.getElementById('wn_hc'); if(hcEl) hcEl.value='';
-}
-
-function saveHCDraft(fid) {
-  const d={
-    resignations: document.getElementById('hc_resign')?.value||'',
-    promotions:   document.getElementById('hc_promo')?.value||'',
-    avgHC:        document.getElementById('hc_avghc')?.value||'',
-    openReqs:     document.getElementById('hc_openreq')?.value||'',
-    newRoles:     document.getElementById('hc_newrole')?.value||'',
-  };
-  setDraft('hcd_'+fid,d);
-}
-
-// Save functions
-async function saveWeekly() {
-  const wkSel=document.getElementById('wn_week');
-  const wkLabel=wkSel?wkSel.value:getCurrentWeekLabel();
-  const f=FUNCS.find(x=>x.id===inpFunc);
-  const payload={action:'saveWeekly',funcId:inpFunc,funcName:f.name,weekLabel:wkLabel};
-  NAR_FIELDS.forEach(nf=>{ const el=document.getElementById('wn_'+nf.k); payload[nf.k]=el?el.value:''; });
-  const hcEl=document.getElementById('wn_hc');
-  if(hcEl&&hcEl.value) payload.hc=parseInt(hcEl.value);
-  try {
-    const btn=document.querySelector('#inp-form .save-btn'); btn.textContent='Saving...'; btn.disabled=true;
-    const res=await postData(payload);
-    if(res.error) throw new Error(res.error);
-    clearDraft('wd_'+inpFunc);
-    showToast('Weekly narrative saved ✓');
-    await loadData();
-    renderInpForm();
-  } catch(e){ showToast('Save failed: '+e.message); const btn=document.querySelector('#inp-form .save-btn'); if(btn){btn.textContent='Save weekly update ↗';btn.disabled=false;} }
-}
-
-async function saveKpis() {
-  const cm=localMonth();
-  const defs=KPI_DEFS[inpFunc]||[];
-  const f=FUNCS.find(x=>x.id===inpFunc);
-  const kpis=defs.map((_,i)=>{ const el=document.getElementById('ki_'+i); return el&&el.value!==''?parseFloat(el.value):null; });
-  try {
-    const btn=document.querySelector('#inp-form .save-btn'); btn.textContent='Saving...'; btn.disabled=true;
-    const res=await postData({action:'saveKpi',funcId:inpFunc,funcName:f.name,month:cm,kpis});
-    if(res.error) throw new Error(res.error);
-    showToast('KPI data saved ✓');
-    await loadData();
-    renderInpForm();
-  } catch(e){ showToast('Save failed: '+e.message); const btn=document.querySelector('#inp-form .save-btn'); if(btn){btn.textContent='Save KPI update ↗';btn.disabled=false;} }
-}
-
-async function saveHCData() {
-  const cm=localMonth();
-  const f=FUNCS.find(x=>x.id===inpFunc);
-  const resignations=document.getElementById('hc_resign')?.value!==''?parseInt(document.getElementById('hc_resign').value):null;
-  const promotions=document.getElementById('hc_promo')?.value!==''?parseInt(document.getElementById('hc_promo').value):null;
-  const avgHC=document.getElementById('hc_avghc')?.value!==''?parseFloat(document.getElementById('hc_avghc').value):null;
-  const openRequisitions=document.getElementById('hc_openreq')?.value!==''?parseInt(document.getElementById('hc_openreq').value):null;
-  const newRolesSinceJan=document.getElementById('hc_newrole')?.value!==''?parseInt(document.getElementById('hc_newrole').value):null;
-  try {
-    const btn=document.querySelector('#inp-form .save-btn'); btn.textContent='Saving...'; btn.disabled=true;
-    const res=await postData({action:'saveKpi',funcId:inpFunc,funcName:f.name,month:cm,kpis:[],resignations,promotions,avgHC,openRequisitions,newRolesSinceJan});
-    if(res.error) throw new Error(res.error);
-    // Update local cache immediately so form pre-fills correctly on next render
-    const existing=allKpis.findIndex(r=>r.funcId===inpFunc&&normalizeMonth(r.month)===cm);
-    const updated={funcId:inpFunc,funcName:f.name,month:cm,updatedAt:new Date().toISOString(),
-      resignations:resignations!=null?resignations:'',promotions:promotions!=null?promotions:'',
-      avgHC:avgHC!=null?avgHC:'',openRequisitions:openRequisitions!=null?openRequisitions:'',
-      newRolesSinceJan:newRolesSinceJan!=null?newRolesSinceJan:''};
-    if(existing>=0) Object.assign(allKpis[existing],updated);
-    else allKpis.push(updated);
-    clearDraft('hcd_'+inpFunc);
-    showToast('HC & people data saved ✓');
-    loadData(); // refresh in background
-    renderInpForm();
-  } catch(e){ showToast('Save failed: '+e.message); const btn=document.querySelector('#inp-form .save-btn'); if(btn){btn.textContent='Save HC & people data ↗';btn.disabled=false;} }
-}
-
-// ─── REPORT ──────────────────────────────────────────────────
-function populateMonthSelect() {
-  const months=new Set();
-  allKpis.forEach(r=>months.add(normalizeMonth(r.month)));
-  allWeekly.forEach(r=>{ if(r.updatedAt) months.add(normalizeMonth(r.updatedAt)); });
-  months.add(localMonth());
-  const sel=document.getElementById('rpt-month');
-  const sorted=[...months].filter(Boolean).sort().reverse();
-  sel.innerHTML=sorted.map(m=>{ const[y,mo]=m.split('-'); const lbl=new Date(+y,+mo-1,1).toLocaleDateString('en-US',{month:'long',year:'numeric'}); return '<option value="'+m+'">'+lbl+'</option>'; }).join('');
-}
-
-function generateReport() {
-  const month=document.getElementById('rpt-month').value;
-  const[y,mo]=month.split('-');
-  const monthLabel=new Date(+y,+mo-1,1).toLocaleDateString('en-US',{month:'long',year:'numeric'});
-  let totalGreen=0,blockerLines=[],updatedCount=0;
-  FUNCS.forEach(f=>{
-    const kpis=getKpisForMonth(f.id,month);
-    if(kpis&&kpis.length){const rags=kpis.map((v,i)=>getRag(f.id,i,v));if(!rags.includes('R')&&!rags.includes('A'))totalGreen++;}
-    const entries=allWeekly.filter(r=>r.funcId===f.id&&normalizeMonth(r.updatedAt)===month);
-    if(entries.length)updatedCount++;
-    entries.forEach(e=>{ if(e.redFlag&&e.redFlag.toString().trim()&&e.redFlag.toString().toLowerCase().indexOf('none')<0) blockerLines.push('<li><b>'+f.name+'</b> ('+e.weekLabel+'): '+e.redFlag+'</li>'); });
-  });
-  const execHtml='<div class="rpt-exec"><div class="rpt-exec-title">Manila Services — Executive Summary</div><p style="margin-bottom:.5rem">Manila Services closed <b>'+monthLabel+'</b> with <b>'+totalGreen+'</b> of '+FUNCS.length+' functions fully on track. <b>'+updatedCount+'</b> of '+FUNCS.length+' functions submitted weekly narratives.</p>'+(blockerLines.length?'<p style="font-weight:700;margin-bottom:.25rem">Open blockers:</p><ul style="padding-left:1.25rem;font-size:11px">'+blockerLines.join('')+'</ul>':'<p style="color:#aaa">No open blockers this month.</p>')+'</div>';
-  let funcSections='';
-  FUNCS.forEach(f=>{
-    const kpis=getKpisForMonth(f.id,month),defs=KPI_DEFS[f.id]||[];
-    const entries=allWeekly.filter(r=>r.funcId===f.id&&normalizeMonth(r.updatedAt)===month).sort((a,b)=>String(a.updatedAt).localeCompare(String(b.updatedAt)));
-    if(!kpis&&!entries.length) return;
-    const rag=kpis&&kpis.length?getFuncRag(f.id):'N';
-    const ragCol=rag==='G'?'#4caf50':rag==='A'?'#ff9800':rag==='R'?'#f44336':'#ccc';
-    let kpiBlock='<div style="font-size:11px;color:#aaa;font-style:italic">No KPI data.</div>';
-    if(kpis&&kpis.length){const rows=kpis.map((v,i)=>{ if(!defs[i])return ''; const r=getRag(f.id,i,v),isLg=defs[i].t>100; return '<div class="rpt-kpi-row"><span>'+defs[i].l+'</span><span>'+defs[i].t+(!isLg?'%':'')+'</span><span><b>'+v+(!isLg&&v<=100?'%':'')+'</b></span><span style="color:'+(r==='G'?'#2e7d32':r==='A'?'#e65100':'#c62828')+'">'+(r==='G'?'On track':r==='A'?'Monitor':'Attention')+'</span></div>'; }).join(''); kpiBlock='<div style="font-size:11px"><div class="rpt-kpi-row hdr"><span>KPI</span><span>Target</span><span>Actual</span><span>Status</span></div>'+rows+'</div>';}
-    const cons={}; NAR_FIELDS.forEach(nf=>{cons[nf.k]=[];}); entries.forEach(e=>{NAR_FIELDS.forEach(nf=>{if(e[nf.k]&&e[nf.k].toString().trim())cons[nf.k].push('['+e.weekLabel+'] '+e[nf.k]);});});
-    const narCards=NAR_FIELDS.map(nf=>'<div><div class="rpt-nar-lbl">'+nf.label+'</div><div style="font-size:11px;line-height:1.6;margin-bottom:.5rem">'+(cons[nf.k].join('<br><br>')||'—')+'</div></div>').join('');
-    funcSections+='<div class="rpt-fsec"><div class="rpt-fhdr"><div style="width:9px;height:9px;border-radius:50%;background:'+ragCol+';flex-shrink:0"></div><div class="rpt-fname">'+f.name+' — '+f.role+'</div><div style="font-size:11px;color:#aaa;margin-left:auto">'+entries.length+' week'+(entries.length!==1?'s':'')+'</div></div>'+kpiBlock+'<div class="rpt-nar-grid" style="margin-top:.75rem">'+narCards+'</div></div>';
-  });
-  document.getElementById('report-out').innerHTML='<div class="rpt-title">Manila Services — Monthly Report</div><div class="rpt-sub">'+monthLabel+' · Generated '+new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})+'</div>'+execHtml+(funcSections||'<div style="color:#aaa;font-size:12px">No data for this month.</div>');
-}
-
-function printReport() {
-  const content=document.getElementById('report-out').innerHTML;
-  const w=window.open('','_blank');
-  w.document.write('<html><head><title>Manila Services Monthly Report</title><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;font-size:12px;padding:2cm;color:#111;max-width:900px;margin:0 auto}.rpt-title{font-size:20px;font-weight:700;margin-bottom:4px}.rpt-sub{font-size:11px;color:#666;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid #ddd}.rpt-exec{background:#f5f5f5;border-radius:6px;padding:1rem;margin-bottom:1.25rem}.rpt-exec-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem;color:#666}.rpt-fsec{margin-bottom:1.25rem;padding-bottom:1.25rem;border-bottom:1px solid #eee}.rpt-fhdr{display:flex;align-items:center;gap:8px;margin-bottom:.75rem}.rpt-fname{font-size:13px;font-weight:700}.rpt-kpi-row{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:6px;font-size:11px;padding:4px 0;border-bottom:1px solid #eee}.rpt-kpi-row.hdr{font-weight:700;color:#aaa;font-size:10px;text-transform:uppercase}.rpt-nar-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:.75rem}.rpt-nar-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:#aaa;margin-bottom:3px}ul{padding-left:1.25rem}@media print{body{padding:1cm}}</style></head><body>'+content+'</body></html>');
-  w.document.close(); w.focus(); setTimeout(()=>w.print(),400);
-}
-
-// ─── NAV ─────────────────────────────────────────────────────
-function setNav(n) {
-  nav=n;
-  ['dash','update','report'].forEach(p=>{ document.getElementById('pane-'+p).classList.toggle('active',p===n); document.getElementById('nb-'+p).classList.toggle('active',p===n); });
-  if(n==='update') renderInpForm();
-  if(n==='report') populateMonthSelect();
-}
-
-function showToast(msg) {
-  const t=document.getElementById('toast'); t.textContent=msg;
-  t.style.display='block'; setTimeout(()=>t.style.display='none',3000);
-}
+function setNav(n){nav=n;['dash','update','report'].forEach(function(p){document.getElementById('pane-'+p).classList.toggle('active',p===n);document.getElementById('nb-'+p).classList.toggle('active',p===n);});if(n==='update')renderInpForm();if(n==='report')populateMonthSelect();}
 
 init();
 </script>
