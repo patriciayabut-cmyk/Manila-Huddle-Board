@@ -5,71 +5,42 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Manila Services — Huddle Board</title>
 <style>
-/* ── Reset & base ─────────────────────────────────────────── */
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f4f5f7;color:#1a1a2e;font-size:13px;min-height:100vh}
-a{color:inherit}
-
-/* ── Layout ──────────────────────────────────────────────── */
 .app{max-width:980px;margin:0 auto;padding:1.25rem 1rem}
-
-/* ── Header ──────────────────────────────────────────────── */
 .header{background:#fff;border-radius:10px;padding:1rem 1.25rem;margin-bottom:1rem;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
-.header-left h1{font-size:16px;font-weight:600;color:#1a1a2e}
+.header h1{font-size:16px;font-weight:600}
 .header-meta{font-size:11px;color:#666;margin-top:2px}
-.header-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
-.deadline-badge{font-size:11px;padding:3px 10px;border-radius:20px;font-weight:600}
-.dl-ok{background:#e8f5e9;color:#2e7d32}
-.dl-warn{background:#fff8e1;color:#f57f17}
-.dl-due{background:#ffebee;color:#c62828}
-.nav-btns{display:flex;gap:5px}
+.dl-badge{font-size:11px;padding:3px 10px;border-radius:20px;font-weight:600}
+.dl-ok{background:#e8f5e9;color:#2e7d32}.dl-warn{background:#fff8e1;color:#f57f17}.dl-due{background:#ffebee;color:#c62828}
+.nav-btns{display:flex;gap:5px;flex-wrap:wrap}
 .nbtn{padding:5px 14px;border:1.5px solid #ddd;border-radius:7px;background:#fff;cursor:pointer;font-size:12px;color:#555;font-weight:500}
 .nbtn.active{background:#1a1a2e;border-color:#1a1a2e;color:#fff}
 .nbtn:hover:not(.active){background:#f4f5f7}
-
-/* ── Config banner ───────────────────────────────────────── */
-.config-banner{background:#fff3e0;border:1.5px solid #ffb74d;border-radius:8px;padding:.85rem 1rem;margin-bottom:1rem;font-size:12px}
-.config-banner b{color:#e65100}
-.config-banner input{width:100%;margin-top:6px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:12px;font-family:inherit}
-.config-banner button{margin-top:6px;padding:5px 14px;background:#e65100;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600}
-
-/* ── Panes ───────────────────────────────────────────────── */
-.pane{display:none}.pane.active{display:block}
-
-/* ── Status bar ──────────────────────────────────────────── */
 .status-bar{background:#fff;border-radius:8px;padding:.5rem 1rem;margin-bottom:.75rem;font-size:11px;color:#666;display:flex;align-items:center;gap:8px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
-.status-dot{width:7px;height:7px;border-radius:50%;background:#aaa;flex-shrink:0}
-.status-dot.ok{background:#4caf50}
-.status-dot.loading{background:#ff9800;animation:pulse 1s infinite}
-.status-dot.err{background:#f44336}
+.sdot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.sdot.ok{background:#4caf50}.sdot.loading{background:#ff9800;animation:pulse 1s infinite}.sdot.err{background:#f44336}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-
-/* ── Tabs ────────────────────────────────────────────────── */
+.pane{display:none}.pane.active{display:block}
 .vtabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:.75rem}
 .vtab{padding:5px 12px;border:1.5px solid #ddd;border-radius:7px;background:#fff;cursor:pointer;font-size:11px;color:#555;white-space:nowrap;font-weight:500}
 .vtab.active{background:#1a1a2e;border-color:#1a1a2e;color:#fff}
 .vtab:hover:not(.active){background:#f4f5f7}
 .vsec{display:none}.vsec.active{display:block}
-
-/* ── Metric cards ────────────────────────────────────────── */
 .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:.85rem}
 .mc{background:#fff;border-radius:8px;padding:.85rem 1rem;box-shadow:0 1px 3px rgba(0,0,0,.06)}
 .mc-label{font-size:10px;color:#888;margin-bottom:2px;text-transform:uppercase;letter-spacing:.04em}
-.mc-val{font-size:20px;font-weight:700;color:#1a1a2e}
+.mc-val{font-size:20px;font-weight:700}
 .mc-sub{font-size:10px;color:#aaa;margin-top:2px}
-
-/* ── Function grid ───────────────────────────────────────── */
 .func-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:8px;margin-bottom:.85rem}
 .fc{background:#fff;border-radius:8px;padding:.85rem;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.06);border:1.5px solid transparent;transition:border-color .15s}
 .fc:hover{border-color:#1a1a2e}
 .fc-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
-.fc-name{font-size:12px;font-weight:600}
-.fc-role{font-size:10px;color:#888;margin-top:1px}
+.fc-name{font-size:12px;font-weight:600}.fc-role{font-size:10px;color:#888;margin-top:1px}
 .fc-dots{display:flex;gap:4px;align-items:center}
 .rag{width:9px;height:9px;border-radius:50%}
 .rag-G{background:#4caf50}.rag-A{background:#ff9800}.rag-R{background:#f44336}.rag-N{background:#ccc}
-.upd{width:9px;height:9px;border-radius:3px}
-.upd-y{background:#4caf50}.upd-n{background:#ddd}
+.upd{width:9px;height:9px;border-radius:3px}.upd-y{background:#4caf50}.upd-n{background:#ddd}
 .km-row{display:flex;justify-content:space-between;font-size:10px;margin-bottom:2px}
 .km-lbl{color:#888;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding-right:4px}
 .km-val{font-weight:600;flex-shrink:0}
@@ -77,17 +48,11 @@ a{color:inherit}
 .km-fill{height:100%;border-radius:2px}
 .fc-stamp{font-size:10px;color:#aaa;margin-top:6px;font-style:italic}
 .no-data{font-size:11px;color:#aaa;font-style:italic;padding:2px 0 6px}
-
-/* ── Chart ───────────────────────────────────────────────── */
-.chart-card{background:#fff;border-radius:8px;padding:.85rem;margin-bottom:.85rem;box-shadow:0 1px 3px rgba(0,0,0,.06)}
-.chart-card-title{font-size:11px;color:#888;margin-bottom:8px}
-
-/* ── Detail ──────────────────────────────────────────────── */
-.det-hdr{margin-bottom:1rem}
-.det-title{font-size:15px;font-weight:700}
-.det-sub{font-size:11px;color:#888;margin-top:2px}
 .card{background:#fff;border-radius:8px;padding:.85rem 1rem;margin-bottom:.75rem;box-shadow:0 1px 3px rgba(0,0,0,.06)}
 .card-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#888;margin-bottom:.5rem}
+.det-hdr{margin-bottom:1rem}
+.det-title{font-size:15px;font-weight:700}
+.det-sub{font-size:11px;color:#888;margin-top:4px;line-height:1.7}
 .kpi-tbl{width:100%;border-collapse:collapse;font-size:12px}
 .kpi-tbl th{text-align:left;padding:6px 10px;border-bottom:1px solid #f0f0f0;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:#aaa}
 .kpi-tbl td{padding:6px 10px;border-bottom:1px solid #f8f8f8;vertical-align:middle}
@@ -99,13 +64,16 @@ a{color:inherit}
 .nc{background:#fafafa;border-radius:7px;padding:.75rem}
 .nc-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:#aaa;margin-bottom:4px}
 .nc-text{font-size:12px;line-height:1.6;color:#333}
-.history-entry{border:1px solid #f0f0f0;border-radius:7px;padding:.6rem .85rem;margin-bottom:5px}
+.he{border:1px solid #f0f0f0;border-radius:7px;padding:.6rem .85rem;margin-bottom:5px;cursor:pointer}
+.he:hover{border-color:#ddd}
 .he-hdr{display:flex;justify-content:space-between;font-weight:600;font-size:11px;margin-bottom:4px}
-.he-pills{display:flex;flex-wrap:wrap;gap:3px}
-.pill{font-size:10px;padding:1px 8px;border-radius:20px;background:#e8f0fe;color:#1565c0}
-
-/* ── Input mode ──────────────────────────────────────────── */
-.inp-mode-tabs{display:flex;gap:5px;margin-bottom:.85rem}
+.pill{font-size:10px;padding:1px 8px;border-radius:20px;background:#e8f0fe;color:#1565c0;margin-right:3px}
+.wk-sel{display:flex;align-items:center;gap:8px;margin-bottom:.75rem;flex-wrap:wrap}
+.wk-sel label{font-size:12px;color:#666;font-weight:500;white-space:nowrap}
+.wk-sel select,.mo-sel select{padding:5px 10px;border:1.5px solid #ddd;border-radius:7px;background:#fff;font-size:12px;color:#333;min-width:200px}
+.mo-sel{display:flex;align-items:center;gap:8px;margin-bottom:.75rem;flex-wrap:wrap}
+.mo-sel label{font-size:12px;color:#666;font-weight:500;white-space:nowrap}
+.imt-tabs{display:flex;gap:5px;margin-bottom:.85rem;flex-wrap:wrap}
 .imt{padding:5px 14px;border:1.5px solid #ddd;border-radius:7px;background:#fff;cursor:pointer;font-size:12px;color:#555;font-weight:500}
 .imt.active{background:#1a1a2e;border-color:#1a1a2e;color:#fff}
 .func-sel{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:.85rem}
@@ -113,21 +81,26 @@ a{color:inherit}
 .fsb.active{background:#1a1a2e;border-color:#1a1a2e;color:#fff}
 .form-card{background:#fff;border-radius:8px;padding:1rem 1.25rem;box-shadow:0 1px 3px rgba(0,0,0,.06)}
 .fsec{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:#888;margin:1rem 0 .5rem;padding-bottom:3px;border-bottom:1px solid #f0f0f0}
-.kpi-inp{display:grid;grid-template-columns:1fr 90px 90px;gap:7px;align-items:center;margin-bottom:7px;font-size:12px}
-.kpi-inp span{color:#888}
-.kpi-inp input{padding:5px 8px;border:1px solid #ddd;border-radius:6px;font-size:12px;font-family:inherit;width:100%}
-.nar-inp-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
 .ng{display:flex;flex-direction:column;gap:3px}
 .ng.full{grid-column:1/-1}
 .ng label{font-size:11px;color:#888;font-weight:500}
-.ng input,.ng textarea,.ng select{padding:7px 9px;border:1px solid #ddd;border-radius:6px;font-size:12px;font-family:inherit;color:#1a1a2e}
+.ng input,.ng textarea,.ng select{padding:7px 9px;border:1px solid #ddd;border-radius:6px;background:#fff;color:#1a1a2e;font-size:12px;font-family:inherit}
 .ng textarea{resize:vertical;min-height:62px}
-.save-btn{padding:8px 20px;background:#1a1a2e;color:#fff;border:none;border-radius:7px;cursor:pointer;font-size:12px;font-weight:600;margin-top:.85rem}
+.ng .hint{font-size:10px;color:#aaa;margin-top:2px}
+.nar-inp-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.kpi-inp{display:grid;grid-template-columns:1fr 90px 90px;gap:7px;align-items:center;margin-bottom:7px;font-size:12px}
+.kpi-inp span{color:#888}
+.kpi-inp input{padding:5px 8px;border:1px solid #ddd;border-radius:6px;font-size:12px;font-family:inherit;width:100%}
+.info-box{background:#f4f5f7;border-radius:7px;padding:.6rem .85rem;font-size:12px;color:#555;margin-bottom:.75rem}
+.btn-row{display:flex;align-items:center;gap:10px;margin-top:.85rem;flex-wrap:wrap}
+.save-btn{padding:8px 20px;background:#1a1a2e;color:#fff;border:none;border-radius:7px;cursor:pointer;font-size:12px;font-weight:600}
 .save-btn:hover{background:#2d2d4e}
 .save-btn:disabled{background:#ccc;cursor:not-allowed}
-.dl-info{font-size:11px;padding:8px 12px;border-radius:7px;margin-bottom:.85rem;background:#e8f5e9;color:#2e7d32;font-weight:500}
-
-/* ── Report ──────────────────────────────────────────────── */
+.clear-btn{padding:7px 14px;border:1.5px solid #ddd;border-radius:7px;background:#fff;cursor:pointer;font-size:12px;color:#888}
+.dl-info{font-size:11px;padding:8px 12px;border-radius:7px;margin-bottom:.85rem;font-weight:500}
+.dl-weekly{background:#e8f5e9;color:#2e7d32}
+.dl-kpi{background:#e8f0fe;color:#1565c0}
+.dl-hc{background:#f3e5f5;color:#6a1b9a}
 .rpt-ctrl{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:.85rem}
 .rpt-sel{padding:6px 10px;border:1.5px solid #ddd;border-radius:7px;background:#fff;font-size:12px;color:#333}
 .rpt-btn{padding:7px 16px;background:#1a1a2e;color:#fff;border:none;border-radius:7px;cursor:pointer;font-size:12px;font-weight:600}
@@ -146,29 +119,18 @@ a{color:inherit}
 .rpt-kpi-row.hdr{font-weight:700;color:#aaa;font-size:10px;text-transform:uppercase}
 .rpt-nar-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:.75rem}
 .rpt-nar-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:#aaa;margin-bottom:3px}
-
 .toast{position:fixed;bottom:20px;right:20px;background:#1a1a2e;color:#fff;padding:10px 18px;border-radius:8px;font-size:12px;font-weight:600;z-index:9999;display:none;box-shadow:0 4px 12px rgba(0,0,0,.15)}
 </style>
 </head>
 <body>
 <div class="app">
-
-  <!-- CONFIG BANNER -->
-  <div class="config-banner" id="config-banner" style="display:none">
-    <b>⚙️ One-time setup:</b> Paste your Google Apps Script Web App URL below, then click Save.
-    <br><small>Extensions → Apps Script → Deploy → New Deployment → Web App → Anyone → Deploy → Copy URL</small>
-    <input type="text" id="script-url-input" placeholder="https://script.google.com/macros/s/YOUR_ID/exec">
-    <button onclick="saveScriptUrl()">Save URL</button>
-  </div>
-
-  <!-- HEADER -->
   <div class="header">
-    <div class="header-left">
+    <div>
       <h1>Manila Services — Huddle Board</h1>
       <div class="header-meta" id="week-meta"></div>
     </div>
-    <div class="header-right">
-      <span class="deadline-badge" id="dl-badge"></span>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+      <span class="dl-badge" id="dl-badge"></span>
       <div class="nav-btns">
         <button class="nbtn active" id="nb-dash"   onclick="setNav('dash')">📊 Dashboard</button>
         <button class="nbtn"        id="nb-update" onclick="setNav('update')">✏️ Enter Update</button>
@@ -177,10 +139,9 @@ a{color:inherit}
     </div>
   </div>
 
-  <!-- STATUS BAR -->
   <div class="status-bar">
-    <div class="status-dot loading" id="status-dot"></div>
-    <span id="status-text">Connecting to Google Sheets...</span>
+    <div class="sdot loading" id="sdot"></div>
+    <span id="stext">Connecting to Google Sheets...</span>
   </div>
 
   <!-- DASHBOARD -->
@@ -189,24 +150,23 @@ a{color:inherit}
     <div class="vsec active" id="vsec-overview">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:.75rem;flex-wrap:wrap">
         <label style="font-size:12px;color:#666;font-weight:500">Viewing week:</label>
-        <select id="week-filter" onchange="onWeekFilterChange()" style="padding:5px 10px;border:1.5px solid #ddd;border-radius:7px;background:#fff;font-size:12px;color:#333;min-width:200px"></select>
-        <span style="font-size:11px;color:#aaa" id="week-filter-meta"></span>
+        <select id="week-filter" onchange="onWeekFilterChange()" style="padding:5px 10px;border:1.5px solid #ddd;border-radius:7px;background:#fff;font-size:12px;color:#333;min-width:220px"></select>
+        <span style="font-size:11px;color:#aaa" id="wf-meta"></span>
       </div>
       <div class="metrics">
         <div class="mc"><div class="mc-label">Total headcount</div><div class="mc-val" id="ov-hc">—</div><div class="mc-sub">across all functions</div></div>
-        <div class="mc"><div class="mc-label">Annualized attrition</div><div class="mc-val" id="ov-attrition">—</div><div class="mc-sub">Manila Services avg</div></div>
-        <div class="mc"><div class="mc-label">Internal promotion %</div><div class="mc-val" id="ov-promo">—</div><div class="mc-sub">movements YTD vs HC</div></div>
+        <div class="mc"><div class="mc-label">Annualized attrition</div><div class="mc-val" id="ov-att">—</div><div class="mc-sub">Manila Services avg</div></div>
+        <div class="mc"><div class="mc-label">Internal movement %</div><div class="mc-val" id="ov-promo">—</div><div class="mc-sub">movements YTD vs HC</div></div>
         <div class="mc"><div class="mc-label">Updated this week</div><div class="mc-val" id="ov-upd">—</div><div class="mc-sub">of 11 functions</div></div>
       </div>
       <div class="func-grid" id="func-cards"></div>
-
     </div>
     <div id="func-vsecs"></div>
   </div>
 
   <!-- UPDATE -->
   <div class="pane" id="pane-update">
-    <div class="inp-mode-tabs">
+    <div class="imt-tabs">
       <button class="imt active" id="imt-w" onclick="setInpMode('weekly')">📝 Weekly narrative <small style="opacity:.6">(due Mon EOD)</small></button>
       <button class="imt"        id="imt-k" onclick="setInpMode('kpi')">📈 Monthly KPIs <small style="opacity:.6">(once a month)</small></button>
       <button class="imt"        id="imt-h" onclick="setInpMode('hc')">👥 HC &amp; People data <small style="opacity:.6">(once a month)</small></button>
@@ -224,13 +184,14 @@ a{color:inherit}
     </div>
     <div id="report-out"><div style="color:#aaa;font-size:12px">Select a month and click Generate.</div></div>
   </div>
-
 </div>
 <div class="toast" id="toast"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
-// ─── CONFIG ───────────────────────────────────────────────────
+// ─── CONFIG ──────────────────────────────────────────────────
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxzE0ecv1NSi08-RpcCKZQ1VASqlQnf72_GNTZv3CrhJveL517NpPf-qYZN-NkqfANStg/exec';
+
 const FUNCS = [
   {id:'grace',    name:'Grace Ulep',       role:'CRC Operations',           hc:49},
   {id:'joyce',    name:'Joyce Wise',       role:'Planning & Scheduling',    hc:37},
@@ -269,575 +230,461 @@ const NAR_FIELDS = [
   {k:'discussion',   label:'Discussion / actions needed'},
 ];
 
-// ─── STATE ────────────────────────────────────────────────────
-let SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxzE0ecv1NSi08-RpcCKZQ1VASqlQnf72_GNTZv3CrhJveL517NpPf-qYZN-NkqfANStg/exec';
-localStorage.setItem('huddle_script_url', SCRIPT_URL);
-let allWeekly  = [];   // all weekly entries from sheet
-let allKpis    = [];   // all kpi entries from sheet
+// ─── STATE ───────────────────────────────────────────────────
+let allWeekly = [], allKpis = [], dataLoaded = false;
 let nav = 'dash', inpMode = 'weekly', inpFunc = 'grace';
-let detailWeek = {};
-let detailKpiMonth = {};
+let viewSec = 'overview';
+let detailWeek = {}, detailKpiMonth = {};
 let selectedFilterWeek = 'latest';
-let viewSec = 'overview', ovChart = null;
-let dataLoaded = false;
 
-// ─── SETUP ────────────────────────────────────────────────────
-function saveScriptUrl(){
-  const val = document.getElementById('script-url-input').value.trim();
-  if(!val || !val.startsWith('https://script.google.com')){
-    alert('Please paste a valid Apps Script URL starting with https://script.google.com');
-    return;
+// ─── HELPERS ─────────────────────────────────────────────────
+function localMonth() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+}
+
+function normalizeMonth(m) {
+  if (!m) return '';
+  return String(m).slice(0,7);
+}
+
+function getRag(fid, idx, val) {
+  const d = KPI_DEFS[fid]; if (!d||!d[idx]) return 'N';
+  const k = d[idx];
+  if (k.hi) { if (val>=k.t) return 'G'; if (val>=k.t*.95) return 'A'; return 'R'; }
+  else { if (val<=k.t) return 'G'; if (val<=k.t*1.1) return 'A'; return 'R'; }
+}
+
+function getFuncRag(fid) {
+  const kpis = getLatestKpis(fid); if (!kpis.length) return 'N';
+  const rags = kpis.map((v,i)=>getRag(fid,i,v));
+  if (rags.includes('R')) return 'R'; if (rags.includes('A')) return 'A'; return 'G';
+}
+
+function getLatestKpis(fid) {
+  const arr = allKpis.filter(r=>r.funcId===fid&&(r.kpi1||r.kpi2||r.kpi3));
+  if (!arr.length) return [];
+  arr.sort((a,b)=>normalizeMonth(b.month).localeCompare(normalizeMonth(a.month)));
+  const r = arr[0];
+  return [r.kpi1,r.kpi2,r.kpi3,r.kpi4,r.kpi5].filter(v=>v!==''&&v!=null&&v!==undefined).map(Number);
+}
+
+function getKpisForMonth(fid, month) {
+  const nm = normalizeMonth(month);
+  const arr = allKpis.filter(r=>r.funcId===fid&&normalizeMonth(r.month)===nm&&(r.kpi1||r.kpi2||r.kpi3));
+  if (!arr.length) return null;
+  arr.sort((a,b)=>String(b.updatedAt).localeCompare(String(a.updatedAt)));
+  const r = arr[0];
+  return [r.kpi1,r.kpi2,r.kpi3,r.kpi4,r.kpi5].filter(v=>v!==''&&v!=null&&v!==undefined).map(Number);
+}
+
+function getLatestPeopleRec(fid) {
+  // Get most recently updated KPI record that has people data
+  const arr = allKpis.filter(r=>r.funcId===fid);
+  if (!arr.length) return null;
+  // Sort by updatedAt descending
+  arr.sort((a,b)=>String(b.updatedAt).localeCompare(String(a.updatedAt)));
+  // Find first one with any people data
+  const withPeople = arr.find(r=>r.resignations||r.promotions||r.avgHC||r.openRequisitions);
+  return withPeople || arr[0];
+}
+
+function getLatestHC(fid) {
+  const arr = allWeekly.filter(r=>r.funcId===fid&&r.hc&&parseInt(r.hc)>0);
+  if (!arr.length) {
+    const pr = getLatestPeopleRec(fid);
+    if (pr && pr.avgHC) return parseInt(pr.avgHC);
+    const f = FUNCS.find(x=>x.id===fid); return f?f.hc:0;
   }
-  SCRIPT_URL = val;
-  localStorage.setItem('huddle_script_url', val);
-  document.getElementById('config-banner').style.display = 'none';
-  loadData();
+  arr.sort((a,b)=>String(b.updatedAt).localeCompare(String(a.updatedAt)));
+  return parseInt(arr[0].hc)||0;
 }
 
-function buildWeekFilter(){
-  const sel = document.getElementById('week-filter');
-  if(!sel) return;
-  // Collect all unique week labels from data, sorted by date
-  const weeks = [...new Set(allWeekly.map(e=>e.weekLabel))]
-    .sort((a,b)=>{
-      const da = allWeekly.find(e=>e.weekLabel===a);
-      const db = allWeekly.find(e=>e.weekLabel===b);
-      if(!da||!db) return 0;
-      return db.updatedAt.localeCompare(da.updatedAt);
-    });
-  sel.innerHTML = '<option value="latest">Latest update (default)</option>' +
-    weeks.map(w=>`<option value="${w}" ${w===selectedFilterWeek?'selected':''}>${w}</option>`).join('');
-  updateWeekFilterMeta();
+function getAttrition(fid) {
+  const pr = getLatestPeopleRec(fid);
+  if (!pr || !pr.resignations) return null;
+  const resignations = parseFloat(pr.resignations)||0;
+  const avgHC = parseFloat(pr.avgHC)||getLatestHC(fid)||1;
+  const monthNum = parseInt(normalizeMonth(pr.month).split('-')[1])||1;
+  const rate = (resignations/avgHC)*(12/monthNum)*100;
+  return {rate:rate.toFixed(1), resignations, avgHC, monthNum};
 }
 
-function updateWeekFilterMeta(){
-  const meta = document.getElementById('week-filter-meta');
-  if(!meta) return;
-  if(selectedFilterWeek==='latest'){
-    meta.textContent = 'Showing most recent update per function';
-  } else {
-    const count = FUNCS.filter(f=>allWeekly.some(e=>e.funcId===f.id&&e.weekLabel===selectedFilterWeek)).length;
-    meta.textContent = `${count} of ${FUNCS.length} functions updated this week`;
-  }
+function getPromo(fid) {
+  const pr = getLatestPeopleRec(fid);
+  if (!pr || !pr.promotions) return null;
+  const promotions = parseFloat(pr.promotions)||0;
+  const avgHC = parseFloat(pr.avgHC)||getLatestHC(fid)||1;
+  const pct = ((promotions/avgHC)*100).toFixed(1);
+  return {pct, promotions, avgHC};
 }
 
-function onWeekFilterChange(){
-  selectedFilterWeek = document.getElementById('week-filter').value;
-  updateWeekFilterMeta();
-  renderOverview();
-}
-
-function setDetailWeek(fid, weekLabel){
-  detailWeek[fid] = weekLabel;
-  renderDetail(fid);
-}
-
-function setDetailKpiMonth(fid, month){
-  detailKpiMonth[fid] = month;
-  renderDetail(fid);
-}
-
-function getFilteredNarrative(fid){
+function getLatestNarrative(fid) {
   const arr = allWeekly.filter(r=>r.funcId===fid);
-  if(!arr.length) return null;
-  if(selectedFilterWeek==='latest'){
-    return [...arr].sort((a,b)=>b.updatedAt.localeCompare(a.updatedAt))[0];
-  }
-  return arr.find(e=>e.weekLabel===selectedFilterWeek) || null;
+  if (!arr.length) return null;
+  return [...arr].sort((a,b)=>String(b.updatedAt).localeCompare(String(a.updatedAt)))[0];
 }
 
-function init(){
-  // week / date meta
-  const d = new Date(), y = d.getFullYear(), s = new Date(y,0,1);
-  const wk = Math.ceil((((d-s)/86400000)+s.getDay()+1)/7);
-  document.getElementById('week-meta').textContent = `Week ${wk} · ${d.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})} · Huddle every Tuesday`;
-
-  // deadline badge
-  const dow = d.getDay();
-  let dlText, dlCls;
-  if(dow===1){ dlText='Deadline today — Monday EOD'; dlCls='dl-due'; }
-  else if(dow===2){ dlText='Huddle today — Tuesday'; dlCls='dl-warn'; }
-  else { const dtm = dow===0?1:(8-dow)%7||7; dlText=`Narrative due in ${dtm} day${dtm>1?'s':''}`; dlCls='dl-ok'; }
-  const badge = document.getElementById('dl-badge');
-  badge.textContent = dlText; badge.className = 'deadline-badge ' + dlCls;
-
-  // config banner always hidden — URL is hardcoded
-  document.getElementById('config-banner').style.display = 'none';
-
-  buildViewTabs();
-  buildInpFuncSel();
-  populateMonthSelect();
-
-  if(SCRIPT_URL) loadData();
-  else setStatus('err','Paste your Apps Script URL to connect to Google Sheets');
+function getFilteredNarrative(fid) {
+  const arr = allWeekly.filter(r=>r.funcId===fid);
+  if (!arr.length) return null;
+  if (selectedFilterWeek==='latest') return [...arr].sort((a,b)=>String(b.updatedAt).localeCompare(String(a.updatedAt)))[0];
+  return arr.find(e=>e.weekLabel===selectedFilterWeek)||null;
 }
 
-// ─── DATA LAYER ───────────────────────────────────────────────
-function setStatus(state, msg){
-  const dot = document.getElementById('status-dot');
-  dot.className = 'status-dot ' + state;
-  document.getElementById('status-text').textContent = msg;
+function wasUpdatedThisWeek(fid) {
+  const latest = getLatestNarrative(fid);
+  if (!latest) return false;
+  return (new Date()-new Date(latest.updatedAt))/86400000 < 7;
 }
 
-// JSONP — avoids CORS when HTML file opened locally
+// ─── WEEK CALENDAR ───────────────────────────────────────────
+// Week 1 = Dec 29, 2025 (Mon). Reporting week = previous completed week.
+const WEEK1 = new Date(2025,11,29);
+
+function getWeekInfo(wkNum) {
+  const start = new Date(WEEK1.getTime()+(wkNum-1)*7*86400000);
+  const end   = new Date(start.getTime()+4*86400000);
+  const fmt = d => d.toLocaleDateString('en-US',{month:'short',day:'2-digit'});
+  return {num:wkNum, label:'Week '+wkNum+' - '+fmt(start)+'-'+fmt(end), start, end};
+}
+
+function getCurrentReportingWeek() {
+  const now = new Date();
+  const diff = Math.floor((now-WEEK1)/86400000);
+  const current = Math.max(1,Math.floor(diff/7)+1);
+  return Math.max(1,current-1); // report on previous week
+}
+
+function getCurrentWeekLabel() {
+  return getWeekInfo(getCurrentReportingWeek()).label;
+}
+
+function getAllWeekOptions() {
+  const reporting = getCurrentReportingWeek();
+  const weeks = [];
+  for (let i=reporting; i>=1; i--) weeks.push(getWeekInfo(i));
+  return weeks;
+}
+
+// ─── JSONP ───────────────────────────────────────────────────
 function jsonp(url) {
-  return new Promise((resolve, reject) => {
-    const cbName = 'huddle_cb_' + Date.now();
+  return new Promise((resolve,reject)=>{
+    const cb = 'hcb_'+Date.now();
     const script = document.createElement('script');
-    const timer = setTimeout(() => {
-      cleanup(); reject(new Error('Request timed out after 30s'));
-    }, 30000);
-    function cleanup() {
-      clearTimeout(timer);
-      delete window[cbName];
-      if (script.parentNode) script.parentNode.removeChild(script);
-    }
-    window[cbName] = (data) => { cleanup(); resolve(data); };
-    script.src = url + (url.includes('?') ? '&' : '?') + 'callback=' + cbName;
-    script.onerror = () => { cleanup(); reject(new Error('Script load failed — check URL')); };
+    const timer = setTimeout(()=>{ cleanup(); reject(new Error('Timeout')); },30000);
+    function cleanup(){ clearTimeout(timer); delete window[cb]; if(script.parentNode) script.parentNode.removeChild(script); }
+    window[cb] = data=>{ cleanup(); resolve(data); };
+    script.src = url+(url.includes('?')?'&':'?')+'callback='+cb;
+    script.onerror = ()=>{ cleanup(); reject(new Error('Script load failed')); };
     document.head.appendChild(script);
   });
 }
 
-async function loadData(){
-  if(!SCRIPT_URL){ setStatus('err','No script URL set'); return; }
+async function loadData() {
+  if (!SCRIPT_URL) return;
   setStatus('loading','Loading from Google Sheets...');
   try {
-    const data = await jsonp(SCRIPT_URL + '?data=' + encodeURIComponent(JSON.stringify({action:'getAll'})));
-    if(data.error) throw new Error(data.error);
-    allWeekly = data.weekly || [];
-    allKpis   = data.kpis   || [];
+    const data = await jsonp(SCRIPT_URL+'?data='+encodeURIComponent(JSON.stringify({action:'getAll'})));
+    if (data.error) throw new Error(data.error);
+    allWeekly = data.weekly||[];
+    allKpis   = data.kpis||[];
     dataLoaded = true;
-    setStatus('ok', `Connected · ${allWeekly.length} weekly entries · ${allKpis.length} KPI records · Last fetch: ${new Date().toLocaleTimeString()}`);
+    setStatus('ok','Connected · '+allWeekly.length+' weekly entries · '+allKpis.length+' KPI records · '+new Date().toLocaleTimeString());
     buildWeekFilter();
     renderOverview();
     populateMonthSelect();
-    if(viewSec !== 'overview') renderDetail(viewSec);
-  } catch(e){
-    setStatus('err', 'Could not reach Google Sheets — ' + e.message);
+    if (viewSec!=='overview') renderDetail(viewSec);
+  } catch(e) {
+    setStatus('err','Could not reach Google Sheets — '+e.message);
   }
 }
 
-async function postData(payload){
-  // Encode entire payload as data param for JSONP GET
-  const url = SCRIPT_URL + '?data=' + encodeURIComponent(JSON.stringify(payload));
+async function postData(payload) {
+  const url = SCRIPT_URL+'?data='+encodeURIComponent(JSON.stringify(payload));
   return jsonp(url);
 }
 
-// ─── DATA HELPERS ─────────────────────────────────────────────
-function getLatestKpis(fid){
-  const arr = allKpis.filter(r=>r.funcId===fid);
-  if(!arr.length) return [];
-  arr.sort((a,b)=>normalizeMonth(b.month).localeCompare(normalizeMonth(a.month)));
-  const r = arr[0];
-  return [r.kpi1,r.kpi2,r.kpi3,r.kpi4,r.kpi5].filter(v=>v!==''&&v!=null).map(Number);
+function setStatus(state,msg) {
+  document.getElementById('sdot').className='sdot '+state;
+  document.getElementById('stext').textContent=msg;
 }
 
-function normalizeMonth(m){
-  // Handle both '2026-05' and '2026-05-31T16:00:00.000Z' formats
-  if(!m) return '';
-  return String(m).slice(0,7);
+// ─── INIT ────────────────────────────────────────────────────
+function init() {
+  const d=new Date(), y=d.getFullYear(), s=new Date(y,0,1);
+  const wk=Math.ceil((((d-s)/86400000)+s.getDay()+1)/7);
+  document.getElementById('week-meta').textContent='Week '+wk+' · '+d.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})+' · Huddle every Tuesday';
+  const dow=d.getDay();
+  let dlText,dlCls;
+  if(dow===1){dlText='Deadline today — Monday EOD';dlCls='dl-due';}
+  else if(dow===2){dlText='Huddle today — Tuesday';dlCls='dl-warn';}
+  else{const dtm=dow===0?1:(8-dow)%7||7;dlText='Narrative due in '+dtm+' day'+(dtm>1?'s':'');dlCls='dl-ok';}
+  const badge=document.getElementById('dl-badge');
+  badge.textContent=dlText; badge.className='dl-badge '+dlCls;
+  buildViewTabs();
+  buildInpFuncSel();
+  loadData();
 }
 
-function getKpisForMonth(fid, month){
-  const nm = normalizeMonth(month);
-  const arr = allKpis.filter(x=>x.funcId===fid&&normalizeMonth(x.month)===nm);
-  if(!arr.length) return null;
-  // Get most recently updated record for this month
-  const r = arr.sort((a,b)=>b.updatedAt.localeCompare(a.updatedAt))[0];
-  return [r.kpi1,r.kpi2,r.kpi3,r.kpi4,r.kpi5].filter(v=>v!==''&&v!=null).map(Number);
-}
-
-function getLatestNarrative(fid){
-  const arr = allWeekly.filter(r=>r.funcId===fid);
-  if(!arr.length) return null;
-  return [...arr].sort((a,b)=>b.updatedAt.localeCompare(a.updatedAt))[0];
-}
-
-function getLatestHC(fid){
-  const arr = allWeekly.filter(r=>r.funcId===fid&&r.hc&&parseInt(r.hc)>0);
-  if(!arr.length){ const f=FUNCS.find(x=>x.id===fid); return f?f.hc:0; }
-  const latest=[...arr].sort((a,b)=>b.updatedAt.localeCompare(a.updatedAt))[0];
-  return parseInt(latest.hc)||0;
-}
-
-function normalizeMonth(m){
-  if(!m) return '';
-  return String(m).slice(0,7);
-}
-
-function getAttrition(fid){
-  const arr = [...allKpis.filter(r=>r.funcId===fid&&r.resignations!=null&&r.resignations!='')].sort((a,b)=>normalizeMonth(b.month).localeCompare(normalizeMonth(a.month)));
-  if(!arr.length) return null;
-  const latest = arr[0];
-  const resignations = parseFloat(latest.resignations)||0;
-  const avgHC = parseFloat(latest.avgHC)||getLatestHC(fid)||1;
-  const monthNum = parseInt(normalizeMonth(latest.month).split('-')[1])||1;
-  const attrition = (resignations / avgHC) * (12 / monthNum) * 100;
-  return { rate: attrition.toFixed(1), resignations, avgHC, month: latest.month, monthsElapsed: monthNum };
-}
-
-function getPromo(fid){
-  const arr = [...allKpis.filter(r=>r.funcId===fid&&r.promotions!=null&&r.promotions!='')].sort((a,b)=>normalizeMonth(b.month).localeCompare(normalizeMonth(a.month)));
-  if(!arr.length) return null;
-  const latest = arr[0];
-  const promotions = parseFloat(latest.promotions)||0;
-  const avgHC = parseFloat(latest.avgHC)||getLatestHC(fid)||1;
-  const pct = ((promotions/avgHC)*100).toFixed(1);
-  return { pct, promotions, avgHC, month: latest.month };
-}
-
-function getMonthEntries(fid, month){
-  return allWeekly.filter(r=>r.funcId===fid&&String(r.updatedAt).slice(0,7)===month)
-    .sort((a,b)=>a.updatedAt.localeCompare(b.updatedAt));
-}
-
-function wasUpdatedThisWeek(fid){
-  const latest = getLatestNarrative(fid);
-  if(!latest) return false;
-  return (new Date()-new Date(latest.updatedAt))/86400000 < 7;
-}
-
-function getRag(fid,idx,val){
-  const d=KPI_DEFS[fid]; if(!d||!d[idx]) return 'N';
-  const k=d[idx];
-  if(k.hi){if(val>=k.t)return 'G';if(val>=k.t*.95)return 'A';return 'R';}
-  else{if(val<=k.t)return 'G';if(val<=k.t*1.1)return 'A';return 'R';}
-}
-
-function getFuncRag(fid){
-  const kpis=getLatestKpis(fid); if(!kpis.length) return 'N';
-  const rags=kpis.map((v,i)=>getRag(fid,i,v));
-  if(rags.includes('R'))return 'R'; if(rags.includes('A'))return 'A'; return 'G';
-}
-
-function getCurrentWeekLabel(){
-  // Week 1 starts Dec 29, 2025 (Monday). Weeks run Mon-Fri.
-  // Reporting week = the week being reported on (previous Mon-Fri period)
-  // Managers report Mon EOD, huddle Tuesday — so reporting week = last completed Mon-Fri week
-  const week1 = new Date(2025, 11, 29); // Dec 29, 2025
-  const now = new Date();
-  const diffDays = Math.floor((now - week1) / 86400000);
-  const currentWkNum = Math.max(1, Math.floor(diffDays / 7) + 1);
-  // Always report on the previous completed week
-  const wkNum = Math.max(1, currentWkNum - 1);
-  const wkStart = new Date(week1.getTime() + (wkNum - 1) * 7 * 86400000);
-  const wkEnd = new Date(wkStart.getTime() + 4 * 86400000);
-  const fmt = (d) => d.toLocaleDateString('en-US', {month:'short', day:'2-digit'});
-  return `Week ${wkNum} - ${fmt(wkStart)}-${fmt(wkEnd)}`;
-}
-
-function getAllWeekOptions(){
-  // Generate all weeks from Week 1 up to current reporting week
-  const week1 = new Date(2025, 11, 29);
-  const now = new Date();
-  const diffDays = Math.floor((now - week1) / 86400000);
-  const currentWkNum = Math.max(1, Math.floor(diffDays / 7) + 1);
-  const reportingWk = Math.max(1, currentWkNum - 1);
-  const weeks = [];
-  for(let i = reportingWk; i >= 1; i--){
-    const wkStart = new Date(week1.getTime() + (i-1) * 7 * 86400000);
-    const wkEnd = new Date(wkStart.getTime() + 4 * 86400000);
-    const fmt = (d) => d.toLocaleDateString('en-US', {month:'short', day:'2-digit'});
-    weeks.push({num:i, label:`Week ${i} - ${fmt(wkStart)}-${fmt(wkEnd)}`});
-  }
-  return weeks;
-}
-
-// ─── BUILD UI STRUCTURE ───────────────────────────────────────
-function buildViewTabs(){
-  const el = document.getElementById('vtabs'); el.innerHTML='';
-  const secs = document.getElementById('func-vsecs'); secs.innerHTML='';
-  const ov = document.createElement('button');
-  ov.className='vtab active'; ov.textContent='Overview';
+// ─── VIEW TABS ───────────────────────────────────────────────
+function buildViewTabs() {
+  const el=document.getElementById('vtabs'); el.innerHTML='';
+  const secs=document.getElementById('func-vsecs'); secs.innerHTML='';
+  const ov=document.createElement('button'); ov.className='vtab active'; ov.textContent='Overview';
   ov.onclick=()=>showVsec('overview',ov); el.appendChild(ov);
   FUNCS.forEach(f=>{
-    const btn=document.createElement('button');
-    btn.className='vtab'; btn.textContent=f.name.split(' ')[0];
-    btn.setAttribute('data-fid',f.id);
+    const btn=document.createElement('button'); btn.className='vtab'; btn.textContent=f.name.split(' ')[0]; btn.setAttribute('data-fid',f.id);
     btn.onclick=()=>showVsec(f.id,btn); el.appendChild(btn);
-    const sec=document.createElement('div');
-    sec.className='vsec'; sec.id='vsec-'+f.id;
-    sec.innerHTML=`<div id="det-${f.id}"></div>`; secs.appendChild(sec);
+    const sec=document.createElement('div'); sec.className='vsec'; sec.id='vsec-'+f.id;
+    sec.innerHTML='<div id="det-'+f.id+'"></div>'; secs.appendChild(sec);
   });
 }
 
-function showVsec(id,btn){
+function showVsec(id,btn) {
   document.querySelectorAll('.vsec').forEach(s=>s.classList.remove('active'));
   const sec=document.getElementById(id==='overview'?'vsec-overview':'vsec-'+id);
-  if(sec)sec.classList.add('active');
+  if(sec) sec.classList.add('active');
   document.querySelectorAll('.vtab').forEach(t=>t.classList.remove('active'));
-  if(btn)btn.classList.add('active');
+  if(btn) btn.classList.add('active');
   viewSec=id;
-  if(id!=='overview')renderDetail(id);
+  if(id!=='overview') renderDetail(id);
 }
 
-// ─── OVERVIEW ─────────────────────────────────────────────────
-function renderOverview(){
-  let hc=0,upd=0,attrRates=[],promoNums=[],promoHCs=[];
+// ─── WEEK FILTER ─────────────────────────────────────────────
+function buildWeekFilter() {
+  const sel=document.getElementById('week-filter'); if(!sel) return;
+  const weeks=[...new Set(allWeekly.map(e=>e.weekLabel))].sort((a,b)=>{
+    const da=allWeekly.find(e=>e.weekLabel===a), db=allWeekly.find(e=>e.weekLabel===b);
+    if(!da||!db) return 0;
+    return String(db.updatedAt).localeCompare(String(da.updatedAt));
+  });
+  sel.innerHTML='<option value="latest">Latest update (default)</option>'+weeks.map(w=>'<option value="'+w+'" '+(w===selectedFilterWeek?'selected':'')+'>'+w+'</option>').join('');
+  updateWFMeta();
+}
+
+function updateWFMeta() {
+  const meta=document.getElementById('wf-meta'); if(!meta) return;
+  if(selectedFilterWeek==='latest'){meta.textContent='Showing most recent per function';}
+  else{const c=FUNCS.filter(f=>allWeekly.some(e=>e.funcId===f.id&&e.weekLabel===selectedFilterWeek)).length; meta.textContent=c+' of '+FUNCS.length+' updated';}
+}
+
+function onWeekFilterChange() {
+  selectedFilterWeek=document.getElementById('week-filter').value;
+  updateWFMeta(); renderOverview();
+}
+
+// ─── OVERVIEW ────────────────────────────────────────────────
+function renderOverview() {
+  let hc=0,upd=0,attRates=[],promoNums=[],promoHCs=[];
   FUNCS.forEach(f=>{
     hc+=getLatestHC(f.id)||f.hc;
-    if(wasUpdatedThisWeek(f.id))upd++;
-    const att=getAttrition(f.id);
-    if(att) attrRates.push(parseFloat(att.rate));
-    const promo=getPromo(f.id);
-    if(promo){ promoNums.push(promo.promotions); promoHCs.push(promo.avgHC||getLatestHC(f.id)||1); }
+    if(wasUpdatedThisWeek(f.id)) upd++;
+    const att=getAttrition(f.id); if(att) attRates.push(parseFloat(att.rate));
+    const promo=getPromo(f.id); if(promo){promoNums.push(promo.promotions);promoHCs.push(promo.avgHC||getLatestHC(f.id)||1);}
   });
   document.getElementById('ov-hc').textContent=hc.toLocaleString();
   document.getElementById('ov-upd').textContent=upd;
-  // Attrition — average across functions that have data
-  if(attrRates.length){
-    const avg=(attrRates.reduce((a,b)=>a+b,0)/attrRates.length).toFixed(1);
-    document.getElementById('ov-attrition').textContent=avg+'%';
-  } else {
-    document.getElementById('ov-attrition').textContent='—';
-  }
-  // Promo % — total promotions / total HC
-  if(promoNums.length){
-    const totalPromo=promoNums.reduce((a,b)=>a+b,0);
-    const totalHC=promoHCs.reduce((a,b)=>a+b,0)||1;
-    const pct=((totalPromo/totalHC)*100).toFixed(1);
-    document.getElementById('ov-promo').textContent=pct+'%';
-  } else {
-    document.getElementById('ov-promo').textContent='—';
-  }
+  if(attRates.length){const avg=(attRates.reduce((a,b)=>a+b,0)/attRates.length).toFixed(1);document.getElementById('ov-att').textContent=avg+'%';}
+  else document.getElementById('ov-att').textContent='—';
+  if(promoNums.length){const tp=promoNums.reduce((a,b)=>a+b,0),th=promoHCs.reduce((a,b)=>a+b,0)||1;document.getElementById('ov-promo').textContent=((tp/th)*100).toFixed(1)+'%';}
+  else document.getElementById('ov-promo').textContent='—';
 
   const grid=document.getElementById('func-cards'); grid.innerHTML='';
   FUNCS.forEach(f=>{
     const rag=getFuncRag(f.id),defs=KPI_DEFS[f.id]||[],kpis=getLatestKpis(f.id);
     const updated=wasUpdatedThisWeek(f.id),latest=getFilteredNarrative(f.id);
+    const att=getAttrition(f.id);
     const card=document.createElement('div'); card.className='fc';
-    card.onclick=()=>{ const btn=document.querySelector(`.vtab[data-fid="${f.id}"]`); showVsec(f.id,btn); };
+    card.onclick=()=>{ const btn=document.querySelector('.vtab[data-fid="'+f.id+'"]'); showVsec(f.id,btn); };
     let kh='';
     if(kpis.length){
       kpis.slice(0,3).forEach((v,i)=>{
-        if(!defs[i])return;
+        if(!defs[i]) return;
         const r=getRag(f.id,i,v),pct=defs[i].hi?Math.min(v/defs[i].t*100,100):Math.max(0,100-(v/defs[i].t-1)*200);
         const col=r==='G'?'#4caf50':r==='A'?'#ff9800':'#f44336';
-        kh+=`<div class="km-row"><span class="km-lbl">${defs[i].l}</span><span class="km-val">${v}${defs[i].t<=100&&v<=100?'%':''}</span></div><div class="km-bar"><div class="km-fill" style="width:${Math.round(pct)}%;background:${col}"></div></div>`;
+        kh+='<div class="km-row"><span class="km-lbl">'+defs[i].l+'</span><span class="km-val">'+v+(defs[i].t<=100&&v<=100?'%':'')+'</span></div><div class="km-bar"><div class="km-fill" style="width:'+Math.round(pct)+'%;background:'+col+'"></div></div>';
       });
-    } else { kh='<div class="no-data">No KPIs yet</div>'; }
-    const stamp=latest?latest.weekLabel:'Not updated';
-    const att=getAttrition(f.id);
-    const attDisp=att?`${att.rate}% attrition`:'';
-    card.innerHTML=`<div class="fc-top"><div><div class="fc-name">${f.name}</div><div class="fc-role">${f.role}</div></div><div class="fc-dots"><div class="upd ${updated?'upd-y':'upd-n'}" title="${updated?'Updated this week':'Not updated this week'}"></div><div class="rag rag-${rag}"></div></div></div>${kh}<div class="fc-stamp">${stamp}${attDisp?' · '+attDisp:''}</div>`;
+    } else kh='<div class="no-data">No KPIs yet</div>';
+    const stamp=(latest?latest.weekLabel:'Not updated')+(att?' · '+att.rate+'% attrition':'');
+    card.innerHTML='<div class="fc-top"><div><div class="fc-name">'+f.name+'</div><div class="fc-role">'+f.role+'</div></div><div class="fc-dots"><div class="upd '+(updated?'upd-y':'upd-n')+'" title="'+(updated?'Updated':'Not updated')+'"></div><div class="rag rag-'+rag+'"></div></div></div>'+kh+'<div class="fc-stamp">'+stamp+'</div>';
     grid.appendChild(card);
   });
-  // chart removed
 }
 
-function renderOvChart(){
-  const canvas = document.getElementById('ov-chart');
-  if(!canvas) return; // chart removed — skip
-  const fw=FUNCS.filter(f=>getLatestKpis(f.id).length);
-  const labels=fw.map(f=>f.name.split(' ')[0]);
-  const scores=fw.map(f=>{
-    const kpis=getLatestKpis(f.id),defs=KPI_DEFS[f.id]||[];
-    let sum=0,cnt=0;
-    kpis.forEach((v,i)=>{ if(!defs[i])return; const p=defs[i].hi?Math.min(v/defs[i].t*100,100):Math.max(0,100-(v/defs[i].t-1)*200); sum+=p; cnt++; });
-    return cnt?Math.round(sum/cnt):0;
-  });
-  const cols=fw.map(f=>{ const r=getFuncRag(f.id); return r==='G'?'#4caf50':r==='A'?'#ff9800':'#f44336'; });
-  const ctx=canvas.getContext('2d');
-  if(ovChart)ovChart.destroy();
-  ovChart=new Chart(ctx,{type:'bar',data:{labels,datasets:[{data:scores,backgroundColor:cols,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{min:0,max:115,grid:{color:'rgba(0,0,0,.05)'},ticks:{callback:v=>v+'%',font:{size:10}}},x:{grid:{display:false},ticks:{font:{size:10}}}}}});
-}
-
-// ─── DETAIL ───────────────────────────────────────────────────
-function renderDetail(fid){
-  const f=FUNCS.find(x=>x.id===fid),defs=KPI_DEFS[fid]||[],kpis=getLatestKpis(fid);
-  const latest=getLatestNarrative(fid);
-  const el=document.getElementById('det-'+fid); if(!el)return;
+// ─── DETAIL ──────────────────────────────────────────────────
+function renderDetail(fid) {
+  const f=FUNCS.find(x=>x.id===fid),defs=KPI_DEFS[fid]||[];
+  const el=document.getElementById('det-'+fid); if(!el) return;
 
   // KPI month selector
-  const allKpiMonths = [...new Set(allKpis.filter(r=>r.funcId===fid).map(r=>r.month))].sort().reverse();
-  if(!detailKpiMonth[fid] && allKpiMonths.length) detailKpiMonth[fid] = allKpiMonths[0];
-  const selectedKpiMonth = detailKpiMonth[fid] || allKpiMonths[0];
-  const selectedKpis = selectedKpiMonth ? getKpisForMonth(fid, selectedKpiMonth) : kpis;
+  const allKpiMonths=[...new Set(allKpis.filter(r=>r.funcId===fid&&(r.kpi1||r.kpi2||r.kpi3)).map(r=>normalizeMonth(r.month)))].filter(Boolean).sort().reverse();
+  if(!detailKpiMonth[fid]&&allKpiMonths.length) detailKpiMonth[fid]=allKpiMonths[0];
+  const selMonth=detailKpiMonth[fid]||allKpiMonths[0];
+  const selKpis=selMonth?getKpisForMonth(fid,selMonth):getLatestKpis(fid);
+  const kpiMonthOpts=allKpiMonths.map(m=>{const[y,mo]=m.split('-');const lbl=new Date(+y,+mo-1,1).toLocaleDateString('en-US',{month:'long',year:'numeric'});return '<option value="'+m+'" '+(m===selMonth?'selected':'')+'>'+lbl+'</option>';}).join('');
+  const kpiMonthNav=allKpiMonths.length?'<div class="mo-sel"><label>Month:</label><select onchange="setDetailKpiMonth(\''+fid+'\',this.value)">'+kpiMonthOpts+'</select><span style="font-size:11px;color:#aaa">'+allKpiMonths.length+' month'+(allKpiMonths.length!==1?'s':'')+' on record</span></div>':'';
 
-  const kpiMonthOpts = allKpiMonths.map(m=>{
-    const [y,mo] = m.split('-');
-    const label = new Date(+y,+mo-1,1).toLocaleDateString('en-US',{month:'long',year:'numeric'});
-    return `<option value="${m}" ${m===selectedKpiMonth?'selected':''}>${label}</option>`;
-  }).join('');
-
-  const kpiMonthNav = allKpiMonths.length ? `
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:.75rem;flex-wrap:wrap">
-      <label style="font-size:12px;color:#666;font-weight:500;white-space:nowrap">Month:</label>
-      <select onchange="setDetailKpiMonth('${fid}',this.value)" style="padding:5px 10px;border:1.5px solid #ddd;border-radius:7px;background:#fff;font-size:12px;color:#333;min-width:180px">${kpiMonthOpts}</select>
-      <span style="font-size:11px;color:#aaa">${allKpiMonths.length} month${allKpiMonths.length!==1?'s':''} on record</span>
-    </div>` : '';
-
-  let kpiBlock='<div class="no-data">No KPI data yet. Use Monthly KPIs input to add.</div>';
-  if(selectedKpis && selectedKpis.length){
+  let kpiBlock='<div class="no-data">No KPI data yet.</div>';
+  if(selKpis&&selKpis.length){
     let rows='';
-    selectedKpis.forEach((v,i)=>{
-      if(!defs[i])return;
+    selKpis.forEach((v,i)=>{
+      if(!defs[i]) return;
       const r=getRag(fid,i,v),isLg=defs[i].t>100;
-      const disp=v+((!isLg&&v<=100)?'%':''),tDisp=defs[i].t+((!isLg&&defs[i].t<=100)?'%':'');
+      const disp=v+(!isLg&&v<=100?'%':''),tDisp=defs[i].t+(!isLg&&defs[i].t<=100?'%':'');
       const diff=defs[i].hi?(v-defs[i].t):(defs[i].t-v);
-      const ds=(diff>=0?'+':'')+diff.toFixed(1)+((!isLg&&v<=100)?'pp':'');
-      rows+=`<tr><td>${defs[i].l}</td><td>${tDisp}</td><td><b>${disp}</b></td><td><span class="rb ${r}">${r==='G'?'On track':r==='A'?'Monitor':r==='R'?'Attention':'—'}</span></td><td class="${diff>=0?'tup':'tdn'}">${diff>=0?'↑':'↓'} ${ds}</td></tr>`;
+      const ds=(diff>=0?'+':'')+diff.toFixed(1)+(!isLg&&v<=100?'pp':'');
+      rows+='<tr><td>'+defs[i].l+'</td><td>'+tDisp+'</td><td><b>'+disp+'</b></td><td><span class="rb '+r+'">'+(r==='G'?'On track':r==='A'?'Monitor':r==='R'?'Attention':'—')+'</span></td><td class="'+(diff>=0?'tup':'tdn')+'">'+(diff>=0?'↑':'↓')+' '+ds+'</td></tr>';
     });
-    kpiBlock=`<table class="kpi-tbl"><thead><tr><th>KPI</th><th>Target</th><th>Actual</th><th>Status</th><th>vs Target</th></tr></thead><tbody>${rows}</tbody></table>`;
+    kpiBlock='<table class="kpi-tbl"><thead><tr><th>KPI</th><th>Target</th><th>Actual</th><th>Status</th><th>vs Target</th></tr></thead><tbody>'+rows+'</tbody></table>';
   }
 
-  // Get all weeks for this function, sorted newest first
-  const allFuncEntries = [...allWeekly.filter(r=>r.funcId===fid)].sort((a,b)=>b.updatedAt.localeCompare(a.updatedAt));
+  // Week selector
+  const allFuncEntries=[...allWeekly.filter(r=>r.funcId===fid)].sort((a,b)=>String(b.updatedAt).localeCompare(String(a.updatedAt)));
+  const allCalWeeks=getAllWeekOptions();
+  if(!detailWeek[fid]) detailWeek[fid]=allCalWeeks[0].label;
+  const selEntry=allFuncEntries.find(e=>e.weekLabel===detailWeek[fid])||null;
+  const submittedWeeks=new Set(allFuncEntries.map(e=>e.weekLabel));
+  const weekOpts=allCalWeeks.map(w=>'<option value="'+w.label+'" '+(w.label===detailWeek[fid]?'selected':'')+'>'+(submittedWeeks.has(w.label)?'✓ ':'')+w.label+'</option>').join('');
+  const weekNav='<div class="wk-sel"><label>Week:</label><select onchange="setDetailWeek(\''+fid+'\',this.value)">'+weekOpts+'</select><span style="font-size:11px;color:#aaa">'+submittedWeeks.size+' of '+allCalWeeks.length+' weeks submitted</span></div>';
 
-  // Build full week list from calendar (not just submitted weeks)
-  const allCalWeeks = getAllWeekOptions(); // newest first
-  
-  // Default to latest reporting week
-  if(!detailWeek[fid]) detailWeek[fid] = allCalWeeks[0].label;
-  const selectedEntry = allFuncEntries.find(e=>e.weekLabel===detailWeek[fid]) || null;
+  let narBlock='<div class="no-data">No entry for this week yet.</div>';
+  if(selEntry) narBlock='<div class="nar-grid">'+NAR_FIELDS.map(nf=>'<div class="nc"><div class="nc-lbl">'+nf.label+'</div><div class="nc-text">'+(selEntry[nf.k]||'—')+'</div></div>').join('')+'</div>';
 
-  // Narrative block — blank if no entry for selected week
-  let narBlock='<div class="no-data" style="padding:.5rem 0">No entry submitted for this week yet.</div>';
-  if(selectedEntry){
-    narBlock=`<div class="nar-grid">${NAR_FIELDS.map(nf=>`<div class="nc"><div class="nc-lbl">${nf.label}</div><div class="nc-text">${selectedEntry[nf.k]||'—'}</div></div>`).join('')}</div>`;
-  }
+  // People data
+  const pr=getLatestPeopleRec(fid);
+  const att=getAttrition(fid),promo=getPromo(fid);
+  const attStr=att?'Attrition: <b>'+att.rate+'%</b> annualized ('+att.resignations+' resignation'+(att.resignations!==1?'s':'')+' YTD)':'Attrition: not entered';
+  const promoStr=promo?'Internal movement: <b>'+promo.pct+'%</b> ('+promo.promotions+' YTD)':'Internal movement: not entered';
+  const openReqStr=pr&&pr.openRequisitions?'Open reqs: <b>'+pr.openRequisitions+'</b>':'';
+  const newRolesStr=pr&&pr.newRolesSinceJan?'New roles YTD: <b>'+pr.newRolesSinceJan+'</b>':'';
+  const extras=[openReqStr,newRolesStr].filter(Boolean).join(' &nbsp;·&nbsp; ');
 
-  // Week dropdown — all calendar weeks, submitted ones marked
-  const submittedWeeks = new Set(allFuncEntries.map(e=>e.weekLabel));
-  const weekNavOpts = allCalWeeks.map(w=>{
-    const submitted = submittedWeeks.has(w.label);
-    return `<option value="${w.label}" ${w.label===detailWeek[fid]?'selected':''}>${w.label}${submitted?' ✓':''}</option>`;
-  }).join('');
-  const weekNavHtml = `
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:.75rem;flex-wrap:wrap">
-      <label style="font-size:12px;color:#666;font-weight:500">Week:</label>
-      <select onchange="setDetailWeek('${fid}', this.value)" style="padding:5px 10px;border:1.5px solid #ddd;border-radius:7px;background:#fff;font-size:12px;color:#333;min-width:220px">${weekNavOpts}</select>
-      <span style="font-size:11px;color:#aaa">${submittedWeeks.size} of ${allCalWeeks.length} weeks submitted</span>
-    </div>`;
-
-  // history pills
+  // History
   let histHtml=allFuncEntries.length?allFuncEntries.slice(0,10).map(e=>{
     const cats=NAR_FIELDS.filter(nf=>e[nf.k]&&e[nf.k].toString().trim());
-    const isSelected = e.weekLabel===detailWeek[fid];
-    return `<div class="history-entry" style="${isSelected?'border-color:#1a1a2e;background:#f8f9ff':''}" onclick="setDetailWeek('${fid}','${e.weekLabel.replace(/'/,"\'")}')"><div class="he-hdr"><span style="${isSelected?'font-weight:700':''}">${e.weekLabel}</span><span style="color:#aaa">${new Date(e.updatedAt).toLocaleDateString()}</span></div><div class="he-pills">${cats.map(c=>`<span class="pill">${c.label}</span>`).join('')}</div></div>`;
+    const isSel=e.weekLabel===detailWeek[fid];
+    return '<div class="he" style="'+(isSel?'border-color:#1a1a2e;background:#f8f9ff':'')+'" onclick="setDetailWeek(\''+fid+'\',\''+e.weekLabel.replace(/'/,"\\'")+'\')">'+'<div class="he-hdr"><span style="'+(isSel?'font-weight:700':'')+'">'+e.weekLabel+'</span><span style="color:#aaa">'+new Date(e.updatedAt).toLocaleDateString()+'</span></div>'+'<div>'+cats.map(c=>'<span class="pill">'+c.label+'</span>').join('')+'</div></div>';
   }).join(''):'<div class="no-data">No history yet.</div>';
 
-  el.innerHTML=`
-    ${(()=>{
-      const att=getAttrition(fid);
-      const promo=getPromo(fid);
-      const attStr=att?'Attrition: <b>'+att.rate+'%</b> annualized ('+att.resignations+' resignation'+(att.resignations!==1?'s':'')+' YTD)':'Attrition: not entered';
-      const promoStr=promo?'Internal movement: <b>'+promo.pct+'%</b> ('+promo.promotions+' YTD)':'Internal movement: not entered';
-      const latestKpiRec=[...allKpis.filter(r=>r.funcId===fid)].sort((a,b)=>b.month.localeCompare(a.month))[0];
-      const openReqStr=latestKpiRec&&latestKpiRec.openRequisitions?'Open reqs: <b>'+latestKpiRec.openRequisitions+'</b>':'';
-      const newRolesStr=latestKpiRec&&latestKpiRec.newRolesSinceJan?'New roles YTD: <b>'+latestKpiRec.newRolesSinceJan+'</b>':'';
-      const extras=[openReqStr,newRolesStr].filter(Boolean).join(' &nbsp;·&nbsp; ');
-      return '<div class="det-hdr"><div class="det-title">'+f.name+' — '+f.role+'</div><div class="det-sub" style="display:flex;gap:8px;flex-wrap:wrap">HC: '+getLatestHC(fid)+' &nbsp;·&nbsp; '+attStr+' &nbsp;·&nbsp; '+promoStr+(extras?' &nbsp;·&nbsp; '+extras:'')+' &nbsp;·&nbsp; '+allFuncEntries.length+' weeks on record</div></div>';
-    })()}
-    <div class="card"><div class="card-title">Monthly KPIs</div>${kpiMonthNav}${kpiBlock}</div>
-    ${weekNavHtml}
-    <div class="card"><div class="card-title">Narrative — ${selectedEntry?selectedEntry.weekLabel:'none'}</div>${narBlock}</div>
-    <div class="card"><div class="card-title">All weeks (click to view)</div>${histHtml}</div>`;
+  el.innerHTML=
+    '<div class="det-hdr"><div class="det-title">'+f.name+' — '+f.role+'</div>'+
+    '<div class="det-sub">HC: '+getLatestHC(fid)+' &nbsp;·&nbsp; '+attStr+' &nbsp;·&nbsp; '+promoStr+(extras?' &nbsp;·&nbsp; '+extras:'')+' &nbsp;·&nbsp; '+allFuncEntries.length+' weeks on record</div></div>'+
+    '<div class="card"><div class="card-title">Monthly KPIs</div>'+kpiMonthNav+kpiBlock+'</div>'+
+    weekNav+
+    '<div class="card"><div class="card-title">Narrative — '+(selEntry?selEntry.weekLabel:'none')+'</div>'+narBlock+'</div>'+
+    '<div class="card"><div class="card-title">All weeks (click to view)</div>'+histHtml+'</div>';
 }
 
-// ─── INPUT ────────────────────────────────────────────────────
-function buildInpFuncSel(){
-  document.getElementById('inp-fsel').innerHTML=FUNCS.map(f=>`<button class="fsb${f.id===inpFunc?' active':''}" onclick="setInpFunc('${f.id}')">${f.name.split(' ')[0]}</button>`).join('');
+function setDetailWeek(fid,wk){ detailWeek[fid]=wk; renderDetail(fid); }
+function setDetailKpiMonth(fid,m){ detailKpiMonth[fid]=m; renderDetail(fid); }
+
+// ─── INPUT MODE ──────────────────────────────────────────────
+function buildInpFuncSel() {
+  document.getElementById('inp-fsel').innerHTML=FUNCS.map(f=>'<button class="fsb'+(f.id===inpFunc?' active':'')+'" onclick="setInpFunc(\''+f.id+'\')">'+f.name.split(' ')[0]+'</button>').join('');
 }
-function setInpFunc(id){
+
+function setInpFunc(id) {
   inpFunc=id;
   document.querySelectorAll('.fsb').forEach(b=>b.classList.toggle('active',b.textContent.trim()===FUNCS.find(f=>f.id===id).name.split(' ')[0]));
   renderInpForm();
 }
-function setInpMode(m){
+
+function setInpMode(m) {
   inpMode=m;
-  document.getElementById('imt-w').classList.toggle('active',m==='weekly');
-  document.getElementById('imt-k').classList.toggle('active',m==='kpi');
-  document.getElementById('imt-h').classList.toggle('active',m==='hc');
+  ['w','k','h'].forEach(x=>document.getElementById('imt-'+x).classList.toggle('active',(m==='weekly'&&x==='w')||(m==='kpi'&&x==='k')||(m==='hc'&&x==='h')));
   renderInpForm();
 }
 
-function renderInpForm(){
-  const f=FUNCS.find(x=>x.id===inpFunc),defs=KPI_DEFS[inpFunc]||[];
+// Draft helpers
+function getDraft(key){ try{return JSON.parse(sessionStorage.getItem(key)||'null');}catch(e){return null;} }
+function setDraft(key,val){ try{sessionStorage.setItem(key,JSON.stringify(val));}catch(e){} }
+function clearDraft(key){ try{sessionStorage.removeItem(key);}catch(e){} }
+
+function renderInpForm() {
+  const f=FUNCS.find(x=>x.id===inpFunc);
   const area=document.getElementById('inp-form');
+  const cm=localMonth();
 
-  if(inpMode==='weekly'){
+  if (inpMode==='weekly') {
     const wkLabel=getCurrentWeekLabel();
-    const weeks=getAllWeekOptions();
-    const weekOpts=weeks.map(w=>`<option value="${w.label}" ${w.label===wkLabel?'selected':''}>${w.label}</option>`).join('');
-    
-    // Use sessionStorage to preserve in-progress edits (blank on fresh open, kept during session)
-    const sessionKey = `draft_${inpFunc}`;
-    const draft = JSON.parse(sessionStorage.getItem(sessionKey) || '{}');
-    
-    const fields=NAR_FIELDS.map(nf=>`<div class="ng"><label>${nf.label}</label><textarea id="wn_${nf.k}" placeholder="${nf.label}..." oninput="saveDraft('${inpFunc}')">${draft[nf.k]||''}</textarea></div>`).join('');
-    area.innerHTML=`
-      <div class="dl-info">📅 Narrative due <b>Monday EOD</b> · ${!dataLoaded?'<span style="color:#e65100">Connect to Google Sheets to save</span>':''}</div>
-      <div class="form-card">
-        <div style="font-weight:700;font-size:13px;margin-bottom:.5rem">${f.name} — ${f.role}</div>
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:.75rem">
-          <label style="font-size:12px;color:#666;font-weight:500;white-space:nowrap">Reporting week:</label>
-          <select id="wn_weekLabel" style="padding:5px 10px;border:1.5px solid #ddd;border-radius:7px;background:#fff;font-size:12px;color:#333;flex:1">${weekOpts}</select>
-        </div>
-        <div class="fsec">Weekly narrative</div>
-        <div class="nar-inp-grid">${fields}</div>
-        <div style="margin-top:.75rem;display:flex;align-items:center;gap:8px">
-          <label style="font-size:12px;color:#666;font-weight:500;white-space:nowrap">Headcount this week:</label>
-          <input type="number" id="wn_hc" value="${draft.hc||f.hc||''}" oninput="saveDraft('${inpFunc}')" style="padding:6px 10px;border:1.5px solid #ddd;border-radius:7px;font-size:12px;width:90px">
-          <span style="font-size:11px;color:#aaa">Update if HC changed from last week</span>
-        </div>
-        <div style="display:flex;align-items:center;gap:10px;margin-top:.85rem">
-          <button class="save-btn" onclick="saveWeekly()" ${!dataLoaded?'disabled':''}>Save weekly update ↗</button>
-          <button onclick="clearDraft('${inpFunc}')" style="padding:7px 14px;border:1.5px solid #ddd;border-radius:7px;background:#fff;cursor:pointer;font-size:12px;color:#888">Clear form</button>
-        </div>
-      </div>`;
-  } else if(inpMode==='kpi'){
-    const now=new Date(); const curMonth=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
-    const existing=getKpisForMonth(inpFunc,curMonth)||[];
-    const existingKpiRec = allKpis.filter(x=>x.funcId===inpFunc&&normalizeMonth(x.month)===curMonth).sort((a,b)=>b.updatedAt.localeCompare(a.updatedAt))[0];
-    const kpiRows=defs.length?defs.map((k,i)=>`<div class="kpi-inp"><span>${k.l}</span><span>Target: ${k.t}${k.t<=100?'%':''}</span><input type="number" step="0.01" id="kpi_${i}" value="${existing[i]!=null?existing[i]:''}" placeholder="Actual"></div>`).join(''):'<div class="no-data">No KPIs defined.</div>';
-    const monthsElapsed = parseInt(curMonth.split('-')[1]) || 1;
-    area.innerHTML=`<div class="dl-info" style="background:#e8f0fe;color:#1565c0">📊 KPIs updated <b>monthly</b> — recording for <b>${curMonth}</b>${!dataLoaded?' · <span style="color:#e65100">Connect to Google Sheets to save</span>':''}</div><div class="form-card"><div style="font-weight:700;font-size:13px;margin-bottom:.25rem">${f.name} — ${f.role}</div><div class="fsec">KPI actuals — ${curMonth}</div>${kpiRows}<button class="save-btn" onclick="saveKpis()" ${!dataLoaded?'disabled':''}>Save KPI update ↗</button></div>`;
+    const allWeeks=getAllWeekOptions();
+    const weekOpts=allWeeks.map(w=>'<option value="'+w.label+'" '+(w.label===wkLabel?'selected':'')+'>'+w.label+'</option>').join('');
+    const draft=getDraft('wd_'+inpFunc)||{};
+    const fields=NAR_FIELDS.map(nf=>'<div class="ng"><label>'+nf.label+'</label><textarea id="wn_'+nf.k+'" placeholder="'+nf.label+'..." oninput="saveWDraft(\''+inpFunc+'\')">'+(draft[nf.k]||'')+'</textarea></div>').join('');
+    area.innerHTML='<div class="dl-info dl-weekly">📅 Narrative due <b>Monday EOD</b></div>'+
+      '<div class="form-card"><div style="font-weight:700;font-size:13px;margin-bottom:.5rem">'+f.name+' — '+f.role+'</div>'+
+      '<div style="display:flex;align-items:center;gap:8px;margin-bottom:.75rem"><label style="font-size:12px;color:#666;font-weight:500;white-space:nowrap">Reporting week:</label><select id="wn_week" style="padding:5px 10px;border:1.5px solid #ddd;border-radius:7px;background:#fff;font-size:12px;color:#333;flex:1">'+weekOpts+'</select></div>'+
+      '<div class="fsec">Weekly narrative</div>'+
+      '<div class="nar-inp-grid">'+fields+'</div>'+
+      '<div style="display:flex;align-items:center;gap:8px;margin-top:.75rem"><label style="font-size:12px;color:#666;font-weight:500;white-space:nowrap">Headcount this week:</label><input type="number" id="wn_hc" value="'+(draft.hc||getLatestHC(inpFunc)||'')+'" oninput="saveWDraft(\''+inpFunc+'\')" style="padding:6px 10px;border:1.5px solid #ddd;border-radius:7px;font-size:12px;width:90px"></div>'+
+      '<div class="btn-row"><button class="save-btn" onclick="saveWeekly()" '+(dataLoaded?'':'disabled')+'>Save weekly update ↗</button><button class="clear-btn" onclick="clearWDraft(\''+inpFunc+'\')">Clear form</button></div></div>';
 
-  } else if(inpMode==='hc'){
-    const now=new Date(); const curMonth=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
-    const existingKpiRec = allKpis.filter(x=>x.funcId===inpFunc&&normalizeMonth(x.month)===curMonth).sort((a,b)=>b.updatedAt.localeCompare(a.updatedAt))[0];
-    // Always fall back to most recent record regardless of month
-    const latestKpiRec = [...allKpis.filter(r=>r.funcId===inpFunc)].sort((a,b)=>normalizeMonth(b.month).localeCompare(normalizeMonth(a.month)))[0];
-    const ref = existingKpiRec || latestKpiRec || {};
-    const existingResign   = ref.resignations    || '';
-    const existingPromo    = ref.promotions       || '';
-    const existingAvgHC    = ref.avgHC            || getLatestHC(inpFunc) || '';
-    const existingOpenReqs = ref.openRequisitions || '';
-    const existingNewRoles = ref.newRolesSinceJan || '';
-    // Use session draft if available, otherwise use sheet data
-    const hcDraftKey = `hc_draft_${inpFunc}`;
-    const hcDraft = JSON.parse(sessionStorage.getItem(hcDraftKey) || 'null');
-    const resign   = hcDraft ? hcDraft.resignations   : existingResign;
-    const promo    = hcDraft ? hcDraft.promotions      : existingPromo;
-    const avgHCVal = hcDraft ? hcDraft.avgHC           : existingAvgHC;
-    const openReqs = hcDraft ? hcDraft.openReqs        : existingOpenReqs;
-    const newRoles = hcDraft ? hcDraft.newRoles        : existingNewRoles;
+  } else if (inpMode==='kpi') {
+    const defs=KPI_DEFS[inpFunc]||[];
+    const existing=getKpisForMonth(inpFunc,cm)||[];
+    const kpiRows=defs.length?defs.map((k,i)=>'<div class="kpi-inp"><span>'+k.l+'</span><span>Target: '+k.t+(k.t<=100?'%':'')+'</span><input type="number" step="0.01" id="ki_'+i+'" value="'+(existing[i]!=null?existing[i]:'')+'" placeholder="Actual"></div>').join(''):'<div class="no-data">No KPIs defined.</div>';
+    area.innerHTML='<div class="dl-info dl-kpi">📊 KPIs updated <b>monthly</b> — recording for <b>'+cm+'</b></div>'+
+      '<div class="form-card"><div style="font-weight:700;font-size:13px;margin-bottom:.25rem">'+f.name+' — '+f.role+'</div>'+
+      '<div class="fsec">KPI actuals — '+cm+'</div>'+kpiRows+
+      '<div class="btn-row"><button class="save-btn" onclick="saveKpis()" '+(dataLoaded&&defs.length?'':'disabled')+'>Save KPI update ↗</button></div></div>';
 
-    area.innerHTML=`<div class="dl-info" style="background:#e8f5e9;color:#2e7d32">👥 HC &amp; People data — recording for <b>${curMonth}</b>${!dataLoaded?' · <span style="color:#e65100">Connect to Google Sheets to save</span>':''}</div><div class="form-card"><div style="font-weight:700;font-size:13px;margin-bottom:.25rem">${f.name} — ${f.role}</div><div class="fsec">Headcount &amp; movements — ${curMonth}</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:.5rem"><div class="ng"><label>Resignations YTD</label><input type="number" min="0" id="hc_resignations" value="${resign}" placeholder="0" oninput="saveHCDraft('${inpFunc}')"></div><div class="ng"><label>Total internal movements YTD</label><input type="number" min="0" id="hc_promotions" value="${promo}" placeholder="0" oninput="saveHCDraft('${inpFunc}')"><span style="font-size:10px;color:#aaa;margin-top:2px">Transfers + promotions within &amp; outside</span></div><div class="ng"><label>Average HC this month</label><input type="number" min="0" id="hc_avgHC" value="${avgHCVal}" placeholder="${getLatestHC(inpFunc)||''}" oninput="saveHCDraft('${inpFunc}')"><span style="font-size:10px;color:#aaa;margin-top:2px">App computes attrition &amp; promo %</span></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:.75rem"><div class="ng"><label>Open requisitions</label><input type="number" min="0" id="hc_openReqs" value="${openReqs}" placeholder="0" oninput="saveHCDraft('${inpFunc}')"></div><div class="ng"><label>New roles since January</label><input type="number" min="0" id="hc_newRoles" value="${newRoles}" placeholder="0" oninput="saveHCDraft('${inpFunc}')"></div></div><div style="background:#f4f5f7;border-radius:7px;padding:.6rem .85rem;font-size:12px;color:#555;margin-bottom:.75rem">Annualized attrition and internal movement % are computed automatically from these numbers.</div><button class="save-btn" onclick="saveHCData()" ${!dataLoaded?'disabled':''}>Save HC &amp; people data ↗</button></div>`;
+  } else if (inpMode==='hc') {
+    // Get most recently updated people record for this function
+    const pr=getLatestPeopleRec(inpFunc)||{};
+    const draft=getDraft('hcd_'+inpFunc)||{};
+    // Draft takes priority, then sheet data, then blank
+    const vResign  = draft.resignations   !== undefined ? draft.resignations   : (pr.resignations   || '');
+    const vPromo   = draft.promotions     !== undefined ? draft.promotions     : (pr.promotions     || '');
+    const vAvgHC   = draft.avgHC          !== undefined ? draft.avgHC          : (pr.avgHC          || getLatestHC(inpFunc) || '');
+    const vOpenReq = draft.openReqs       !== undefined ? draft.openReqs       : (pr.openRequisitions|| '');
+    const vNewRole = draft.newRoles       !== undefined ? draft.newRoles       : (pr.newRolesSinceJan|| '');
+
+    area.innerHTML='<div class="dl-info dl-hc">👥 HC &amp; People data — recording for <b>'+cm+'</b></div>'+
+      '<div class="form-card"><div style="font-weight:700;font-size:13px;margin-bottom:.25rem">'+f.name+' — '+f.role+'</div>'+
+      '<div class="fsec">Headcount &amp; movements — '+cm+'</div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:.5rem">'+
+        '<div class="ng"><label>Resignations YTD</label><input type="number" min="0" id="hc_resign" value="'+vResign+'" placeholder="0" oninput="saveHCDraft(\''+inpFunc+'\')"></div>'+
+        '<div class="ng"><label>Total internal movements YTD</label><input type="number" min="0" id="hc_promo" value="'+vPromo+'" placeholder="0" oninput="saveHCDraft(\''+inpFunc+'\')"><span class="hint">Transfers + promotions within &amp; outside</span></div>'+
+        '<div class="ng"><label>Average HC this month</label><input type="number" min="0" id="hc_avghc" value="'+vAvgHC+'" placeholder="'+getLatestHC(inpFunc)+'" oninput="saveHCDraft(\''+inpFunc+'\')"><span class="hint">App computes attrition &amp; promo %</span></div>'+
+      '</div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:.75rem">'+
+        '<div class="ng"><label>Open requisitions</label><input type="number" min="0" id="hc_openreq" value="'+vOpenReq+'" placeholder="0" oninput="saveHCDraft(\''+inpFunc+'\')"></div>'+
+        '<div class="ng"><label>New roles since January</label><input type="number" min="0" id="hc_newrole" value="'+vNewRole+'" placeholder="0" oninput="saveHCDraft(\''+inpFunc+'\')"></div>'+
+      '</div>'+
+      '<div class="info-box">Annualized attrition and internal movement % are computed automatically.</div>'+
+      '<div class="btn-row"><button class="save-btn" onclick="saveHCData()" '+(dataLoaded?'':'disabled')+'>Save HC &amp; people data ↗</button></div></div>';
   }
 }
 
-function saveDraft(funcId){
-  const sessionKey = `draft_${funcId}`;
-  const draft = {};
-  NAR_FIELDS.forEach(nf=>{ const el=document.getElementById('wn_'+nf.k); if(el) draft[nf.k]=el.value; });
-  const hcEl = document.getElementById('wn_hc');
-  if(hcEl) draft.hc = hcEl.value;
-  sessionStorage.setItem(sessionKey, JSON.stringify(draft));
+// Draft functions
+function saveWDraft(fid) {
+  const d={};
+  NAR_FIELDS.forEach(nf=>{ const el=document.getElementById('wn_'+nf.k); if(el) d[nf.k]=el.value; });
+  const hcEl=document.getElementById('wn_hc'); if(hcEl) d.hc=hcEl.value;
+  setDraft('wd_'+fid,d);
 }
 
-function clearDraft(funcId){
-  const sessionKey = `draft_${funcId}`;
-  sessionStorage.removeItem(sessionKey);
+function clearWDraft(fid) {
+  clearDraft('wd_'+fid);
   NAR_FIELDS.forEach(nf=>{ const el=document.getElementById('wn_'+nf.k); if(el) el.value=''; });
-  const hcEl = document.getElementById('wn_hc');
-  if(hcEl) hcEl.value = '';
+  const hcEl=document.getElementById('wn_hc'); if(hcEl) hcEl.value='';
 }
 
-async function saveWeekly(){
-  const wkSel=document.getElementById('wn_weekLabel');
+function saveHCDraft(fid) {
+  const d={
+    resignations: document.getElementById('hc_resign')?.value||'',
+    promotions:   document.getElementById('hc_promo')?.value||'',
+    avgHC:        document.getElementById('hc_avghc')?.value||'',
+    openReqs:     document.getElementById('hc_openreq')?.value||'',
+    newRoles:     document.getElementById('hc_newrole')?.value||'',
+  };
+  setDraft('hcd_'+fid,d);
+}
+
+// Save functions
+async function saveWeekly() {
+  const wkSel=document.getElementById('wn_week');
   const wkLabel=wkSel?wkSel.value:getCurrentWeekLabel();
   const f=FUNCS.find(x=>x.id===inpFunc);
   const payload={action:'saveWeekly',funcId:inpFunc,funcName:f.name,weekLabel:wkLabel};
@@ -845,173 +692,114 @@ async function saveWeekly(){
   const hcEl=document.getElementById('wn_hc');
   if(hcEl&&hcEl.value) payload.hc=parseInt(hcEl.value);
   try {
-    const btn=document.querySelector('#inp-form .save-btn');
-    btn.textContent='Saving...'; btn.disabled=true;
+    const btn=document.querySelector('#inp-form .save-btn'); btn.textContent='Saving...'; btn.disabled=true;
     const res=await postData(payload);
     if(res.error) throw new Error(res.error);
-    clearDraft(inpFunc);
+    clearDraft('wd_'+inpFunc);
     showToast('Weekly narrative saved ✓');
     await loadData();
     renderInpForm();
-  } catch(e){ showToast('Save failed: '+e.message); }
+  } catch(e){ showToast('Save failed: '+e.message); const btn=document.querySelector('#inp-form .save-btn'); if(btn){btn.textContent='Save weekly update ↗';btn.disabled=false;} }
 }
 
-function saveHCDraft(funcId){
-  const d = {
-    resignations: document.getElementById('hc_resignations')?.value || '',
-    promotions:   document.getElementById('hc_promotions')?.value  || '',
-    avgHC:        document.getElementById('hc_avgHC')?.value       || '',
-    openReqs:     document.getElementById('hc_openReqs')?.value    || '',
-    newRoles:     document.getElementById('hc_newRoles')?.value    || '',
-  };
-  sessionStorage.setItem(`hc_draft_${funcId}`, JSON.stringify(d));
-}
-
-function clearHCDraft(funcId){
-  sessionStorage.removeItem(`hc_draft_${funcId}`);
-}
-
-async function saveHCData(){
-  const now=new Date(); const curMonth=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
-  const f=FUNCS.find(x=>x.id===inpFunc);
-  const resignEl=document.getElementById('hc_resignations');
-  const promoEl=document.getElementById('hc_promotions');
-  const avgHCEl=document.getElementById('hc_avgHC');
-  const openReqsEl=document.getElementById('hc_openReqs');
-  const newRolesEl=document.getElementById('hc_newRoles');
-  const resignations=resignEl&&resignEl.value!==''?parseInt(resignEl.value):null;
-  const promotions=promoEl&&promoEl.value!==''?parseInt(promoEl.value):null;
-  const avgHC=avgHCEl&&avgHCEl.value!==''?parseFloat(avgHCEl.value):null;
-  const openRequisitions=openReqsEl&&openReqsEl.value!==''?parseInt(openReqsEl.value):null;
-  const newRolesSinceJan=newRolesEl&&newRolesEl.value!==''?parseInt(newRolesEl.value):null;
-  try {
-    const btn=document.querySelector('#inp-form .save-btn');
-    btn.textContent='Saving...'; btn.disabled=true;
-    const res=await postData({action:'saveKpi',funcId:inpFunc,funcName:f.name,month:curMonth,kpis:[],resignations,promotions,avgHC,openRequisitions,newRolesSinceJan});
-    if(res.error) throw new Error(res.error);
-    // Update local cache immediately so form re-renders with saved values
-    const existingIdx = allKpis.findIndex(r=>r.funcId===inpFunc&&r.month===curMonth);
-    const updatedRec = {
-      funcId:inpFunc, funcName:f.name, month:curMonth,
-      resignations: resignations!=null?resignations:'',
-      promotions:   promotions!=null?promotions:'',
-      avgHC:        avgHC!=null?avgHC:'',
-      openRequisitions: openRequisitions!=null?openRequisitions:'',
-      newRolesSinceJan: newRolesSinceJan!=null?newRolesSinceJan:'',
-    };
-    if(existingIdx>=0) Object.assign(allKpis[existingIdx], updatedRec);
-    else allKpis.push(updatedRec);
-    clearHCDraft(inpFunc);
-    showToast('HC & people data saved ✓');
-    loadData(); // refresh in background
-    renderInpForm();
-  } catch(e){ showToast('Save failed: '+e.message); }
-}
-
-async function saveKpis(){
-  const now=new Date(); const curMonth=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+async function saveKpis() {
+  const cm=localMonth();
   const defs=KPI_DEFS[inpFunc]||[];
   const f=FUNCS.find(x=>x.id===inpFunc);
-  const kpis=defs.map((_,i)=>{ const el=document.getElementById('kpi_'+i); return el&&el.value!==''?parseFloat(el.value):null; });
-  const resignEl=document.getElementById('kpi_resignations');
-  const promoEl=document.getElementById('kpi_promotions');
-  const avgHCEl=document.getElementById('kpi_avgHC');
-  const resignations=resignEl&&resignEl.value!==''?parseInt(resignEl.value):null;
-  const promotions=promoEl&&promoEl.value!==''?parseInt(promoEl.value):null;
-  const avgHC=avgHCEl&&avgHCEl.value!==''?parseFloat(avgHCEl.value):null;
-  const openReqsEl=document.getElementById('kpi_openReqs');
-  const newRolesEl=document.getElementById('kpi_newRoles');
-  const openRequisitions=openReqsEl&&openReqsEl.value!==''?parseInt(openReqsEl.value):null;
-  const newRolesSinceJan=newRolesEl&&newRolesEl.value!==''?parseInt(newRolesEl.value):null;
+  const kpis=defs.map((_,i)=>{ const el=document.getElementById('ki_'+i); return el&&el.value!==''?parseFloat(el.value):null; });
   try {
-    const btn=document.querySelector('#inp-form .save-btn');
-    btn.textContent='Saving...'; btn.disabled=true;
-    const res=await postData({action:'saveKpi',funcId:inpFunc,funcName:f.name,month:curMonth,kpis,resignations,promotions,avgHC,openRequisitions,newRolesSinceJan});
+    const btn=document.querySelector('#inp-form .save-btn'); btn.textContent='Saving...'; btn.disabled=true;
+    const res=await postData({action:'saveKpi',funcId:inpFunc,funcName:f.name,month:cm,kpis});
     if(res.error) throw new Error(res.error);
     showToast('KPI data saved ✓');
     await loadData();
     renderInpForm();
-  } catch(e){ showToast('Save failed: '+e.message); }
+  } catch(e){ showToast('Save failed: '+e.message); const btn=document.querySelector('#inp-form .save-btn'); if(btn){btn.textContent='Save KPI update ↗';btn.disabled=false;} }
 }
 
-// ─── REPORT ───────────────────────────────────────────────────
-function populateMonthSelect(){
+async function saveHCData() {
+  const cm=localMonth();
+  const f=FUNCS.find(x=>x.id===inpFunc);
+  const resignations=document.getElementById('hc_resign')?.value!==''?parseInt(document.getElementById('hc_resign').value):null;
+  const promotions=document.getElementById('hc_promo')?.value!==''?parseInt(document.getElementById('hc_promo').value):null;
+  const avgHC=document.getElementById('hc_avghc')?.value!==''?parseFloat(document.getElementById('hc_avghc').value):null;
+  const openRequisitions=document.getElementById('hc_openreq')?.value!==''?parseInt(document.getElementById('hc_openreq').value):null;
+  const newRolesSinceJan=document.getElementById('hc_newrole')?.value!==''?parseInt(document.getElementById('hc_newrole').value):null;
+  try {
+    const btn=document.querySelector('#inp-form .save-btn'); btn.textContent='Saving...'; btn.disabled=true;
+    const res=await postData({action:'saveKpi',funcId:inpFunc,funcName:f.name,month:cm,kpis:[],resignations,promotions,avgHC,openRequisitions,newRolesSinceJan});
+    if(res.error) throw new Error(res.error);
+    // Update local cache immediately so form pre-fills correctly on next render
+    const existing=allKpis.findIndex(r=>r.funcId===inpFunc&&normalizeMonth(r.month)===cm);
+    const updated={funcId:inpFunc,funcName:f.name,month:cm,updatedAt:new Date().toISOString(),
+      resignations:resignations!=null?resignations:'',promotions:promotions!=null?promotions:'',
+      avgHC:avgHC!=null?avgHC:'',openRequisitions:openRequisitions!=null?openRequisitions:'',
+      newRolesSinceJan:newRolesSinceJan!=null?newRolesSinceJan:''};
+    if(existing>=0) Object.assign(allKpis[existing],updated);
+    else allKpis.push(updated);
+    clearDraft('hcd_'+inpFunc);
+    showToast('HC & people data saved ✓');
+    loadData(); // refresh in background
+    renderInpForm();
+  } catch(e){ showToast('Save failed: '+e.message); const btn=document.querySelector('#inp-form .save-btn'); if(btn){btn.textContent='Save HC & people data ↗';btn.disabled=false;} }
+}
+
+// ─── REPORT ──────────────────────────────────────────────────
+function populateMonthSelect() {
   const months=new Set();
-  allKpis.forEach(r=>months.add(r.month));
-  allWeekly.forEach(r=>{ if(r.updatedAt) months.add(String(r.updatedAt).slice(0,7)); });
-  months.add(new Date().toISOString().slice(0,7));
+  allKpis.forEach(r=>months.add(normalizeMonth(r.month)));
+  allWeekly.forEach(r=>{ if(r.updatedAt) months.add(normalizeMonth(r.updatedAt)); });
+  months.add(localMonth());
   const sel=document.getElementById('rpt-month');
   const sorted=[...months].filter(Boolean).sort().reverse();
-  sel.innerHTML=sorted.map(m=>{
-    const [y,mo]=m.split('-');
-    const label=new Date(+y,+mo-1,1).toLocaleDateString('en-US',{month:'long',year:'numeric'});
-    return `<option value="${m}">${label}</option>`;
-  }).join('');
+  sel.innerHTML=sorted.map(m=>{ const[y,mo]=m.split('-'); const lbl=new Date(+y,+mo-1,1).toLocaleDateString('en-US',{month:'long',year:'numeric'}); return '<option value="'+m+'">'+lbl+'</option>'; }).join('');
 }
 
-function generateReport(){
+function generateReport() {
   const month=document.getElementById('rpt-month').value;
-  const [y,mo]=month.split('-');
+  const[y,mo]=month.split('-');
   const monthLabel=new Date(+y,+mo-1,1).toLocaleDateString('en-US',{month:'long',year:'numeric'});
-
   let totalGreen=0,blockerLines=[],updatedCount=0;
   FUNCS.forEach(f=>{
     const kpis=getKpisForMonth(f.id,month);
-    if(kpis&&kpis.length){
-      const rags=kpis.map((v,i)=>getRag(f.id,i,v));
-      if(!rags.includes('R')&&!rags.includes('A'))totalGreen++;
-    }
-    const entries=getMonthEntries(f.id,month);
+    if(kpis&&kpis.length){const rags=kpis.map((v,i)=>getRag(f.id,i,v));if(!rags.includes('R')&&!rags.includes('A'))totalGreen++;}
+    const entries=allWeekly.filter(r=>r.funcId===f.id&&normalizeMonth(r.updatedAt)===month);
     if(entries.length)updatedCount++;
-    entries.forEach(e=>{ if(e.redFlag&&e.redFlag.toString().trim()&&e.redFlag.toString().toLowerCase().indexOf('none')<0) blockerLines.push(`<li><b>${f.name}</b> (${e.weekLabel}): ${e.redFlag}</li>`); });
+    entries.forEach(e=>{ if(e.redFlag&&e.redFlag.toString().trim()&&e.redFlag.toString().toLowerCase().indexOf('none')<0) blockerLines.push('<li><b>'+f.name+'</b> ('+e.weekLabel+'): '+e.redFlag+'</li>'); });
   });
-
-  const execHtml=`<div class="rpt-exec"><div class="rpt-exec-title">Manila Services — Executive Summary</div><p style="margin-bottom:.5rem">Manila Services closed <b>${monthLabel}</b> with <b>${totalGreen}</b> of ${FUNCS.length} functions fully on track. <b>${updatedCount}</b> of ${FUNCS.length} functions submitted weekly narratives.</p>${blockerLines.length?`<p style="font-weight:700;margin-bottom:.25rem">Open blockers:</p><ul style="padding-left:1.25rem;font-size:11px">${blockerLines.join('')}</ul>`:'<p style="color:#aaa">No open blockers this month.</p>'}</div>`;
-
+  const execHtml='<div class="rpt-exec"><div class="rpt-exec-title">Manila Services — Executive Summary</div><p style="margin-bottom:.5rem">Manila Services closed <b>'+monthLabel+'</b> with <b>'+totalGreen+'</b> of '+FUNCS.length+' functions fully on track. <b>'+updatedCount+'</b> of '+FUNCS.length+' functions submitted weekly narratives.</p>'+(blockerLines.length?'<p style="font-weight:700;margin-bottom:.25rem">Open blockers:</p><ul style="padding-left:1.25rem;font-size:11px">'+blockerLines.join('')+'</ul>':'<p style="color:#aaa">No open blockers this month.</p>')+'</div>';
   let funcSections='';
   FUNCS.forEach(f=>{
-    const kpis=getKpisForMonth(f.id,month),defs=KPI_DEFS[f.id]||[],entries=getMonthEntries(f.id,month);
-    if(!kpis&&!entries.length)return;
+    const kpis=getKpisForMonth(f.id,month),defs=KPI_DEFS[f.id]||[];
+    const entries=allWeekly.filter(r=>r.funcId===f.id&&normalizeMonth(r.updatedAt)===month).sort((a,b)=>String(a.updatedAt).localeCompare(String(b.updatedAt)));
+    if(!kpis&&!entries.length) return;
     const rag=kpis&&kpis.length?getFuncRag(f.id):'N';
     const ragCol=rag==='G'?'#4caf50':rag==='A'?'#ff9800':rag==='R'?'#f44336':'#ccc';
     let kpiBlock='<div style="font-size:11px;color:#aaa;font-style:italic">No KPI data.</div>';
-    if(kpis&&kpis.length){
-      const rows=kpis.map((v,i)=>{
-        if(!defs[i])return '';
-        const r=getRag(f.id,i,v),isLg=defs[i].t>100;
-        return `<div class="rpt-kpi-row"><span>${defs[i].l}</span><span>${defs[i].t}${!isLg?'%':''}</span><span><b>${v}${!isLg&&v<=100?'%':''}</b></span><span style="color:${r==='G'?'#2e7d32':r==='A'?'#e65100':'#c62828'}">${r==='G'?'On track':r==='A'?'Monitor':'Attention'}</span></div>`;
-      }).join('');
-      kpiBlock=`<div style="font-size:11px"><div class="rpt-kpi-row hdr"><span>KPI</span><span>Target</span><span>Actual</span><span>Status</span></div>${rows}</div>`;
-    }
-    const cons={};
-    NAR_FIELDS.forEach(nf=>{ cons[nf.k]=[]; });
-    entries.forEach(e=>{ NAR_FIELDS.forEach(nf=>{ if(e[nf.k]&&e[nf.k].toString().trim()) cons[nf.k].push(`[${e.weekLabel}] ${e[nf.k]}`); }); });
-    const narCards=NAR_FIELDS.map(nf=>`<div class="rpt-nar-lbl">${nf.label}</div><div style="font-size:11px;line-height:1.6;margin-bottom:.5rem">${cons[nf.k].join('<br><br>')||'—'}</div>`).join('');
-    funcSections+=`<div class="rpt-fsec"><div class="rpt-fhdr"><div style="width:9px;height:9px;border-radius:50%;background:${ragCol};flex-shrink:0"></div><div class="rpt-fname">${f.name} — ${f.role}</div><div style="font-size:11px;color:#aaa;margin-left:auto">${entries.length} week${entries.length!==1?'s':''}</div></div>${kpiBlock}<div class="rpt-nar-grid" style="margin-top:.75rem">${narCards}</div></div>`;
+    if(kpis&&kpis.length){const rows=kpis.map((v,i)=>{ if(!defs[i])return ''; const r=getRag(f.id,i,v),isLg=defs[i].t>100; return '<div class="rpt-kpi-row"><span>'+defs[i].l+'</span><span>'+defs[i].t+(!isLg?'%':'')+'</span><span><b>'+v+(!isLg&&v<=100?'%':'')+'</b></span><span style="color:'+(r==='G'?'#2e7d32':r==='A'?'#e65100':'#c62828')+'">'+(r==='G'?'On track':r==='A'?'Monitor':'Attention')+'</span></div>'; }).join(''); kpiBlock='<div style="font-size:11px"><div class="rpt-kpi-row hdr"><span>KPI</span><span>Target</span><span>Actual</span><span>Status</span></div>'+rows+'</div>';}
+    const cons={}; NAR_FIELDS.forEach(nf=>{cons[nf.k]=[];}); entries.forEach(e=>{NAR_FIELDS.forEach(nf=>{if(e[nf.k]&&e[nf.k].toString().trim())cons[nf.k].push('['+e.weekLabel+'] '+e[nf.k]);});});
+    const narCards=NAR_FIELDS.map(nf=>'<div><div class="rpt-nar-lbl">'+nf.label+'</div><div style="font-size:11px;line-height:1.6;margin-bottom:.5rem">'+(cons[nf.k].join('<br><br>')||'—')+'</div></div>').join('');
+    funcSections+='<div class="rpt-fsec"><div class="rpt-fhdr"><div style="width:9px;height:9px;border-radius:50%;background:'+ragCol+';flex-shrink:0"></div><div class="rpt-fname">'+f.name+' — '+f.role+'</div><div style="font-size:11px;color:#aaa;margin-left:auto">'+entries.length+' week'+(entries.length!==1?'s':'')+'</div></div>'+kpiBlock+'<div class="rpt-nar-grid" style="margin-top:.75rem">'+narCards+'</div></div>';
   });
-
-  document.getElementById('report-out').innerHTML=`<div class="rpt-title">Manila Services — Monthly Report</div><div class="rpt-sub">${monthLabel} · Generated ${new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</div>${execHtml}${funcSections||'<div style="color:#aaa;font-size:12px">No data for this month.</div>'}`;
+  document.getElementById('report-out').innerHTML='<div class="rpt-title">Manila Services — Monthly Report</div><div class="rpt-sub">'+monthLabel+' · Generated '+new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})+'</div>'+execHtml+(funcSections||'<div style="color:#aaa;font-size:12px">No data for this month.</div>');
 }
 
-function printReport(){
+function printReport() {
   const content=document.getElementById('report-out').innerHTML;
   const w=window.open('','_blank');
-  w.document.write(`<html><head><title>Manila Services Monthly Report</title><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;font-size:12px;padding:2cm;color:#111;max-width:900px;margin:0 auto}.rpt-title{font-size:20px;font-weight:700;margin-bottom:4px}.rpt-sub{font-size:11px;color:#666;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid #ddd}.rpt-exec{background:#f5f5f5;border-radius:6px;padding:1rem;margin-bottom:1.25rem}.rpt-exec-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem;color:#666}.rpt-fsec{margin-bottom:1.25rem;padding-bottom:1.25rem;border-bottom:1px solid #eee}.rpt-fsec:last-child{border-bottom:none}.rpt-fhdr{display:flex;align-items:center;gap:8px;margin-bottom:.75rem}.rpt-fname{font-size:13px;font-weight:700}.rpt-kpi-row{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:6px;font-size:11px;padding:4px 0;border-bottom:1px solid #eee}.rpt-kpi-row.hdr{font-weight:700;color:#aaa;font-size:10px;text-transform:uppercase}.rpt-nar-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:.75rem}.rpt-nar-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:#aaa;margin-bottom:3px}ul{padding-left:1.25rem}@media print{body{padding:1cm}}</style></head><body>${content}</body></html>`);
+  w.document.write('<html><head><title>Manila Services Monthly Report</title><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;font-size:12px;padding:2cm;color:#111;max-width:900px;margin:0 auto}.rpt-title{font-size:20px;font-weight:700;margin-bottom:4px}.rpt-sub{font-size:11px;color:#666;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid #ddd}.rpt-exec{background:#f5f5f5;border-radius:6px;padding:1rem;margin-bottom:1.25rem}.rpt-exec-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem;color:#666}.rpt-fsec{margin-bottom:1.25rem;padding-bottom:1.25rem;border-bottom:1px solid #eee}.rpt-fhdr{display:flex;align-items:center;gap:8px;margin-bottom:.75rem}.rpt-fname{font-size:13px;font-weight:700}.rpt-kpi-row{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:6px;font-size:11px;padding:4px 0;border-bottom:1px solid #eee}.rpt-kpi-row.hdr{font-weight:700;color:#aaa;font-size:10px;text-transform:uppercase}.rpt-nar-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:.75rem}.rpt-nar-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:#aaa;margin-bottom:3px}ul{padding-left:1.25rem}@media print{body{padding:1cm}}</style></head><body>'+content+'</body></html>');
   w.document.close(); w.focus(); setTimeout(()=>w.print(),400);
 }
 
-// ─── NAV ──────────────────────────────────────────────────────
-function setNav(n){
+// ─── NAV ─────────────────────────────────────────────────────
+function setNav(n) {
   nav=n;
-  ['dash','update','report'].forEach(p=>{
-    document.getElementById('pane-'+p).classList.toggle('active',p===n);
-    document.getElementById('nb-'+p).classList.toggle('active',p===n);
-  });
-  if(n==='update')renderInpForm();
-  if(n==='report')populateMonthSelect();
+  ['dash','update','report'].forEach(p=>{ document.getElementById('pane-'+p).classList.toggle('active',p===n); document.getElementById('nb-'+p).classList.toggle('active',p===n); });
+  if(n==='update') renderInpForm();
+  if(n==='report') populateMonthSelect();
 }
 
-function showToast(msg){
+function showToast(msg) {
   const t=document.getElementById('toast'); t.textContent=msg;
   t.style.display='block'; setTimeout(()=>t.style.display='none',3000);
 }
