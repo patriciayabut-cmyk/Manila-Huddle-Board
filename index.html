@@ -296,10 +296,12 @@ function renderPatDetail(el, f){
   } else {
     secHtml='<div class="no-data" style="padding:.5rem 0">No entry for this week yet.</div>';
   }
-  var histHtml=allEntries.length?allEntries.slice(0,10).map(function(e){
+  // Store entries in global for click access
+  window._patEntries = allEntries;
+  var histHtml=allEntries.length?allEntries.slice(0,10).map(function(e,idx){
     var cats=PAT_FIELDS.filter(function(pf){return e[pf.k]&&e[pf.k].toString().trim();});
     var isSel=e.weekLabel===detailWeek.pat;
-    return '<div class="he" style="'+(isSel?'border-color:#1a1a2e;background:#f8f9ff':'')+'" onclick="patWeekChange(this.getAttribute(\'data-wk\'))" data-wk="'+e.weekLabel+'"><div class="he-hdr"><span style="'+(isSel?'font-weight:700':'')+'">'+e.weekLabel+'</span><span style="color:#aaa">'+new Date(e.updatedAt).toLocaleDateString()+'</span></div><div>'+cats.map(function(c){return '<span class="pill">'+c.label+'</span>';}).join('')+'</div></div>';
+    return '<div class="he" style="'+(isSel?'border-color:#1a1a2e;background:#f8f9ff':'')+'" onclick="patWeekChange(window._patEntries['+idx+'].weekLabel)"><div class="he-hdr"><span style="'+(isSel?'font-weight:700':'')+'">'+e.weekLabel+'</span><span style="color:#aaa">'+new Date(e.updatedAt).toLocaleDateString()+'</span></div><div>'+cats.map(function(c){return '<span class="pill">'+c.label+'</span>';}).join('')+'</div></div>';
   }).join(''):'<div class="no-data">No history yet.</div>';
   el.innerHTML='<div class="det-hdr"><div class="det-title">'+f.name+' &#9733; -- '+f.role+'</div><div class="det-sub">'+allEntries.length+' weeks on record</div></div>'+weekNav+secHtml+'<div class="card"><div class="card-title">All weeks (click to view)</div>'+histHtml+'</div>';
 }
@@ -325,20 +327,49 @@ function renderPatInpForm(area){
   var wkLabel=getCurrentWeekLabel();
   var allWeeks=getAllWeekOptions();
   var weekOpts=allWeeks.map(function(w){return '<option value="'+w.label+'" '+(w.label===wkLabel?'selected':'')+'>'+w.label+'</option>';}).join('');
+
+  // Use session draft first, then fall back to last saved entry for the selected week
   var draft=getDraft('wd_pat')||{};
-  var fields=PAT_FIELDS.map(function(pf){return '<div class="ng"><label>'+pf.label+'</label><textarea id="pat_'+pf.k+'" placeholder="'+pf.label+'..." oninput="savePatDraft()">'+(draft[pf.k]||'')+'</textarea></div>';}).join('');
+  var draftWeek=draft._week||wkLabel;
+
+  // Find last saved entry for the current week label
+  var lastEntry=allWeekly.filter(function(r){return r.funcId==='pat'&&r.weekLabel===draftWeek;}).slice().sort(function(a,b){return String(b.updatedAt).localeCompare(String(a.updatedAt));})[0]||null;
+
+  var fields=PAT_FIELDS.map(function(pf){
+    var val=draft[pf.k]!==undefined?draft[pf.k]:(lastEntry?lastEntry[pf.k]||'':'');
+    return '<div class="ng"><label>'+pf.label+'</label><textarea id="pat_'+pf.k+'" placeholder="'+pf.label+'..." oninput="savePatDraft()">'+(val)+'</textarea></div>';
+  }).join('');
+
   area.innerHTML='<div class="dl-info dl-weekly">Weekly update due Monday EOD</div>'+
     '<div class="form-card"><div style="font-weight:700;font-size:13px;margin-bottom:.5rem">Pat Yabut &#9733; -- Manila Services Lead</div>'+
     '<div style="display:flex;align-items:center;gap:8px;margin-bottom:.75rem"><label style="font-size:12px;color:#666;font-weight:500;white-space:nowrap">Reporting week:</label>'+
-    '<select id="pat_week" style="padding:5px 10px;border:1.5px solid #ddd;border-radius:7px;background:#fff;font-size:12px;color:#333;flex:1">'+weekOpts+'</select></div>'+
+    '<select id="pat_week" onchange="onPatWeekSelect(this.value)" style="padding:5px 10px;border:1.5px solid #ddd;border-radius:7px;background:#fff;font-size:12px;color:#333;flex:1">'+weekOpts+'</select></div>'+
     '<div class="fsec">Weekly update</div>'+
     '<div class="nar-inp-grid">'+fields+'</div>'+
     '<div class="btn-row"><button class="save-btn" onclick="savePatWeekly()" '+(dataLoaded?'':'disabled')+'>Save update</button>'+
     '<button class="clear-btn" onclick="clearPatDraft()">Clear form</button></div></div>';
 }
 
+function onPatWeekSelect(wk){
+  // When week changes, load that week's saved entry (if any)
+  var entry=allWeekly.filter(function(r){return r.funcId==='pat'&&r.weekLabel===wk;}).slice().sort(function(a,b){return String(b.updatedAt).localeCompare(String(a.updatedAt));})[0]||null;
+  var draft={_week:wk};
+  PAT_FIELDS.forEach(function(pf){
+    var el=document.getElementById('pat_'+pf.k);
+    var val=entry?entry[pf.k]||'':'';
+    if(el)el.value=val;
+    draft[pf.k]=val;
+  });
+  setDraft('wd_pat',draft);
+  // Update week select
+  var wkSel=document.getElementById('pat_week');
+  if(wkSel)wkSel.value=wk;
+}
+
 function savePatDraft(){
   var d={};
+  var wkSel=document.getElementById('pat_week');
+  d._week=wkSel?wkSel.value:getCurrentWeekLabel();
   PAT_FIELDS.forEach(function(pf){var el=document.getElementById('pat_'+pf.k);if(el)d[pf.k]=el.value;});
   setDraft('wd_pat',d);
 }
@@ -346,6 +377,7 @@ function savePatDraft(){
 function clearPatDraft(){
   clearDraft('wd_pat');
   PAT_FIELDS.forEach(function(pf){var el=document.getElementById('pat_'+pf.k);if(el)el.value='';});
+  showToast('Form cleared');
 }
 
 async function savePatWeekly(){
