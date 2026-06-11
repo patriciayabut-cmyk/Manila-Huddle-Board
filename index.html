@@ -263,8 +263,29 @@ function getCurrentWeekLabel(){return getWeekInfo(getCurrentReportingWeek()).lab
 function getAllWeekOptions(){var rw=getCurrentReportingWeek();var weeks=[];for(var i=rw;i>=1;i--)weeks.push(getWeekInfo(i));return weeks;}
 
 function jsonp(url){return new Promise(function(res,rej){var cb='hcb_'+Date.now();var s=document.createElement('script');var t=setTimeout(function(){cleanup();rej(new Error('Timeout'));},30000);function cleanup(){clearTimeout(t);delete window[cb];if(s.parentNode)s.parentNode.removeChild(s);}window[cb]=function(d){cleanup();res(d);};s.src=url+(url.indexOf('?')>=0?'&':'?')+'callback='+cb;s.onerror=function(){cleanup();rej(new Error('Load failed'));};document.head.appendChild(s);});}
+function sanitizePayload(p){
+  // Replace special Unicode characters that break URL encoding
+  var clean = {};
+  Object.keys(p).forEach(function(k){
+    if(typeof p[k]==='string'){
+      clean[k] = p[k]
+        .replace(/[‘’]/g,"'")   // smart single quotes
+        .replace(/[“”]/g,'"')   // smart double quotes
+        .replace(/–/g,'-')            // en dash
+        .replace(/—/g,'--')           // em dash
+        .replace(/•/g,'*')            // bullet
+        .replace(/​/g,'')             // zero-width space
+        .replace(/ /g,' ');           // non-breaking space
+    } else {
+      clean[k] = p[k];
+    }
+  });
+  return clean;
+}
+
 function postData(p){
-  var json = JSON.stringify(p);
+  var safe = sanitizePayload(p);
+  var json = JSON.stringify(safe);
   var encoded = encodeURIComponent(json);
   if(encoded.length <= 7000){
     return jsonp(SCRIPT_URL+'?data='+encoded);
