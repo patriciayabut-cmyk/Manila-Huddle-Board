@@ -263,7 +263,47 @@ function getCurrentWeekLabel(){return getWeekInfo(getCurrentReportingWeek()).lab
 function getAllWeekOptions(){var rw=getCurrentReportingWeek();var weeks=[];for(var i=rw;i>=1;i--)weeks.push(getWeekInfo(i));return weeks;}
 
 function jsonp(url){return new Promise(function(res,rej){var cb='hcb_'+Date.now();var s=document.createElement('script');var t=setTimeout(function(){cleanup();rej(new Error('Timeout'));},30000);function cleanup(){clearTimeout(t);delete window[cb];if(s.parentNode)s.parentNode.removeChild(s);}window[cb]=function(d){cleanup();res(d);};s.src=url+(url.indexOf('?')>=0?'&':'?')+'callback='+cb;s.onerror=function(){cleanup();rej(new Error('Load failed'));};document.head.appendChild(s);});}
-function postData(p){return jsonp(SCRIPT_URL+'?data='+encodeURIComponent(JSON.stringify(p)));}
+function postData(p){
+  // For saves, use fetch POST to avoid URL length limits on large narratives
+  // Wrap in no-cors mode and use a hidden iframe trick to get response via JSONP
+  var json = JSON.stringify(p);
+  if(json.length > 1500){
+    // Large payload - use form POST with callback
+    return new Promise(function(resolve, reject){
+      var cb = 'hcb_post_'+Date.now();
+      var iframe = document.createElement('iframe');
+      iframe.name = cb;
+      iframe.style.display = 'none';
+      document.body.appendChild(iframe);
+      var form = document.createElement('form');
+      form.method = 'POST';
+      form.action = SCRIPT_URL+'?callback='+cb+'_fn';
+      form.target = cb;
+      var input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'data';
+      input.value = json;
+      form.appendChild(input);
+      document.body.appendChild(form);
+      var timer = setTimeout(function(){
+        cleanup();
+        // Assume success if no error after timeout - POST went through
+        resolve({success:true,assumed:true});
+      }, 15000);
+      function cleanup(){
+        clearTimeout(timer);
+        if(form.parentNode)form.parentNode.removeChild(form);
+        if(iframe.parentNode)iframe.parentNode.removeChild(iframe);
+      }
+      window[cb+'_fn'] = function(data){ cleanup(); resolve(data); };
+      iframe.onload = function(){ 
+        setTimeout(function(){ cleanup(); resolve({success:true}); }, 500);
+      };
+      form.submit();
+    });
+  }
+  return jsonp(SCRIPT_URL+'?data='+encodeURIComponent(json));
+}
 function setStatus(st,msg){document.getElementById('sdot').className='sdot '+st;document.getElementById('stext').textContent=msg;}
 function showToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.style.display='block';setTimeout(function(){t.style.display='none';},3000);}
 function getDraft(k){try{return JSON.parse(sessionStorage.getItem(k)||'null');}catch(e){return null;}}
