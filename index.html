@@ -244,7 +244,17 @@ var detailWeek={},detailKpiMonth={},selectedFilterWeek='latest';
 var WEEK1=new Date(2025,11,29);
 
 function localMonth(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');}
-function normalizeMonth(m){if(!m)return '';return String(m).slice(0,7);}
+function normalizeMonth(m){
+  if(!m)return '';
+  var s=String(m);
+  // If it's a full ISO timestamp, convert to Manila time (UTC+8) before slicing
+  if(s.length>7&&s.indexOf('T')>-1){
+    var d=new Date(s);
+    d.setHours(d.getHours()+8); // Manila offset
+    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+  }
+  return s.slice(0,7);
+}
 function getRag(fid,idx,val){var d=KPI_DEFS[fid];if(!d||!d[idx])return 'N';var k=d[idx];if(k.hi){if(val>=k.t)return 'G';if(val>=k.t*.95)return 'A';return 'R';}else{if(val<=k.t)return 'G';if(val<=k.t*1.1)return 'A';return 'R';}}
 function getFuncRag(fid){var kpis=getLatestKpis(fid);if(!kpis.length)return 'N';var rags=kpis.map(function(v,i){return getRag(fid,i,v);});if(rags.indexOf('R')>=0)return 'R';if(rags.indexOf('A')>=0)return 'A';return 'G';}
 function getLatestKpis(fid){var arr=allKpis.filter(function(r){return r.funcId===fid&&(r.kpi1||r.kpi2||r.kpi3);});if(!arr.length)return [];arr.sort(function(a,b){return normalizeMonth(b.month).localeCompare(normalizeMonth(a.month));});var r=arr[0];return [r.kpi1,r.kpi2,r.kpi3,r.kpi4,r.kpi5].filter(function(v){return v!==''&&v!=null&&v!==undefined;}).map(Number);}
@@ -258,7 +268,7 @@ function getFilteredNarrative(fid){var arr=allWeekly.filter(function(r){return r
 function wasUpdatedThisWeek(fid){var l=getLatestNarrative(fid);if(!l)return false;return (new Date()-new Date(l.updatedAt))/86400000<7;}
 
 function getWeekInfo(n){var s=new Date(WEEK1.getTime()+(n-1)*7*86400000);var e=new Date(s.getTime()+4*86400000);var fmt=function(d){return d.toLocaleDateString('en-US',{month:'short',day:'2-digit'});};return {num:n,label:'Week '+n+' - '+fmt(s)+'-'+fmt(e)};}
-function getCurrentReportingWeek(){var diff=Math.floor((new Date()-WEEK1)/86400000);return Math.max(1,Math.floor(diff/7));}
+function getCurrentReportingWeek(){var diff=Math.floor((new Date()-WEEK1)/86400000);return Math.max(1,Math.ceil((diff+1)/7));}
 function getCurrentWeekLabel(){return getWeekInfo(getCurrentReportingWeek()).label;}
 function getAllWeekOptions(){var rw=getCurrentReportingWeek();var weeks=[];for(var i=rw;i>=1;i--)weeks.push(getWeekInfo(i));return weeks;}
 
