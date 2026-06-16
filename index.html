@@ -440,7 +440,7 @@ function onPatWeekSelect(wk){
     if(el)el.value=val;
     draft[pf.k]=val;
   });
-  setDraft('wd_pat',draft);
+  setDraft('wd_'+inpFunc,draft);
   // Update week select
   var wkSel=document.getElementById('pat_week');
   if(wkSel)wkSel.value=wk;
@@ -451,11 +451,11 @@ function savePatDraft(){
   var wkSel=document.getElementById('pat_week');
   d._week=wkSel?wkSel.value:getCurrentWeekLabel();
   PAT_FIELDS.forEach(function(pf){var el=document.getElementById('pat_'+pf.k);if(el)d[pf.k]=el.value;});
-  setDraft('wd_pat',d);
+  setDraft('wd_'+inpFunc,d);
 }
 
 function clearPatDraft(){
-  clearDraft('wd_pat');
+  clearDraft('wd_'+inpFunc);
   PAT_FIELDS.forEach(function(pf){var el=document.getElementById('pat_'+pf.k);if(el)el.value='';});
   showToast('Form cleared');
 }
