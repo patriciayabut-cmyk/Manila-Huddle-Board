@@ -380,7 +380,7 @@ function buildInpFuncSel(){document.getElementById('inp-fsel').innerHTML=FUNCS.m
 function setInpFunc(id){inpFunc=id;document.querySelectorAll('.fsb').forEach(function(b){b.classList.toggle('active',b.textContent.trim()===FUNCS.find(function(f){return f.id===id;}).name.split(' ')[0]);});renderInpForm();}
 function setInpMode(m){inpMode=m;['w','k','h'].forEach(function(x){document.getElementById('imt-'+x).classList.toggle('active',(m==='weekly'&&x==='w')||(m==='kpi'&&x==='k')||(m==='hc'&&x==='h'));});renderInpForm();}
 
-function saveWDraft(fid){var d={};var wkSel=document.getElementById('wn_week');d._week=wkSel?wkSel.value:getCurrentWeekLabel();NAR_FIELDS.forEach(function(nf){var el=document.getElementById('wn_'+nf.k);if(el)d[nf.k]=el.value;});var setDraft('wd_'+inpFunc,d);}
+function saveWDraft(fid){var d={};var wkSel=document.getElementById('wn_week');d._week=wkSel?wkSel.value:getCurrentWeekLabel();NAR_FIELDS.forEach(function(nf){var el=document.getElementById('wn_'+nf.k);if(el)d[nf.k]=el.value;});setDraft('wd_'+inpFunc,d);}
 
 function onWeekSelect(wk){
   // Load saved entry for selected week into form
