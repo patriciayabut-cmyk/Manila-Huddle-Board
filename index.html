@@ -176,7 +176,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <button class="imt"        id="imt-k" onclick="setInpMode('kpi')">&#128200; Monthly KPIs <small style="opacity:.6">(once a month)</small></button>
       <button class="imt"        id="imt-h" onclick="setInpMode('hc')">&#128101; HC &amp; People data <small style="opacity:.6">(once a month)</small></button>
     </div>
-    <div class="func-sel" id="inp-fsel"></div>
+    <p style="font-size:12px;color:#888;margin:0 0 6px 0;font-weight:600;letter-spacing:.04em;">SELECT YOUR NAME TO BEGIN</p><div class="func-sel" id="inp-fsel"></div>
     <div id="inp-form"></div>
   </div>
 
@@ -239,7 +239,7 @@ var PAT_FIELDS=[
 ];
 
 var allWeekly=[],allKpis=[],dataLoaded=false;
-var nav='dash',inpMode='weekly',inpFunc='grace',viewSec='overview';
+var nav='dash',inpMode='weekly',inpFunc=null,viewSec='overview';
 var detailWeek={},detailKpiMonth={},selectedFilterWeek='latest';
 var WEEK1=new Date(2025,11,29);
 
@@ -257,8 +257,8 @@ function normalizeMonth(m){
 }
 function getRag(fid,idx,val){var d=KPI_DEFS[fid];if(!d||!d[idx])return 'N';var k=d[idx];if(k.hi){if(val>=k.t)return 'G';if(val>=k.t*.95)return 'A';return 'R';}else{if(val<=k.t)return 'G';if(val<=k.t*1.1)return 'A';return 'R';}}
 function getFuncRag(fid){var kpis=getLatestKpis(fid);if(!kpis.length)return 'N';var rags=kpis.map(function(v,i){return getRag(fid,i,v);});if(rags.indexOf('R')>=0)return 'R';if(rags.indexOf('A')>=0)return 'A';return 'G';}
-function getLatestKpis(fid){var arr=allKpis.filter(function(r){return r.funcId===fid&&(r.kpi1||r.kpi2||r.kpi3);});if(!arr.length)return [];arr.sort(function(a,b){return normalizeMonth(b.month).localeCompare(normalizeMonth(a.month));});var r=arr[0];return [r.kpi1,r.kpi2,r.kpi3,r.kpi4,r.kpi5].filter(function(v){return v!==''&&v!=null&&v!==undefined;}).map(Number);}
-function getKpisForMonth(fid,month){var nm=normalizeMonth(month);var arr=allKpis.filter(function(r){return r.funcId===fid&&normalizeMonth(r.month)===nm&&(r.kpi1||r.kpi2||r.kpi3);});if(!arr.length)return null;arr.sort(function(a,b){return String(b.updatedAt).localeCompare(String(a.updatedAt));});var r=arr[0];return [r.kpi1,r.kpi2,r.kpi3,r.kpi4,r.kpi5].filter(function(v){return v!==''&&v!=null&&v!==undefined;}).map(Number);}
+function getLatestKpis(fid){var arr=allKpis.filter(function(r){return r.funcId===fid&&(r.kpi1||r.kpi2||r.kpi3);});if(!arr.length)return [];arr.sort(function(a,b){return normalizeMonth(b.month).localeCompare(normalizeMonth(a.month));});var r=arr[0];return [r.kpi1,r.kpi2,r.kpi3,r.kpi4,r.kpi5,r.kpi6,r.kpi7].filter(function(v){return v!==''&&v!=null&&v!==undefined;}).map(Number);}
+function getKpisForMonth(fid,month){var nm=normalizeMonth(month);var arr=allKpis.filter(function(r){return r.funcId===fid&&normalizeMonth(r.month)===nm&&(r.kpi1||r.kpi2||r.kpi3);});if(!arr.length)return null;arr.sort(function(a,b){return String(b.updatedAt).localeCompare(String(a.updatedAt));});var r=arr[0];return [r.kpi1,r.kpi2,r.kpi3,r.kpi4,r.kpi5,r.kpi6,r.kpi7].filter(function(v){return v!==''&&v!=null&&v!==undefined;}).map(Number);}
 function getLatestPeopleRec(fid){var arr=allKpis.filter(function(r){return r.funcId===fid;});if(!arr.length)return null;arr.sort(function(a,b){return String(b.updatedAt).localeCompare(String(a.updatedAt));});var wp=arr.find(function(r){return r.resignations||r.promotions||r.avgHC||r.openRequisitions;});return wp||arr[0];}
 function getLatestHC(fid){var arr=allWeekly.filter(function(r){return r.funcId===fid&&r.hc&&parseInt(r.hc)>0;});if(!arr.length){var pr=getLatestPeopleRec(fid);if(pr&&pr.avgHC)return parseInt(pr.avgHC);var f=FUNCS.find(function(x){return x.id===fid;});return f?f.hc:0;}arr.sort(function(a,b){return String(b.updatedAt).localeCompare(String(a.updatedAt));});return parseInt(arr[0].hc)||0;}
 function getAttrition(fid){var pr=getLatestPeopleRec(fid);if(!pr||!pr.resignations)return null;var res=parseFloat(pr.resignations)||0;var hc=parseFloat(pr.avgHC)||getLatestHC(fid)||1;var mn=parseInt(normalizeMonth(pr.month).split('-')[1])||1;return {rate:((res/hc)*(12/mn)*100).toFixed(1),resignations:res};}
@@ -274,25 +274,25 @@ function getAllWeekOptions(){var rw=getCurrentReportingWeek();var weeks=[];for(v
 
 function jsonp(url){return new Promise(function(res,rej){var cb='hcb_'+Date.now();var s=document.createElement('script');var t=setTimeout(function(){cleanup();rej(new Error('Timeout'));},30000);function cleanup(){clearTimeout(t);delete window[cb];if(s.parentNode)s.parentNode.removeChild(s);}window[cb]=function(d){cleanup();res(d);};s.src=url+(url.indexOf('?')>=0?'&':'?')+'callback='+cb;s.onerror=function(){cleanup();rej(new Error('Load failed'));};document.head.appendChild(s);});}
 function sanitizePayload(p){
-  // Replace special Unicode characters that break URL encoding
   var clean = {};
   Object.keys(p).forEach(function(k){
     if(typeof p[k]==='string'){
       clean[k] = p[k]
-        .replace(/[‘’]/g,"'")   // smart single quotes
-        .replace(/[“”]/g,'"')   // smart double quotes
-        .replace(/–/g,'-')            // en dash
-        .replace(/—/g,'--')           // em dash
-        .replace(/•/g,'*')            // bullet
-        .replace(/​/g,'')             // zero-width space
-        .replace(/ /g,' ');           // non-breaking space
+        .replace(/[‘’]/g,"'")
+        .replace(/[“”]/g,'"')
+        .replace(/–/g,'-')
+        .replace(/—/g,'--')
+        .replace(/•/g,'*')
+        .replace(/​/g,'')
+        .replace(/ /g,' ')
+        .replace(/ /g,'')
+        .replace(/[--]/g,'');
     } else {
       clean[k] = p[k];
     }
   });
   return clean;
 }
-
 function postData(p){
   var safe = sanitizePayload(p);
   var json = JSON.stringify(safe);
@@ -497,7 +497,8 @@ function onKpiMonthSelect(month){
   renderInpForm();
 }
 
-function renderInpForm(){var f=FUNCS.find(function(x){return x.id===inpFunc;});var area=document.getElementById('inp-form');var cm=localMonth();if(inpMode==='weekly'){
+function renderInpForm(){var f=FUNCS.find(function(x){return x.id===inpFunc;});var area=document.getElementById('inp-form');
+  if(!inpFunc){area.innerHTML='<div style="padding:2rem;text-align:center;color:#555;font-size:15px;">Please select your name above to begin your update.</div>';return;}var cm=localMonth();if(inpMode==='weekly'){
   if(inpFunc==='pat'){renderPatInpForm(area);return;}var wkLabel=getCurrentWeekLabel();var allWeeks=getAllWeekOptions();var weekOpts=allWeeks.map(function(w){return '<option value="'+w.label+'" '+(w.label===wkLabel?'selected':'')+'>'+w.label+'</option>';}).join('');var draft=getDraft('wd_'+inpFunc)||{};var draftWeek=draft._week||wkLabel;var lastEntry=allWeekly.filter(function(r){return r.funcId===inpFunc&&r.weekLabel===draftWeek;}).slice().sort(function(a,b){return String(b.updatedAt).localeCompare(String(a.updatedAt));})[0]||null;var fields=NAR_FIELDS.map(function(nf){var val=draft[nf.k]!==undefined?draft[nf.k]:(lastEntry?lastEntry[nf.k]||'':'');return '<div class="ng"><label>'+nf.label+'</label><textarea id="wn_'+nf.k+'" placeholder="'+nf.label+'..." oninput="saveWDraft(inpFunc)">'+val+'</textarea></div>';}).join('');var hcValW=draft.hc!==undefined?draft.hc:(lastEntry?lastEntry.hc||getLatestHC(inpFunc)||'':getLatestHC(inpFunc)||'');area.innerHTML='<div class="dl-info dl-weekly">Narrative due Monday EOD</div><div class="form-card"><div style="font-weight:700;font-size:13px;margin-bottom:.5rem">'+f.name+' -- '+f.role+'</div><div style="display:flex;align-items:center;gap:8px;margin-bottom:.75rem"><label style="font-size:12px;color:#666;font-weight:500;white-space:nowrap">Reporting week:</label><select id="wn_week" onchange="onWeekSelect(this.value)" style="padding:5px 10px;border:1.5px solid #ddd;border-radius:7px;background:#fff;font-size:12px;color:#333;flex:1">'+weekOpts+'</select></div><div class="fsec">Weekly narrative</div><div class="nar-inp-grid">'+fields+'</div><div style="display:flex;align-items:center;gap:8px;margin-top:.75rem"><label style="font-size:12px;color:#666;font-weight:500;white-space:nowrap">Headcount this week:</label><input type="number" id="wn_hc" value="'+hcValW+'" oninput="saveWDraft(\''+inpFunc+'\')" style="padding:6px 10px;border:1.5px solid #ddd;border-radius:7px;font-size:12px;width:90px"></div><div class="btn-row"><button class="save-btn" onclick="saveWeekly()" '+(dataLoaded?'':'disabled')+'>Save weekly update</button><button class="clear-btn" onclick="clearWDraft(\''+inpFunc+'\')">Clear form</button></div></div>';}else if(inpMode==='kpi'){var defs=KPI_DEFS[inpFunc]||[];var selKpiMonth=window._selKpiMonth&&window._selKpiMonth[inpFunc]?window._selKpiMonth[inpFunc]:cm;var existing=getKpisForMonth(inpFunc,selKpiMonth)||[];var monthOpts=generateMonthOptions(selKpiMonth);var kpiRows=defs.length?defs.map(function(k,i){return '<div class="kpi-inp"><span>'+k.l+'</span><span>Target: '+k.t+(k.t<=100?'%':'')+'</span><input type="number" step="0.01" id="ki_'+i+'" value="'+(existing[i]!=null?existing[i]:'')+'" placeholder="Actual"></div>';}).join(''):'<div class="no-data">No KPIs defined.</div>';area.innerHTML='<div class="dl-info dl-kpi">KPIs updated monthly</div><div class="form-card"><div style="font-weight:700;font-size:13px;margin-bottom:.5rem">'+f.name+' -- '+f.role+'</div><div style="display:flex;align-items:center;gap:8px;margin-bottom:.75rem"><label style="font-size:12px;color:#666;font-weight:500;white-space:nowrap">Month:</label><select id="kpi_month_sel" onchange="onKpiMonthSelect(this.value)" style="padding:5px 10px;border:1.5px solid #ddd;border-radius:7px;background:#fff;font-size:12px;color:#333;min-width:180px">'+monthOpts+'</select></div><div class="fsec">KPI actuals -- '+selKpiMonth+'</div>'+kpiRows+'<div class="btn-row"><button class="save-btn" onclick="saveKpis()" '+(dataLoaded&&defs.length?'':'disabled')+'>Save KPI update</button></div></div>';}else if(inpMode==='hc'){var pr=getLatestPeopleRec(inpFunc)||{};var draft=getDraft('hcd_'+inpFunc)||{};var vR=draft.resignations!==undefined?draft.resignations:(pr.resignations||'');var vP=draft.promotions!==undefined?draft.promotions:(pr.promotions||'');var vH=draft.avgHC!==undefined?draft.avgHC:(pr.avgHC||getLatestHC(inpFunc)||'');var vO=draft.openReqs!==undefined?draft.openReqs:(pr.openRequisitions||'');var vN=draft.newRoles!==undefined?draft.newRoles:(pr.newRolesSinceJan||'');area.innerHTML='<div class="dl-info dl-hc">HC and People data - recording for '+cm+'</div><div class="form-card"><div style="font-weight:700;font-size:13px;margin-bottom:.25rem">'+f.name+' -- '+f.role+'</div><div class="fsec">Headcount and movements -- '+cm+'</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:.5rem"><div class="ng"><label>Resignations YTD</label><input type="number" min="0" id="hc_resign" value="'+vR+'" placeholder="0" oninput="saveHCDraft(\''+inpFunc+'\')"></div><div class="ng"><label>Total internal movements YTD</label><input type="number" min="0" id="hc_promo" value="'+vP+'" placeholder="0" oninput="saveHCDraft(\''+inpFunc+'\')"><span class="hint">Transfers + promotions within and outside</span></div><div class="ng"><label>Average HC this month</label><input type="number" min="0" id="hc_avghc" value="'+vH+'" placeholder="'+getLatestHC(inpFunc)+'" oninput="saveHCDraft(\''+inpFunc+'\')"><span class="hint">App computes attrition and promo %</span></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:.75rem"><div class="ng"><label>Open requisitions</label><input type="number" min="0" id="hc_openreq" value="'+vO+'" placeholder="0" oninput="saveHCDraft(\''+inpFunc+'\')"></div><div class="ng"><label>New roles since January</label><input type="number" min="0" id="hc_newrole" value="'+vN+'" placeholder="0" oninput="saveHCDraft(\''+inpFunc+'\')"></div></div><div class="info-box">Annualized attrition and internal movement % are computed automatically.</div><div class="btn-row"><button class="save-btn" onclick="saveHCData()" '+(dataLoaded?'':'disabled')+'>Save HC and people data</button></div></div>';}}
 
 async function saveWeekly(){
@@ -559,7 +560,7 @@ async function saveKpis(){var selMo=document.getElementById('kpi_month_sel');var
     window._selKpiMonth[inpFunc]=cm;
     // Update allKpis locally so form pre-fills immediately
     var existIdx=allKpis.findIndex(function(r){return r.funcId===inpFunc&&normalizeMonth(r.month)===cm;});
-    var updatedRec={funcId:inpFunc,funcName:f.name,month:cm,updatedAt:new Date().toISOString(),kpi1:kpis[0]!=null?kpis[0]:'',kpi2:kpis[1]!=null?kpis[1]:'',kpi3:kpis[2]!=null?kpis[2]:'',kpi4:kpis[3]!=null?kpis[3]:'',kpi5:kpis[4]!=null?kpis[4]:''};
+    var updatedRec={funcId:inpFunc,funcName:f.name,month:cm,updatedAt:new Date().toISOString(),kpi1:kpis[0]!=null?kpis[0]:'',kpi2:kpis[1]!=null?kpis[1]:'',kpi3:kpis[2]!=null?kpis[2]:'',kpi4:kpis[3]!=null?kpis[3]:'',kpi5:kpis[4]!=null?kpis[4]:'',kpi6:kpis[5]!=null?kpis[5]:'',kpi7:kpis[6]!=null?kpis[6]:''};
     if(existIdx>=0){Object.assign(allKpis[existIdx],updatedRec);}else{allKpis.push(updatedRec);}
     showToast('KPI data saved');
     // Restore field values directly — avoids blank revert from stale loadData
