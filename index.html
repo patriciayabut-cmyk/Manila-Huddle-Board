@@ -463,13 +463,14 @@ function clearPatDraft(){
 async function savePatWeekly(){
   var wkSel=document.getElementById('pat_week');
   var wkLabel=wkSel?wkSel.value:getCurrentWeekLabel();
-  var payload={action:'saveWeekly',funcId:'pat',funcName:'Pat Yabut',weekLabel:wkLabel};
+  var f=FUNCS.find(function(x){return x.id===inpFunc;})||{id:inpFunc,name:inpFunc};
+  var payload={action:'saveWeekly',funcId:inpFunc,funcName:f.name,weekLabel:wkLabel};
   PAT_FIELDS.forEach(function(pf){var el=document.getElementById('pat_'+pf.k);payload[pf.k]=el?el.value:'';});
   try{
     var btn=document.querySelector('#inp-form .save-btn');btn.textContent='Saving...';btn.disabled=true;
     var res=await postData(payload);
     if(res.error)throw new Error(res.error);
-    clearDraft('wd_pat');
+    clearDraft('wd_'+inpFunc);
     showToast('Update saved');
     await loadData();
     renderInpForm();
