@@ -341,15 +341,16 @@ function onWeekFilterChange(){selectedFilterWeek=document.getElementById('week-f
 function renderOverview(){var hc=0,upd=0,attRates=[],promoNums=[],promoHCs=[];FUNCS.forEach(function(f){if(f.lead)return;hc+=getLatestHC(f.id)||f.hc;if(wasUpdatedThisWeek(f.id))upd++;var att=getAttrition(f.id);if(att)attRates.push(parseFloat(att.rate));if(f.id!=='pat'){var promo=getPromo(f.id);var promoHC=parseFloat((getLatestPeopleRec(f.id)||{}).avgHC)||0;if(promo&&promoHC>0){promoNums.push(promo.promotions);promoHCs.push(promoHC);}}});var totalNewRoles=0;FUNCS.forEach(function(f){if(f.lead)return;var pr=getLatestPeopleRec(f.id);if(pr&&pr.newRolesSinceJan)totalNewRoles+=parseInt(pr.newRolesSinceJan)||0;});document.getElementById('ov-hc').textContent=hc.toLocaleString();document.getElementById('ov-upd').textContent=upd;document.getElementById('ov-newroles').textContent=totalNewRoles>0?totalNewRoles.toString():'--';document.getElementById('ov-att').textContent=attRates.length?((attRates.reduce(function(a,b){return a+b;},0)/attRates.length).toFixed(1)+'%'):'--';document.getElementById('ov-promo').textContent=promoNums.length?(((promoNums.reduce(function(a,b){return a+b;},0)/Math.max(1,promoHCs.reduce(function(a,b){return a+b;},0)))*100).toFixed(1)+'%'):'--';var grid=document.getElementById('func-cards');grid.innerHTML='';FUNCS.forEach(function(f){var rag=getFuncRag(f.id),defs=KPI_DEFS[f.id]||[],kpis=getLatestKpis(f.id);var updated=wasUpdatedThisWeek(f.id),latest=getFilteredNarrative(f.id);var att=getAttrition(f.id);var card=document.createElement('div');card.className='fc';card.onclick=function(){var btn=document.querySelector('.vtab[data-fid="'+f.id+'"]');showVsec(f.id,btn);};var kh='';if(kpis.length){kpis.slice(0,3).forEach(function(v,i){if(!defs[i])return;var r=getRag(f.id,i,v),pct=defs[i].hi?Math.min(v/defs[i].t*100,100):Math.max(0,100-(v/defs[i].t-1)*200);var col=r==='G'?'#4caf50':r==='A'?'#ff9800':'#f44336';kh+='<div class="km-row"><span class="km-lbl">'+defs[i].l+'</span><span class="km-val">'+v+(defs[i].t<=100&&v<=100?'%':'')+'</span></div><div class="km-bar"><div class="km-fill" style="width:'+Math.round(pct)+'%;background:'+col+'"></div></div>';});}else kh='<div class="no-data">No KPIs yet</div>';var stamp=(latest?latest.weekLabel:'Not updated')+(att?' - '+att.rate+'% attrition':'');card.innerHTML='<div class="fc-top"><div><div class="fc-name">'+f.name+'</div><div class="fc-role">'+f.role+'</div></div><div class="fc-dots"><div class="upd '+(updated?'upd-y':'upd-n')+'"></div><div class="rag rag-'+rag+'"></div></div></div>'+kh+'<div class="fc-stamp">'+stamp+'</div>';grid.appendChild(card);});}
 
 function renderPatDetail(el, f){
-  var allEntries=allWeekly.filter(function(r){return r.funcId==='pat';}).slice().sort(function(a,b){return String(b.updatedAt).localeCompare(String(a.updatedAt));});
+  var fid=f.id;
+  var allEntries=allWeekly.filter(function(r){return r.funcId===fid;}).slice().sort(function(a,b){return String(b.updatedAt).localeCompare(String(a.updatedAt));});
   var allCalWeeks=getAllWeekOptions();
   // Default to most recently submitted week, not latest calendar week
-  if(!detailWeek.pat){
-    detailWeek.pat = allEntries.length ? allEntries[0].weekLabel : allCalWeeks[0].label;
+  if(!detailWeek[fid]){
+    detailWeek[fid] = allEntries.length ? allEntries[0].weekLabel : allCalWeeks[0].label;
   }
-  var selEntry=allEntries.find(function(e){return e.weekLabel===detailWeek.pat;})||null;
+  var selEntry=allEntries.find(function(e){return e.weekLabel===detailWeek[fid];})||null;
   var submittedWeeks=new Set(allEntries.map(function(e){return e.weekLabel;}));
-  var weekOpts=allCalWeeks.map(function(w){return '<option value="'+w.label+'" '+(w.label===detailWeek.pat?'selected':'')+'>'+(submittedWeeks.has(w.label)?'&#10003; ':'')+w.label+'</option>';}).join('');
+  var weekOpts=allCalWeeks.map(function(w){return '<option value="'+w.label+'" '+(w.label===detailWeek[fid]?'selected':'')+'>'+(submittedWeeks.has(w.label)?'&#10003; ':'')+w.label+'</option>';}).join('');
   var weekNav='<div class="wk-sel"><label>Week:</label><select onchange="patWeekChange(this.value)">'+weekOpts+'</select><span style="font-size:11px;color:#aaa">'+submittedWeeks.size+' of '+allCalWeeks.length+' weeks submitted</span></div>';
   var secHtml='';
   if(selEntry){
@@ -361,14 +362,14 @@ function renderPatDetail(el, f){
   window._patEntries = allEntries;
   var histHtml=allEntries.length?allEntries.slice(0,10).map(function(e,idx){
     var cats=PAT_FIELDS.filter(function(pf){return e[pf.k]&&e[pf.k].toString().trim();});
-    var isSel=e.weekLabel===detailWeek.pat;
+    var isSel=e.weekLabel===detailWeek[fid];
     return '<div class="he" style="'+(isSel?'border-color:#1a1a2e;background:#f8f9ff':'')+'" onclick="patWeekChange(window._patEntries['+idx+'].weekLabel)"><div class="he-hdr"><span style="'+(isSel?'font-weight:700':'')+'">'+e.weekLabel+'</span><span style="color:#aaa">'+new Date(e.updatedAt).toLocaleDateString()+'</span></div><div>'+cats.map(function(c){return '<span class="pill">'+c.label+'</span>';}).join('')+'</div></div>';
   }).join(''):'<div class="no-data">No history yet.</div>';
   var editBtn='<button onclick="setNav(\'update\');setInpFunc(\'pat\');" style="margin-top:.5rem;padding:6px 14px;background:#1a1a2e;color:#fff;border:none;border-radius:7px;font-size:12px;cursor:pointer">Edit / Add update</button>';
   el.innerHTML='<div class="det-hdr"><div class="det-title">'+f.name+' -- '+f.role+'</div><div class="det-sub">'+allEntries.length+' weeks on record</div>'+editBtn+'</div>'+weekNav+secHtml+'<div class="card"><div class="card-title">All weeks (click to view)</div>'+histHtml+'</div>';
 }
 
-function patWeekChange(wk){detailWeek.pat=wk;var f=FUNCS.find(function(x){return x.id==='pat';});var el=document.getElementById('det-pat');if(el&&f)renderPatDetail(el,f);}
+function patWeekChange(wk){detailWeek[fid]=wk;var f=FUNCS.find(function(x){return x.id==='pat';});var el=document.getElementById('det-pat');if(el&&f)renderPatDetail(el,f);}
 
 
 function renderDetail(fid){var f=FUNCS.find(function(x){return x.id===fid;}),defs=KPI_DEFS[fid]||[];var el=document.getElementById('det-'+fid);if(!el)return;
@@ -402,13 +403,13 @@ function onWeekSelect(wk){
 function clearWDraft(fid){clearDraft('wd_'+fid);NAR_FIELDS.forEach(function(nf){var el=document.getElementById('wn_'+nf.k);if(el)el.value='';});var hcEl=document.getElementById('wn_hc');if(hcEl)hcEl.value='';}
 function saveHCDraft(fid){var d={resignations:document.getElementById('hc_resign')?document.getElementById('hc_resign').value:'',promotions:document.getElementById('hc_promo')?document.getElementById('hc_promo').value:'',avgHC:document.getElementById('hc_avghc')?document.getElementById('hc_avghc').value:'',openReqs:document.getElementById('hc_openreq')?document.getElementById('hc_openreq').value:'',newRoles:document.getElementById('hc_newrole')?document.getElementById('hc_newrole').value:''};setDraft('hcd_'+fid,d);}
 
-function renderPatInpForm(area){
+function renderPatInpForm(area){var _pf=FUNCS.find(function(x){return x.id===inpFunc;})||{name:'Pat Yabut',role:'Customer Support'};
   var wkLabel=getWeekInfo(getDefaultReportingWeek()).label;
   var allWeeks=getAllWeekOptions();
   var weekOpts=allWeeks.map(function(w){return '<option value="'+w.label+'" '+(w.label===wkLabel?'selected':'')+'>'+w.label+'</option>';}).join('');
 
   // Use session draft first, then fall back to last saved entry for the selected week
-  var draft=getDraft('wd_pat')||{};
+  var draft=getDraft('wd_'+inpFunc)||{};
   var draftWeek=draft._week||wkLabel;
 
   // Find last saved entry for the current week label
@@ -420,7 +421,7 @@ function renderPatInpForm(area){
   }).join('');
 
   area.innerHTML='<div class="dl-info dl-weekly">Weekly update due Monday EOD</div>'+
-    '<div class="form-card"><div style="font-weight:700;font-size:13px;margin-bottom:.5rem">Pat Yabut &#9733; -- Manila Services Lead</div>'+
+    '<div class="form-card"><div style="font-weight:700;font-size:13px;margin-bottom:.5rem">'+_pf.name+' -- '+_pf.role+'</div>'+
     '<div style="display:flex;align-items:center;gap:8px;margin-bottom:.75rem"><label style="font-size:12px;color:#666;font-weight:500;white-space:nowrap">Reporting week:</label>'+
     '<select id="pat_week" onchange="onPatWeekSelect(this.value)" style="padding:5px 10px;border:1.5px solid #ddd;border-radius:7px;background:#fff;font-size:12px;color:#333;flex:1">'+weekOpts+'</select></div>'+
     '<div class="fsec">Weekly update</div>'+
