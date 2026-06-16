@@ -413,7 +413,7 @@ function renderPatInpForm(area){var _pf=FUNCS.find(function(x){return x.id===inp
   var draftWeek=draft._week||wkLabel;
 
   // Find last saved entry for the current week label
-  var lastEntry=allWeekly.filter(function(r){return r.funcId==='pat'&&r.weekLabel===draftWeek;}).slice().sort(function(a,b){return String(b.updatedAt).localeCompare(String(a.updatedAt));})[0]||null;
+  var lastEntry=allWeekly.filter(function(r){return r.funcId===inpFunc&&r.weekLabel===draftWeek;}).slice().sort(function(a,b){return String(b.updatedAt).localeCompare(String(a.updatedAt));})[0]||null;
 
   var fields=PAT_FIELDS.map(function(pf){
     var val=draft[pf.k]!==undefined?draft[pf.k]:(lastEntry?lastEntry[pf.k]||'':'');
@@ -432,7 +432,7 @@ function renderPatInpForm(area){var _pf=FUNCS.find(function(x){return x.id===inp
 
 function onPatWeekSelect(wk){
   // When week changes, load that week's saved entry (if any)
-  var entry=allWeekly.filter(function(r){return r.funcId==='pat'&&r.weekLabel===wk;}).slice().sort(function(a,b){return String(b.updatedAt).localeCompare(String(a.updatedAt));})[0]||null;
+  var entry=allWeekly.filter(function(r){return r.funcId===inpFunc&&r.weekLabel===wk;}).slice().sort(function(a,b){return String(b.updatedAt).localeCompare(String(a.updatedAt));})[0]||null;
   var draft={_week:wk};
   PAT_FIELDS.forEach(function(pf){
     var el=document.getElementById('pat_'+pf.k);
